@@ -72,7 +72,7 @@ export default function DeviceDetailPage() {
     { label: 'Model', value: device.hardware_model || '—' },
     { label: 'Firmware channel', value: device.firmware_channel },
     { label: 'Status', value: device.status },
-    { label: 'Last seen', value: timeAgo(device.last_seen as string) },
+    { label: 'Last seen', value: timeAgo((device.last_seen || device.last_seen_at) as string) },
     { label: 'Created', value: formatDate(device.created_at) },
   ];
 

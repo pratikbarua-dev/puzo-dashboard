@@ -71,6 +71,7 @@ export interface Device {
   status: 'unknown' | 'online' | 'offline' | 'updating';
   owner_id: string | null;
   last_seen?: string | null;
+  last_seen_at?: string | null;
   created_at: string;
   updated_at: string;
   [key: string]: unknown;

@@ -81,7 +81,7 @@ export default function OverviewPage() {
                   </div>
                   <div className="flex items-center gap-3">
                     <span className="hidden text-micro-label text-on-surface-variant sm:inline">
-                      {timeAgo(d.last_seen as string)}
+                      {timeAgo((d.last_seen || d.last_seen_at) as string)}
                     </span>
                     <StatusBadge status={d.status} />
                   </div>

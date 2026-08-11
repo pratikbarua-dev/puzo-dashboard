@@ -83,7 +83,7 @@ export default function AdminDevicesPage() {
     },
     { key: 'hardware_model', header: 'Model', render: (d) => d.hardware_model || '—' },
     { key: 'status', header: 'Status', render: (d) => <StatusBadge status={d.status} /> },
-    { key: 'last_seen', header: 'Last seen', render: (d) => timeAgo(d.last_seen as string) },
+    { key: 'last_seen', header: 'Last seen', render: (d) => timeAgo((d.last_seen || d.last_seen_at) as string) },
     {
       key: 'actions',
       header: 'Actions',
