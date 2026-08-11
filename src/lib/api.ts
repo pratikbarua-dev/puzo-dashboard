@@ -15,6 +15,7 @@ import type {
   OwnershipHistoryEntry,
   PairingCode,
   Plan,
+  Profile,
   ProfileLite,
   Relationship,
   Schedule,
@@ -68,28 +69,34 @@ async function request<T>(
 
 export const me = () => request<MeResponse>('GET', '/me');
 export const updateMe = (patch: { display_name?: string; username?: string; timezone?: string }) =>
-  request<MeResponse>('PATCH', '/me', patch);
+  request<{ profile: Profile }>('PATCH', '/me', patch).then((d) => d.profile);
 export const deleteMe = () => request<{ deleted: boolean }>('DELETE', '/me');
 export const searchUsers = (q: string) =>
-  request<ProfileLite[]>('GET', `/users/search?q=${encodeURIComponent(q)}`);
+  request<{ users: ProfileLite[] }>('GET', `/users/search?q=${encodeURIComponent(q)}`).then(
+    (d) => d.users,
+  );
 
 /* ---- devices ---- */
 
-export const myDevices = () => request<Device[]>('GET', '/devices');
-export const myDevice = (deviceId: string) => request<Device>('GET', `/devices/${deviceId}`);
+export const myDevices = () =>
+  request<{ devices: Device[] }>('GET', '/devices').then((d) => d.devices);
+export const myDevice = (deviceId: string) =>
+  request<{ device: Device }>('GET', `/devices/${deviceId}`).then((d) => d.device);
 export const provisionDevice = (input: {
   device_id: string;
   name: string;
   hardware_model?: string;
 }) => request<{ device: Device; token: string; note: string }>('POST', '/devices/provision', input);
 export const deviceHistory = (deviceId: string) =>
-  request<OwnershipHistoryEntry[]>('GET', `/devices/${deviceId}/history`);
+  request<{ history: OwnershipHistoryEntry[] }>('GET', `/devices/${deviceId}/history`).then(
+    (d) => d.history,
+  );
 export const transferDevice = (deviceId: string, newOwnerUsername: string) =>
   request<{ device: Device }>('POST', `/devices/${deviceId}/transfer`, {
     new_owner_username: newOwnerUsername,
   });
 export const removeMyDevice = (deviceId: string) =>
-  request<{ removed: boolean }>('DELETE', `/devices/${deviceId}`);
+  request<{ device: Device }>('DELETE', `/devices/${deviceId}`);
 
 /* ---- pairing ---- */
 
@@ -99,21 +106,30 @@ export const createPairingCode = (relationshipType: string) =>
   });
 export const joinPairingCode = (code: string) =>
   request<{ relationship: Relationship }>('POST', '/pairing/join', { code });
-export const myPairingCodes = () => request<PairingCode[]>('GET', '/pairing');
+export const myPairingCodes = () =>
+  request<{ codes: PairingCode[] }>('GET', '/pairing').then((d) => d.codes);
 export const revokePairingCode = (codeId: string) =>
-  request<{ revoked: boolean }>('DELETE', `/pairing/${codeId}`);
+  request<{ revoked: string }>('DELETE', `/pairing/${codeId}`);
 
 /* ---- relationships ---- */
 
-export const myRelationships = () => request<Relationship[]>('GET', '/relationships');
-export const relationship = (id: string) => request<Relationship>('GET', `/relationships/${id}`);
+export const myRelationships = () =>
+  request<{ relationships: Relationship[] }>('GET', '/relationships').then((d) => d.relationships);
+export const relationship = (id: string) =>
+  request<{ relationship: Relationship }>('GET', `/relationships/${id}`).then(
+    (d) => d.relationship,
+  );
 export const relationshipAction = (
   id: string,
   action: 'pause' | 'resume' | 'block' | 'unblock',
-) => request<Relationship>('POST', `/relationships/${id}/${action}`, {});
+) =>
+  request<{ relationship: Relationship }>('POST', `/relationships/${id}/${action}`, {}).then(
+    (d) => d.relationship,
+  );
 export const unpair = (id: string, reason?: string) =>
-  request<{ unpair: boolean }>('DELETE', `/relationships/${id}`, { reason });
-export const myBlocks = () => request<BlockEntry[]>('GET', '/relationships/blocks');
+  request<{ relationship: Relationship }>('DELETE', `/relationships/${id}`, { reason });
+export const myBlocks = () =>
+  request<{ blocks: BlockEntry[] }>('GET', '/relationships/blocks').then((d) => d.blocks);
 
 /* ---- interactions ---- */
 
@@ -123,8 +139,12 @@ export const sendInteraction = (input: {
   target_device_id: string;
   source_device_id?: string;
   relationship_id?: string;
-}) => request<Interaction>('POST', '/interactions', input);
-export const myInteractions = () => request<Interaction[]>('GET', '/interactions');
+}) =>
+  request<{ interaction: Interaction }>('POST', '/interactions', input).then(
+    (d) => d.interaction,
+  );
+export const myInteractions = () =>
+  request<{ interactions: Interaction[] }>('GET', '/interactions').then((d) => d.interactions);
 export const deleteInteraction = (id: string) =>
   request<{ deleted: boolean }>('DELETE', `/interactions/${id}`);
 
@@ -138,7 +158,8 @@ export const cancelSubscription = () =>
 
 /* ---- schedules ---- */
 
-export const mySchedules = () => request<Schedule[]>('GET', '/schedules');
+export const mySchedules = () =>
+  request<{ schedules: Schedule[] }>('GET', '/schedules').then((d) => d.schedules);
 export const createSchedule = (input: {
   type: string;
   payload: Record<string, unknown>;
@@ -153,14 +174,34 @@ export const cancelSchedule = (id: string) =>
 
 /* ---- admin ---- */
 
-export const adminDevices = () => request<Device[]>('GET', '/admin/devices');
-export const adminDevice = (deviceId: string) => request<Device>('GET', `/admin/devices/${deviceId}`);
+export const adminDevices = () =>
+  request<{ devices: Device[] }>('GET', '/admin/devices').then((d) => d.devices);
+export const adminDevice = (deviceId: string) =>
+  request<{ device: Device }>('GET', `/admin/devices/${deviceId}`).then((d) => d.device);
 export const adminDeviceStatus = (deviceId: string) =>
-  request<DeviceStatus>('GET', `/admin/devices/${deviceId}/status`);
+  request<{ device: Device; state: Record<string, unknown> | null }>(
+    'GET',
+    `/admin/devices/${deviceId}/status`,
+  ).then((d) => ({
+    device: d.device,
+    presence: {
+      status: d.state?.online ? 'online' : 'offline',
+      last_seen: (d.state?.updated_at as string) ?? null,
+      telemetry: {
+        heap_free: d.state?.heap_free,
+        uptime: d.state?.uptime,
+        temperature: d.state?.temperature,
+      },
+    },
+  }));
 export const adminDeviceEvents = (deviceId: string) =>
-  request<DeviceEvent[]>('GET', `/admin/devices/${deviceId}/events`);
+  request<{ events: DeviceEvent[] }>('GET', `/admin/devices/${deviceId}/events`).then(
+    (d) => d.events,
+  );
 export const adminDeviceCommands = (deviceId: string) =>
-  request<CommandRecord[]>('GET', `/admin/devices/${deviceId}/commands`);
+  request<{ commands: CommandRecord[] }>('GET', `/admin/devices/${deviceId}/commands`).then(
+    (d) => d.commands,
+  );
 export const adminSendCommand = (deviceId: string, command: string, payload: unknown) =>
   request<{ command: CommandRecord }>('POST', `/admin/devices/${deviceId}/commands`, {
     command,
@@ -178,28 +219,41 @@ export const adminRegisterDevice = (input: {
   firmware_channel?: string;
 }) => request<{ device: Device; token: string; note: string }>('POST', '/admin/devices', input);
 export const adminRemoveDevice = (deviceId: string) =>
-  request<{ removed: boolean }>('DELETE', `/admin/devices/${deviceId}`);
+  request<{ deleted: string }>('DELETE', `/admin/devices/${deviceId}`);
 
-export const adminUsers = () => request<AdminUser[]>('GET', '/admin/users');
-export const adminUser = (id: string) => request<AdminUser>('GET', `/admin/users/${id}`);
+export const adminUsers = () =>
+  request<{ users: AdminUser[] }>('GET', '/admin/users').then((d) => d.users);
+export const adminUser = (id: string) =>
+  request<{ user: AdminUser }>('GET', `/admin/users/${id}`).then((d) => d.user);
 export const adminSetRole = (id: string, role: string) =>
   request<{ user: AdminUser }>('PATCH', `/admin/users/${id}/role`, { role });
 
 export const adminSubscriptions = () =>
-  request<Subscription[]>('GET', '/admin/subscriptions');
+  request<{ subscriptions: Subscription[] }>('GET', '/admin/subscriptions').then(
+    (d) => d.subscriptions,
+  );
 
-export const adminAuditLogs = () => request<AuditLogEntry[]>('GET', '/admin/audit-logs');
+export const adminAuditLogs = () =>
+  request<{ logs: AuditLogEntry[] }>('GET', '/admin/audit-logs').then((d) => d.logs);
 
-export const firmwareReleases = () => request<FirmwareRelease[]>('GET', '/admin/firmware/releases');
+export const firmwareReleases = () =>
+  request<{ releases: FirmwareRelease[] }>('GET', '/admin/firmware/releases').then(
+    (d) => d.releases,
+  );
 export const firmwareRelease = (id: string) =>
-  request<FirmwareRelease>('GET', `/admin/firmware/releases/${id}`);
+  request<{ release: FirmwareRelease }>('GET', `/admin/firmware/releases/${id}`).then(
+    (d) => d.release,
+  );
 export const firmwarePublish = (id: string, publish: boolean) =>
-  request<FirmwareRelease>(
+  request<{ release: FirmwareRelease }>(
     'POST',
     `/admin/firmware/releases/${id}/${publish ? 'publish' : 'unpublish'}`,
-  );
+  ).then((d) => d.release);
 export const firmwareUpload = (form: FormData) =>
-  request<FirmwareRelease>('POST', '/admin/firmware/releases', form, true);
+  request<{ release: FirmwareRelease }>('POST', '/admin/firmware/releases', form, true).then(
+    (d) => d.release,
+  );
 
-export const otaJobs = () => request<OtaJob[]>('GET', '/admin/ota/jobs');
+export const otaJobs = () =>
+  request<{ jobs: OtaJob[] }>('GET', '/admin/ota/jobs').then((d) => d.jobs);
 export const otaStats = () => request<OtaStats>('GET', '/admin/ota/stats');
