@@ -59,9 +59,10 @@ async function proxy(
     method,
     headers,
     body: body as BodyInit | undefined,
+    duplex: 'half',
     cache: 'no-store',
     redirect: 'follow',
-  });
+  } as RequestInit);
 
   const responseBody = await upstream.arrayBuffer();
   const responseHeaders = new Headers();
