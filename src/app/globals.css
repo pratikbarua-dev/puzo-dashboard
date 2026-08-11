@@ -71,43 +71,21 @@
   /* Typography (Hanken Grotesk, Satori-style) */
   --font-sans: "Hanken Grotesk", ui-sans-serif, system-ui, sans-serif;
 
-  --text-headline-lg: 32px;
-  --text-headline-lg--line-height: 36px;
-  --text-headline-lg--font-weight: 800;
-  --text-headline-lg--letter-spacing: -0.02em;
-
-  --text-headline-md: 24px;
-  --text-headline-md--line-height: 28px;
-  --text-headline-md--font-weight: 800;
-
-  --text-body-base: 13.2px;
-  --text-body-base--line-height: 15px;
-  --text-body-base--font-weight: 600;
-
-  --text-label-caps: 10px;
-  --text-label-caps--line-height: 12px;
-  --text-label-caps--font-weight: 800;
-  --text-label-caps--letter-spacing: 0.05em;
-
-  --text-micro-label: 9px;
-  --text-micro-label--line-height: 11px;
-  --text-micro-label--font-weight: 800;
-
   /* Radius */
   --radius-sm: 0.25rem;
   --radius-md: 0.75rem;
   --radius-lg: 1rem;
   --radius-xl: 1.5rem;
 
-  /* Spacing (6px base) */
-  --spacing-xs: 6px;
-  --spacing-sm: 12px;
-  --spacing-md: 18px;
-  --spacing-lg: 24px;
-  --spacing-xl: 36px;
+  /* Max width containers */
+  --max-width-xs: 20rem;
+  --max-width-sm: 24rem;
+  --max-width-md: 28rem;
+  --max-width-lg: 32rem;
+  --max-width-xl: 36rem;
 
   /* Shadows */
-  --shadow-puzo: rgba(0, 0, 0, 0.25) 0 10px 40px;
+  --shadow-puzo: 0 10px 40px rgba(0, 0, 0, 0.4);
 }
 
 :root {
@@ -128,6 +106,51 @@ body {
 
 * {
   border-color: var(--color-outline-variant);
+}
+
+/* Typography & Spacing Utilities */
+@utility text-headline-lg {
+  font-size: 32px;
+  line-height: 36px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+@utility text-headline-md {
+  font-size: 24px;
+  line-height: 28px;
+  font-weight: 800;
+}
+
+@utility text-body-base {
+  font-size: 13.2px;
+  line-height: 15px;
+  font-weight: 600;
+}
+
+@utility text-label-caps {
+  font-size: 10px;
+  line-height: 12px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+}
+
+@utility text-micro-label {
+  font-size: 9px;
+  line-height: 11px;
+  font-weight: 800;
+}
+
+@utility p-md {
+  padding: 18px;
+}
+
+@utility py-lg {
+  padding-block: 24px;
+}
+
+@utility py-xl {
+  padding-block: 36px;
 }
 
 /* Motion: 200ms / 500ms transitions */
