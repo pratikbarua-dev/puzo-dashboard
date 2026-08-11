@@ -1,22 +1,36 @@
 import { NextRequest } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { auth } from '@/lib/auth';
 
 const PUZO_API_BASE = process.env.PUZO_API_BASE || 'http://localhost:8080';
 
 /**
- * BFF proxy: forwards browser requests to the PUZO backend, attaching the
- * user's Supabase access token server-side so it never reaches the browser.
- * Admin paths also get the legacy x-admin-key from the server env.
+ * BFF proxy: forwards browser requests to the PUZO backend. It validates the
+ * Better Auth session server-side, mints a short-lived RS256 JWT via the JWT
+ * plugin, and attaches it as a Bearer token so the backend can verify it
+ * against this app's JWKS endpoint. Admin paths also get the legacy admin key.
  */
 async function proxy(
   request: NextRequest,
   { params }: { params: Promise<{ path: string[] }> },
 ) {
   const { path } = await params;
-  const supabase = await createClient();
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
+
+  let token: string | null = null;
+  const session = await auth.api.getSession({
+    headers: request.headers,
+  });
+  if (session?.session) {
+    const res = await auth.api.signJWT({
+      body: {
+        payload: {
+          sub: session.user.id,
+          email: session.user.email ?? '',
+          name: session.user.name ?? '',
+        },
+      },
+    });
+    token = res.token ?? null;
+  }
 
   const target = new URL(
     `/api/${path.join('/')}${request.nextUrl.search}`,
@@ -29,8 +43,8 @@ async function proxy(
   if (request.headers.get('accept')) {
     headers.set('accept', request.headers.get('accept')!);
   }
-  if (session?.access_token) {
-    headers.set('authorization', `Bearer ${session.access_token}`);
+  if (token) {
+    headers.set('authorization', `Bearer ${token}`);
   }
   // Legacy admin-key support for admin routes (requireAdmin accepts either).
   const isAdminPath = path[0] === 'admin';

@@ -24,7 +24,7 @@ import {
 import { cn } from '@/lib/utils';
 import { useAuth, isAdmin } from '@/lib/auth-store';
 import { Button, Sheet } from './ui';
-import { createClient } from '@/lib/supabase/client';
+import { authClient } from '@/lib/auth-client';
 import { toast } from './Toast';
 
 interface NavItem {
@@ -64,8 +64,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const allNav = [...USER_NAV, ...ADMIN_NAV.filter((n) => !n.adminOnly || admin)];
 
   const signOut = async () => {
-    const supabase = createClient();
-    await supabase.auth.signOut();
+    await authClient.signOut();
     toast.info('Signed out');
     router.push('/login');
     router.refresh();
