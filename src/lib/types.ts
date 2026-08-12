@@ -77,6 +77,18 @@ export interface Device {
   [key: string]: unknown;
 }
 
+export type DeviceSetupStatus = 'pending' | 'claimed' | 'expired' | 'cancelled';
+
+export interface DeviceSetupSession {
+  session_id: string;
+  setup_id: string;
+  code?: string;
+  status: DeviceSetupStatus;
+  expires_at: string;
+  claimed_at?: string | null;
+  device?: Device | null;
+}
+
 export interface DeviceTelemetry {
   rssi?: number;
   battery_voltage?: number;

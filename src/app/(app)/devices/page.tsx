@@ -1,83 +1,153 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Cpu, Plus } from 'lucide-react';
-import { myDevices, provisionDevice, ApiError } from '@/lib/api';
+import { Check, Copy, Cpu, Plus } from 'lucide-react';
+import { myDevices, createDeviceSetupSession, getDeviceSetupSession } from '@/lib/api';
 import { PageHeader } from '@/components/PageHeader';
 import { DataTable, type Column } from '@/components/DataTable';
 import { StatusBadge } from '@/components/StatusBadge';
-import { Card, Button, Input, Select, Sheet, Loading, EmptyState } from '@/components/ui';
-import { TokenModal } from '@/components/TokenModal';
+import { Card, Button, Input, Sheet, Loading } from '@/components/ui';
 import { toast } from '@/components/Toast';
 import { timeAgo, extractError } from '@/lib/utils';
-import type { Device } from '@/lib/types';
+import type { Device, DeviceSetupSession } from '@/lib/types';
 
-type ProvisionResult = { device: Device; token: string; note: string };
-
-function ProvisionSheet({ onDone }: { onDone: (result: ProvisionResult) => void }) {
+function AddPuzoSheet() {
+  const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
-  const [deviceId, setDeviceId] = useState('');
+  const [setupId, setSetupId] = useState('');
   const [name, setName] = useState('');
-  const [hardwareModel, setHardwareModel] = useState('ESP32-WROOM-32');
-  const [busy, setBusy] = useState(false);
+  const [session, setSession] = useState<DeviceSetupSession | null>(null);
+  const [copied, setCopied] = useState(false);
 
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setBusy(true);
-    try {
-      const result = await provisionDevice({
-        device_id: deviceId.trim().toUpperCase(),
+  const create = useMutation({
+    mutationFn: () =>
+      createDeviceSetupSession({
+        setup_id: setupId.trim().toUpperCase(),
         name: name.trim(),
-        hardware_model: hardwareModel,
-      });
-      onDone(result);
-      setOpen(false);
-      setDeviceId('');
-      setName('');
-      toast.success('Device registered');
-    } catch (err) {
-      toast.error(extractError(err).message);
-    } finally {
-      setBusy(false);
+        hardware_model: 'ESP32-WROOM-32',
+      }),
+    onSuccess: (result) => {
+      setSession(result);
+      toast.success('Setup code created');
+    },
+    onError: (err) => toast.error(extractError(err).message),
+  });
+
+  const status = useQuery({
+    queryKey: ['device-setup', session?.session_id],
+    queryFn: () => getDeviceSetupSession(session!.session_id),
+    enabled: Boolean(session?.session_id),
+    refetchInterval: session?.status === 'pending' ? 2000 : false,
+  });
+
+  useEffect(() => {
+    if (!status.data) return;
+    setSession((current) => (current ? { ...current, ...status.data } : current));
+    if (status.data.status === 'claimed') {
+      void queryClient.invalidateQueries({ queryKey: ['devices'] });
+    }
+  }, [status.data, queryClient]);
+
+  const reset = () => {
+    setOpen(false);
+    setSession(null);
+    setSetupId('');
+    setName('');
+    setCopied(false);
+  };
+
+  const copyCode = async () => {
+    if (!session?.code) return;
+    try {
+      await navigator.clipboard.writeText(session.code);
+      setCopied(true);
+      toast.success('Code copied');
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      toast.error('Could not copy code');
     }
   };
+
+  const apName = setupId ? `PUZO-${setupId.slice(-4)}` : 'PUZO-XXXX';
 
   return (
     <>
       <Button onClick={() => setOpen(true)}>
-        <Plus size={16} /> Register device
+        <Plus size={16} /> Add PUZO
       </Button>
-      <Sheet open={open} onClose={() => setOpen(false)} title="Register a device">
-        <form onSubmit={submit} className="flex flex-col gap-4">
-          <Input
-            label="Device ID"
-            value={deviceId}
-            onChange={(e) => setDeviceId(e.target.value)}
-            placeholder="PUZO-XXXXXXXX"
-            required
-          />
-          <Input
-            label="Name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Desk companion"
-            required
-          />
-          <Select
-            label="Hardware model"
-            value={hardwareModel}
-            onChange={(e) => setHardwareModel(e.target.value)}
+      <Sheet open={open} onClose={reset} title={session ? 'Connect your PUZO' : 'Add a PUZO'}>
+        {!session ? (
+          <form
+            onSubmit={(event) => {
+              event.preventDefault();
+              create.mutate();
+            }}
+            className="flex flex-col gap-4"
           >
-            <option>ESP32-WROOM-32</option>
-            <option>ESP32-S3</option>
-            <option>ESP32-C3</option>
-          </Select>
-          <Button type="submit" disabled={busy}>
-            {busy ? 'Registering…' : 'Register device'}
-          </Button>
-        </form>
+            <p className="text-sm text-on-surface-variant">
+              Turn on an unconfigured PUZO. Its screen shows a setup ID. Enter it here to generate a
+              one-time code.
+            </p>
+            <Input
+              label="PUZO setup ID"
+              value={setupId}
+              onChange={(event) => setSetupId(event.target.value)}
+              placeholder="PUZO-C05D89DD921C"
+              autoCapitalize="characters"
+              required
+            />
+            <Input
+              label="Name"
+              value={name}
+              onChange={(event) => setName(event.target.value)}
+              placeholder="Desk companion"
+              required
+            />
+            <Button type="submit" disabled={create.isPending}>
+              {create.isPending ? 'Creating code…' : 'Create setup code'}
+            </Button>
+          </form>
+        ) : (
+          <div className="flex flex-col gap-4">
+            {session.status === 'pending' && session.code && (
+              <>
+                <p className="text-sm text-on-surface-variant">
+                  Use this code on the PUZO setup page. It expires in about 10 minutes and can be used once.
+                </p>
+                <div className="flex items-center justify-between rounded-lg bg-surface-container-high p-4">
+                  <code className="text-3xl font-black tracking-[0.25em] text-primary-container">
+                    {session.code}
+                  </code>
+                  <Button variant="ghost" size="sm" onClick={copyCode} aria-label="Copy setup code">
+                    {copied ? <Check size={18} /> : <Copy size={18} />}
+                  </Button>
+                </div>
+                <ol className="list-decimal space-y-2 pl-5 text-sm text-on-surface-variant">
+                  <li>Connect your phone to Wi-Fi named <strong>{apName}</strong>.</li>
+                  <li>Open <strong>http://192.168.4.1</strong> in your browser.</li>
+                  <li>Enter your home Wi-Fi and this setup code.</li>
+                </ol>
+                <p className="text-sm text-secondary">Waiting for PUZO to finish setup…</p>
+              </>
+            )}
+            {session.status === 'claimed' && (
+              <div className="rounded-lg bg-secondary/10 p-4 text-secondary">
+                <p className="font-extrabold">PUZO connected successfully.</p>
+                <p className="mt-1 text-sm">It should appear in your device list shortly.</p>
+              </div>
+            )}
+            {(session.status === 'expired' || session.status === 'cancelled') && (
+              <div className="rounded-lg bg-error-container/20 p-4 text-on-error-container">
+                This setup code is no longer active. Close this window and create a new code.
+              </div>
+            )}
+            <Button variant="outline" onClick={reset}>
+              {session.status === 'claimed' ? 'Done' : 'Cancel setup'}
+            </Button>
+          </div>
+        )}
       </Sheet>
     </>
   );
@@ -85,27 +155,29 @@ function ProvisionSheet({ onDone }: { onDone: (result: ProvisionResult) => void 
 
 export default function DevicesPage() {
   const router = useRouter();
-  const queryClient = useQueryClient();
   const { data: devices, isLoading } = useQuery({ queryKey: ['devices'], queryFn: myDevices });
-  const [tokenResult, setTokenResult] = useState<ProvisionResult | null>(null);
 
   const columns: Column<Device>[] = [
     {
       key: 'name',
       header: 'Device',
-      render: (d) => (
+      render: (device) => (
         <div className="flex items-center gap-3">
           <Cpu size={18} className="text-primary-container" />
           <div>
-            <p className="font-extrabold">{d.name}</p>
-            <p className="text-micro-label text-on-surface-variant">{d.device_id}</p>
+            <p className="font-extrabold">{device.name}</p>
+            <p className="text-micro-label text-on-surface-variant">{device.device_id}</p>
           </div>
         </div>
       ),
     },
-    { key: 'hardware_model', header: 'Model', render: (d) => d.hardware_model || '—' },
-    { key: 'status', header: 'Status', render: (d) => <StatusBadge status={d.status} /> },
-    { key: 'last_seen', header: 'Last seen', render: (d) => timeAgo((d.last_seen || d.last_seen_at) as string) },
+    { key: 'hardware_model', header: 'Model', render: (device) => device.hardware_model || '—' },
+    { key: 'status', header: 'Status', render: (device) => <StatusBadge status={device.status} /> },
+    {
+      key: 'last_seen',
+      header: 'Last seen',
+      render: (device) => timeAgo((device.last_seen || device.last_seen_at) as string),
+    },
   ];
 
   return (
@@ -113,7 +185,7 @@ export default function DevicesPage() {
       <PageHeader
         title="Devices"
         subtitle="Manage the PUZOs linked to your account"
-        action={<ProvisionSheet onDone={setTokenResult} />}
+        action={<AddPuzoSheet />}
       />
 
       {isLoading ? (
@@ -124,26 +196,13 @@ export default function DevicesPage() {
             columns={columns}
             rows={devices ?? []}
             loading={false}
-            onRowClick={(d) => router.push(`/devices/${d.device_id}`)}
+            onRowClick={(device) => router.push(`/devices/${device.device_id}`)}
             empty={{
               title: 'No devices yet',
-              message: 'Register your first PUZO to start using it.',
+              message: 'Add your first PUZO. You will only need its setup ID from the device screen.',
             }}
           />
         </Card>
-      )}
-
-      {tokenResult && (
-        <TokenModal
-          open={!!tokenResult}
-          onClose={() => {
-            setTokenResult(null);
-            void queryClient.invalidateQueries({ queryKey: ['devices'] });
-          }}
-          deviceName={tokenResult.device.name}
-          deviceId={tokenResult.device.device_id}
-          token={tokenResult.token}
-        />
       )}
     </div>
   );

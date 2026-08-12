@@ -5,6 +5,7 @@ import type {
   BlockEntry,
   CommandRecord,
   Device,
+  DeviceSetupSession,
   DeviceEvent,
   DeviceStatus,
   FirmwareRelease,
@@ -87,6 +88,13 @@ export const provisionDevice = (input: {
   name: string;
   hardware_model?: string;
 }) => request<{ device: Device; token: string; note: string }>('POST', '/devices/provision', input);
+export const createDeviceSetupSession = (input: {
+  setup_id: string;
+  name: string;
+  hardware_model?: string;
+}) => request<DeviceSetupSession & { code: string }>('POST', '/device-setup/sessions', input);
+export const getDeviceSetupSession = (sessionId: string) =>
+  request<DeviceSetupSession>('GET', `/device-setup/sessions/${sessionId}`);
 export const deviceHistory = (deviceId: string) =>
   request<{ history: OwnershipHistoryEntry[] }>('GET', `/devices/${deviceId}/history`).then(
     (d) => d.history,
