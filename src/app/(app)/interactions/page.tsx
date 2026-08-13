@@ -39,7 +39,7 @@ export default function InteractionsPage() {
       if (!partnerDevice) throw new Error('No partner PUZO is available');
       return sendInteraction({
         type: 'emotion',
-        payload: { emotion },
+        payload: { emotion, message: labelForEmotion(emotion) },
         target_device_id: partnerDevice.device_id,
       });
     },
@@ -49,6 +49,15 @@ export default function InteractionsPage() {
     },
     onError: (e) => toast.error(extractError(e).message),
   });
+
+  function labelForEmotion(emotion: string) {
+    return {
+      thinking_of_you: 'Thinking of you',
+      happy: "I'm feeling happy",
+      miss_you: 'I miss you',
+      love: 'I love you',
+    }[emotion] || emotion;
+  }
 
   const sendMut = useMutation({
     mutationFn: () =>
@@ -131,7 +140,11 @@ export default function InteractionsPage() {
                 <div>
                   <p className="text-label-caps">
                     {i.type === 'emotion' && i.payload?.emotion ? String(i.payload.emotion) : i.type}
-                    {i.payload?.text ? ` · ${String(i.payload.text).slice(0, 40)}` : ''}
+                    {i.payload?.message
+                      ? ` · ${String(i.payload.message).slice(0, 80)}`
+                      : i.payload?.text
+                        ? ` · ${String(i.payload.text).slice(0, 40)}`
+                        : ''}
                   </p>
                   <p className="text-micro-label text-on-surface-variant">
                     {i.status} · {formatDate(i.created_at)} · to {i.target_device_id || '—'}

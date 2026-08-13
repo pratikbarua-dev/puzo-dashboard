@@ -38,7 +38,10 @@ export const COMMAND_DEFINITIONS: CommandDef[] = [
     command: 'emotion',
     label: 'Emotion',
     interactionType: 'emotion',
-    fields: [{ name: 'emotion', label: 'Emotion name', type: 'text', max: 50 }],
+    fields: [
+      { name: 'emotion', label: 'Emotion name', type: 'text', max: 50 },
+      { name: 'message', label: 'Message (optional)', type: 'text', max: 120 },
+    ],
   },
   {
     command: 'animation',
