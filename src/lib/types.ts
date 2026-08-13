@@ -145,6 +145,7 @@ export interface Relationship {
   created_by: string;
   created_at: string;
   updated_at: string;
+  devices?: Array<Pick<Device, 'device_id' | 'name' | 'status' | 'owner_id'>>;
 }
 
 export interface BlockEntry {
@@ -173,8 +174,13 @@ export interface Interaction {
   payload: Record<string, unknown>;
   source_device_id: string | null;
   target_device_id: string | null;
-  status: 'queued' | 'sent' | 'failed';
+  status: 'queued' | 'sent' | 'delivered' | 'acknowledged' | 'completed' | 'failed';
   created_at: string;
+  sent_at?: string | null;
+  delivered_at?: string | null;
+  acknowledged_at?: string | null;
+  completed_at?: string | null;
+  failed_at?: string | null;
   deleted_for_sender_at?: string | null;
   deleted_for_recipient_at?: string | null;
 }

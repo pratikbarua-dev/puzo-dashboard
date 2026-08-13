@@ -29,6 +29,27 @@ export default function InteractionsPage() {
 
   const def = commandDef(type === 'message' ? 'display' : type);
 
+  const partnerDevice = (relationships ?? [])
+    .filter((relationship) => relationship.status === 'active')
+    .flatMap((relationship) => relationship.devices ?? [])
+    .find((device) => !devices?.some((mine) => mine.device_id === device.device_id));
+
+  const presetMut = useMutation({
+    mutationFn: (emotion: string) => {
+      if (!partnerDevice) throw new Error('No partner PUZO is available');
+      return sendInteraction({
+        type: 'emotion',
+        payload: { emotion },
+        target_device_id: partnerDevice.device_id,
+      });
+    },
+    onSuccess: () => {
+      toast.success('Reaction sent');
+      void queryClient.invalidateQueries({ queryKey: ['interactions'] });
+    },
+    onError: (e) => toast.error(extractError(e).message),
+  });
+
   const sendMut = useMutation({
     mutationFn: () =>
       sendInteraction({
@@ -64,6 +85,27 @@ export default function InteractionsPage() {
         }
       />
 
+      <Card className="mb-4">
+        <CardHeader title="Quick reactions" subtitle={partnerDevice ? `To ${partnerDevice.name}` : 'Pair a partner PUZO first'} />
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+          {[
+            ['thinking_of_you', '❤️ Thinking of you'],
+            ['happy', '😊 Happy'],
+            ['miss_you', '🥺 Miss you'],
+            ['love', '💕 I love you'],
+          ].map(([emotion, label]) => (
+            <Button
+              key={emotion}
+              variant="outline"
+              disabled={!partnerDevice || presetMut.isPending}
+              onClick={() => presetMut.mutate(emotion)}
+            >
+              {label}
+            </Button>
+          ))}
+        </div>
+      </Card>
+
       {isLoading ? (
         <Loading />
       ) : !interactions?.length ? (
@@ -88,7 +130,7 @@ export default function InteractionsPage() {
               >
                 <div>
                   <p className="text-label-caps">
-                    {i.type}
+                    {i.type === 'emotion' && i.payload?.emotion ? String(i.payload.emotion) : i.type}
                     {i.payload?.text ? ` · ${String(i.payload.text).slice(0, 40)}` : ''}
                   </p>
                   <p className="text-micro-label text-on-surface-variant">
