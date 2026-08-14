@@ -68,6 +68,7 @@ export interface Device {
   hardware_model: string | null;
   firmware_channel: string;
   firmware_version?: string | null;
+  firmware_build?: number | null;
   status: 'unknown' | 'online' | 'offline' | 'updating';
   owner_id: string | null;
   last_seen?: string | null;
