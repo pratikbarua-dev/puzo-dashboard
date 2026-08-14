@@ -17,9 +17,9 @@ export default function AdminSubscriptionsPage() {
   });
 
   const columns: Column<Subscription>[] = [
-    { key: 'user_id', header: 'User', render: (s) => <span className="font-mono text-xs">{s.user_id.slice(0, 8)}…</span> },
-    { key: 'plan', header: 'Plan', render: (s) => s.plan?.name || s.plan_id.slice(0, 8) },
-    { key: 'status', header: 'Status', render: (s) => <StatusBadge status={s.status} /> },
+    { key: 'user_id', header: 'User', render: (s) => <span className="font-mono text-xs">{s.user_id ? `${s.user_id.slice(0, 8)}…` : '—'}</span> },
+    { key: 'plan', header: 'Plan', render: (s) => s.plan?.name || (s.plan_id ? s.plan_id.slice(0, 8) : '—') },
+    { key: 'status', header: 'Status', render: (s) => <StatusBadge status={s.status || 'unknown'} /> },
     { key: 'current_period_end', header: 'Renews', render: (s) => formatDate(s.current_period_end) },
   ];
 

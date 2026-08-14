@@ -31,9 +31,9 @@ export default function AdminOtaPage() {
   const { data: stats } = useQuery({ queryKey: ['admin', 'ota', 'stats'], queryFn: otaStats });
 
   const columns: Column<OtaJob>[] = [
-    { key: 'device_id', header: 'Device', render: (j) => <span className="font-mono text-xs font-extrabold">{j.device_id}</span> },
-    { key: 'release_id', header: 'Release ID', render: (j) => <span className="font-mono text-xs">{j.release_id.slice(0, 8)}…</span> },
-    { key: 'state', header: 'State', render: (j) => <StatusBadge status={j.state} /> },
+    { key: 'device_id', header: 'Device', render: (j) => <span className="font-mono text-xs font-extrabold">{j.device_id || '—'}</span> },
+    { key: 'release_id', header: 'Release ID', render: (j) => <span className="font-mono text-xs">{j.release_id ? `${j.release_id.slice(0, 8)}…` : '—'}</span> },
+    { key: 'state', header: 'State', render: (j) => <StatusBadge status={j.state || 'unknown'} /> },
     { key: 'created_at', header: 'Created', render: (j) => formatDate(j.created_at) },
     { key: 'updated_at', header: 'Last activity', render: (j) => timeAgo(j.updated_at) },
   ];

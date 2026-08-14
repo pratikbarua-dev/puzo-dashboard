@@ -83,7 +83,7 @@ export default function SettingsPage() {
           <dl className="flex flex-col gap-2 text-body-base">
             <div className="flex justify-between">
               <dt className="text-on-surface-variant">Account ID</dt>
-              <dd className="font-mono text-xs">{profile?.id.slice(0, 8)}…</dd>
+              <dd className="font-mono text-xs">{profile?.id ? `${profile.id.slice(0, 8)}…` : '—'}</dd>
             </div>
             <div className="flex justify-between">
               <dt className="text-on-surface-variant">Role</dt>

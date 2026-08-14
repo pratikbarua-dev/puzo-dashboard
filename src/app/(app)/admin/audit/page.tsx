@@ -16,7 +16,7 @@ export default function AdminAuditPage() {
   });
 
   const columns: Column<AuditLogEntry>[] = [
-    { key: 'action', header: 'Action', render: (l) => <span className="font-extrabold">{l.action}</span> },
+    { key: 'action', header: 'Action', render: (l) => <span className="font-extrabold">{l.action || '—'}</span> },
     {
       key: 'entity',
       header: 'Entity',
@@ -27,7 +27,7 @@ export default function AdminAuditPage() {
         </div>
       ),
     },
-    { key: 'actor_id', header: 'Actor', render: (l) => <span className="font-mono text-xs">{l.actor_id.slice(0, 8)}</span> },
+    { key: 'actor_id', header: 'Actor', render: (l) => <span className="font-mono text-xs">{l.actor_id ? l.actor_id.slice(0, 8) : '—'}</span> },
     { key: 'created_at', header: 'Time', render: (l) => formatDate(l.created_at) },
   ];
 
