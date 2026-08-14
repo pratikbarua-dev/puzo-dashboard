@@ -3,19 +3,20 @@
 import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { ArrowLeft, Send } from 'lucide-react';
+import { ArrowLeft, CloudDownload, Send } from 'lucide-react';
 import {
   adminDevice,
   adminDeviceStatus,
   adminDeviceEvents,
   adminDeviceCommands,
   adminSendCommand,
+  firmwareReleases,
 } from '@/lib/api';
 import { COMMAND_DEFINITIONS } from '@/lib/registry';
 import { PageHeader } from '@/components/PageHeader';
 import { StatusBadge } from '@/components/StatusBadge';
 import { CommandForm } from '@/components/CommandForm';
-import { Card, CardHeader, Button, Sheet, Loading, ErrorState } from '@/components/ui';
+import { Card, CardHeader, Button, Select, Sheet, Loading, ErrorState } from '@/components/ui';
 import { toast } from '@/components/Toast';
 import { timeAgo, formatDate, extractError } from '@/lib/utils';
 
@@ -41,8 +42,14 @@ export default function AdminDeviceDetailPage() {
     queryKey: ['admin', 'devices', deviceId, 'commands'],
     queryFn: () => adminDeviceCommands(deviceId),
   });
+  const { data: releases } = useQuery({
+    queryKey: ['admin', 'firmware'],
+    queryFn: firmwareReleases,
+  });
 
   const [commandOpen, setCommandOpen] = useState(false);
+  const [updateOpen, setUpdateOpen] = useState(false);
+  const [selectedRelease, setSelectedRelease] = useState('');
 
   const sendMut = useMutation({
     mutationFn: ({ command, payload }: { command: string; payload: Record<string, unknown> }) =>
@@ -50,10 +57,22 @@ export default function AdminDeviceDetailPage() {
     onSuccess: () => {
       toast.success('Command sent');
       setCommandOpen(false);
-      void queryClient.invalidateQueries({ queryKey: ['admin', 'devices', deviceId] });
+      setUpdateOpen(false);
+      setSelectedRelease('');
+      void queryClient.invalidateQueries({ queryKey: ['admin', 'devices', deviceId, 'commands'] });
     },
     onError: (e) => toast.error(extractError(e).message),
   });
+
+  const checkNow = () =>
+    sendMut.mutate({ command: 'ota_check', payload: {} }, { onSuccess: () => toast.success('Update check pushed to device') });
+  const sendUpdate = () => {
+    if (!selectedRelease) return toast.error('Choose a release to send');
+    sendMut.mutate(
+      { command: 'ota_check', payload: { release_id: selectedRelease } },
+      { onSuccess: () => toast.success('Update pushed to device') },
+    );
+  };
 
   if (isLoading) return <Loading />;
   if (isError || !device) return <ErrorState message={extractError(error).message} onRetry={() => void refetch()} />;
@@ -86,6 +105,23 @@ export default function AdminDeviceDetailPage() {
       />
 
       <div className="grid gap-4 lg:grid-cols-3">
+        <Card>
+          <CardHeader title="Firmware & updates" subtitle="Push an update to this device now" />
+          <div className="flex flex-col gap-3">
+            <Button variant="outline" onClick={checkNow} disabled={sendMut.isPending}>
+              <CloudDownload size={16} />
+              {sendMut.isPending ? 'Pushing…' : 'Check for update now'}
+            </Button>
+            <Button variant="secondary" onClick={() => setUpdateOpen(true)} disabled={sendMut.isPending}>
+              <Send size={16} /> Send update
+            </Button>
+            <p className="text-micro-label text-on-surface-variant">
+              The device must be online to receive the push. If it is offline the command is queued and delivered on
+              its next connection.
+            </p>
+          </div>
+        </Card>
+
         <Card>
           <CardHeader title="Live telemetry" subtitle={timeAgo(status?.presence?.last_seen as string)} />
           {telemRows.length ? (
@@ -151,6 +187,38 @@ export default function AdminDeviceDetailPage() {
           busy={sendMut.isPending}
           onSubmit={(command, payload) => sendMut.mutate({ command, payload })}
         />
+      </Sheet>
+
+      <Sheet
+        open={updateOpen}
+        onClose={() => setUpdateOpen(false)}
+        title={`Send firmware update to ${device.name}`}
+      >
+        <div className="flex flex-col gap-4">
+          <Select
+            label="Release"
+            value={selectedRelease}
+            onChange={(e) => setSelectedRelease(e.target.value)}
+          >
+            <option value="">Select a release…</option>
+            {(releases ?? [])
+              .filter((r) => r.status === 'published')
+              .filter((r) => !device.hardware_model || r.hardware_model === device.hardware_model)
+              .map((r) => (
+                <option key={r.id} value={r.id}>
+                  v{r.version} · {r.hardware_model} · {r.channel}
+                </option>
+              ))}
+          </Select>
+          {!releases?.some((r) => r.status === 'published') && (
+            <p className="text-micro-label text-on-surface-variant">
+              No published releases yet. Upload and publish a build from the Firmware page first.
+            </p>
+          )}
+          <Button onClick={sendUpdate} disabled={sendMut.isPending || !selectedRelease}>
+            {sendMut.isPending ? 'Pushing…' : 'Push release to device'}
+          </Button>
+        </div>
       </Sheet>
     </div>
   );
