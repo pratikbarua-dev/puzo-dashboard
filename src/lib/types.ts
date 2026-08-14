@@ -238,6 +238,25 @@ export interface OtaJob {
 }
 
 export interface OtaStats {
+  devices?: {
+    total: number;
+    online: number;
+    offline: number;
+    updating: number;
+    update_failed: number;
+    unknown: number;
+    firmware_versions_in_use: { firmware_version: string; count: number }[];
+  };
+  firmware?: {
+    latest_stable: FirmwareRelease[];
+  };
+  ota?: {
+    total_jobs: number;
+    success: number;
+    failed: number;
+    success_rate: number;
+    failure_rate: number;
+  };
   total_jobs?: number;
   success_rate?: number;
   [key: string]: unknown;

@@ -46,6 +46,7 @@ const USER_NAV: NavItem[] = [
 ];
 
 const ADMIN_NAV: NavItem[] = [
+  { href: '/admin', label: 'Overview', icon: LayoutDashboard, adminOnly: true },
   { href: '/admin/devices', label: 'Devices', icon: Cpu, adminOnly: true },
   { href: '/admin/firmware', label: 'Firmware', icon: FolderCog, adminOnly: true },
   { href: '/admin/ota', label: 'OTA jobs', icon: UploadCloud, adminOnly: true },
@@ -71,7 +72,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   };
 
   const renderItem = (item: NavItem) => {
-    const active = pathname === item.href || pathname.startsWith(item.href + '/');
+    const active =
+      item.href === '/admin'
+        ? pathname === '/admin'
+        : pathname === item.href || pathname.startsWith(item.href + '/');
     return (
       <Link
         key={item.href}
