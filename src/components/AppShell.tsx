@@ -136,7 +136,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         {/* Main column */}
         <div className="flex min-w-0 flex-1 flex-col">
           {/* Mobile top bar */}
-          <header className="sticky top-0 z-30 flex items-center justify-between border-b border-outline-variant bg-surface-container-lowest/90 px-4 py-2 backdrop-blur md:hidden">
+          <header className="sticky top-0 z-30 flex items-center justify-between border-b border-outline-variant bg-surface-container-lowest/90 px-4 py-2 pt-safe backdrop-blur md:hidden">
             <Link href="/overview" className="flex items-center gap-2">
               <span className="grid h-8 w-8 place-items-center rounded-md bg-primary-container font-extrabold text-white">
                 P
@@ -152,14 +152,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </button>
           </header>
 
-          <main className="mx-auto w-full max-w-5xl flex-1 px-4 pb-24 pt-4 md:px-6 md:pb-8">
+          <main className="mx-auto w-full max-w-5xl flex-1 px-4 pb-28 pt-4 md:px-6 md:pb-8">
             {children}
           </main>
         </div>
       </div>
 
       {/* Mobile bottom tab bar */}
-      <nav className="fixed inset-x-0 bottom-0 z-40 flex border-t border-outline-variant bg-surface-container-lowest/95 backdrop-blur md:hidden">
+      <nav className="fixed inset-x-0 bottom-0 z-40 flex border-t border-outline-variant bg-surface-container-lowest/95 pb-safe backdrop-blur md:hidden">
         {USER_NAV.slice(0, 4).map((item) => {
           const active = pathname === item.href;
           return (
