@@ -21,6 +21,8 @@ import type {
   Relationship,
   Schedule,
   Subscription,
+  ContentEmotion,
+  ContentAsset,
 } from './types';
 
 export class ApiError extends Error {
@@ -265,3 +267,17 @@ export const firmwareUpload = (form: FormData) =>
 export const otaJobs = () =>
   request<{ jobs: OtaJob[] }>('GET', '/admin/ota/jobs').then((d) => d.jobs);
 export const otaStats = () => request<OtaStats>('GET', '/admin/ota/stats');
+
+export const adminListEmotions = () =>
+  request<{ emotions: ContentEmotion[] }>('GET', '/emotions').then((d) => d.emotions);
+export const adminUpsertEmotion = (input: ContentEmotion) =>
+  request<{ emotion: ContentEmotion }>('POST', '/emotions', input).then((d) => d.emotion);
+
+export const adminListAssets = () =>
+  request<{ assets: ContentAsset[] }>('GET', '/content/assets').then((d) => d.assets);
+export const adminCreateAsset = (input: Partial<ContentAsset>) =>
+  request<{ asset: ContentAsset }>('POST', '/content/assets', input).then((d) => d.asset);
+export const adminSetAssetStatus = (id: string, status: string) =>
+  request<{ asset: ContentAsset }>('POST', `/content/assets/${id}/status`, { status }).then(
+    (d) => d.asset,
+  );

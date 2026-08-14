@@ -268,6 +268,32 @@ export interface AdminUser extends Profile {
   last_active_at?: string | null;
 }
 
+export interface ContentEmotion {
+  id?: string;
+  name: string;
+  expression: string;
+  haptic?: string | null;
+  sound?: string | null;
+  duration_ms?: number | null;
+  priority?: 'idle_personality' | 'scheduled' | 'local_user' | 'partner' | 'system' | 'critical_safety';
+  description?: string | null;
+  is_active?: boolean;
+  created_at?: string;
+}
+
+export interface ContentAsset {
+  id: string;
+  kind: 'animation' | 'expression' | 'sound' | 'theme' | 'animation_pack' | 'sound_pack';
+  name: string;
+  version: string;
+  status: 'draft' | 'published' | 'unpublished';
+  storage_path?: string;
+  file_size?: number;
+  sha256?: string;
+  url?: string;
+  created_at: string;
+}
+
 export interface AuditLogEntry {
   id: string;
   actor_id: string;
