@@ -249,6 +249,14 @@ export function Spinner({ className }: { className?: string }) {
   );
 }
 
+export function Skeleton({ className }: { className?: string }) {
+  return (
+    <div
+      className={cn('animate-pulse rounded-md bg-surface-container-high', className)}
+    />
+  );
+}
+
 export function Loading({ label = 'Loading…' }: { label?: string }) {
   return (
     <div className="flex flex-col items-center justify-center gap-3 py-xl text-on-surface-variant">
