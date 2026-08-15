@@ -98,8 +98,8 @@ export default function OverviewPage() {
                   <div className="flex items-center gap-3">
                     <Cpu size={18} className="text-primary-container" />
                     <div>
-                      <p className="font-extrabold">{d.name}</p>
-                      <p className="text-micro-label text-on-surface-variant">{d.device_id}</p>
+                      <p className="font-extrabold">{d?.name || d?.device_id || 'PUZO Device'}</p>
+                      <p className="text-micro-label text-on-surface-variant">{d?.device_id}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
@@ -117,14 +117,14 @@ export default function OverviewPage() {
         {/* Partner companion status & quick actions */}
         <div className="flex flex-col gap-4">
           <Card className="border-primary/20 bg-primary/5">
-            <CardHeader title="Partner Companion" subtitle={partnerDevice ? partnerDevice.name : 'Not paired yet'} />
+            <CardHeader title="Partner Companion" subtitle={partnerDevice ? (partnerDevice.name || partnerDevice.device_id) : 'Not paired yet'} />
             {loadingRelationships ? (
               <CardSkeleton count={1} />
             ) : partnerDevice ? (
               <div className="flex flex-col gap-3">
                 <div className="flex items-center justify-between rounded-lg bg-surface-container/60 p-3">
                   <div>
-                    <p className="font-extrabold text-on-surface">{partnerDevice.name}</p>
+                    <p className="font-extrabold text-on-surface">{partnerDevice.name || partnerDevice.device_id || 'Partner PUZO'}</p>
                     <p className="text-micro-label text-on-surface-variant">{partnerDevice.device_id}</p>
                   </div>
                   <StatusBadge status={partnerDevice.status} />

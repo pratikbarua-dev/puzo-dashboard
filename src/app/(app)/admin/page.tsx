@@ -158,7 +158,7 @@ export default function AdminOverviewPage() {
                       paddingAngle={4}
                     >
                       {otaPieData.map((entry) => (
-                        <Cell key={entry.name} fill={entry.color} stroke="transparent" />
+                        <Cell key={entry?.name || 'entry'} fill={entry.color} stroke="transparent" />
                       ))}
                     </Pie>
                     <Tooltip
@@ -174,10 +174,10 @@ export default function AdminOverviewPage() {
               </div>
               <div className="flex w-1/2 flex-col gap-2 pl-4">
                 {otaPieData.map((d) => (
-                  <div key={d.name} className="flex items-center justify-between text-body-base">
+                  <div key={d?.name || 'status'} className="flex items-center justify-between text-body-base">
                     <div className="flex items-center gap-2">
                       <span className="h-3 w-3 rounded-full" style={{ backgroundColor: d.color }} />
-                      <span className="text-on-surface-variant">{d.name}</span>
+                      <span className="text-on-surface-variant">{d?.name}</span>
                     </div>
                     <span className="font-extrabold">{d.value}</span>
                   </div>
@@ -245,8 +245,8 @@ export default function AdminOverviewPage() {
                   <div className="flex items-center gap-3">
                     <Cpu size={16} className="text-on-surface-variant" />
                     <div>
-                      <span className="font-extrabold">{d.name}</span>
-                      <p className="text-micro-label font-mono text-on-surface-variant">{d.device_id}</p>
+                      <span className="font-extrabold">{d?.name || d?.device_id || 'Device'}</span>
+                      <p className="text-micro-label font-mono text-on-surface-variant">{d?.device_id}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">

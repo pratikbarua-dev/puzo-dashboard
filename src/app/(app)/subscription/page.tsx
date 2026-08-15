@@ -59,6 +59,7 @@ export default function SubscriptionPage() {
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {(data.plans as Plan[]).map((p) => {
+            if (!p) return null;
             const current = p.name === activePlanName;
             const isFree = p.name === 'free';
             return (
@@ -77,7 +78,7 @@ export default function SubscriptionPage() {
                   subtitle={current ? 'Your current plan' : p.description || undefined}
                 />
                 <p className="mb-3 text-headline-lg">
-                  ${Number(p.price).toFixed(2)}
+                  ${Number(p.price || 0).toFixed(2)}
                   <span className="text-label-caps text-on-surface-variant">/mo</span>
                 </p>
                 <ul className="mb-4 flex flex-col gap-2">

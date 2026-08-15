@@ -100,8 +100,8 @@ export default function DeviceDetailPage() {
       </button>
 
       <PageHeader
-        title={device.name}
-        subtitle={device.device_id}
+        title={device?.name || device?.device_id || 'Device'}
+        subtitle={device?.device_id}
         action={<StatusBadge status={device.status} />}
       />
 
@@ -121,7 +121,7 @@ export default function DeviceDetailPage() {
             <Button
               variant="outline"
               onClick={() => {
-                setNewName(device.name);
+                setNewName(device?.name || '');
                 setRenameOpen(true);
               }}
             >
@@ -207,7 +207,7 @@ export default function DeviceDetailPage() {
         open={transferConfirmOpen}
         onClose={() => setTransferConfirmOpen(false)}
         title="Confirm ownership transfer"
-        message={`Are you sure you want to transfer "${device.name}" to @${username.replace(/^@/, '')}? You will lose access to this device immediately.`}
+        message={`Are you sure you want to transfer "${device?.name || device?.device_id}" to @${username.replace(/^@/, '')}? You will lose access to this device immediately.`}
         confirmLabel="Transfer now"
         danger
         onConfirm={() => transferMut.mutate()}
@@ -218,7 +218,7 @@ export default function DeviceDetailPage() {
         open={removeOpen}
         onClose={() => setRemoveOpen(false)}
         title="Remove device"
-        message={`Remove "${device.name}" from your account? Its token will be invalidated immediately.`}
+        message={`Remove "${device?.name || device?.device_id}" from your account? Its token will be invalidated immediately.`}
         confirmLabel="Remove"
         onConfirm={() => removeMut.mutate()}
         busy={removeMut.isPending}

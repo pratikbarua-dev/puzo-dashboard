@@ -124,8 +124,8 @@ export default function AdminDeviceDetailPage() {
       </button>
 
       <PageHeader
-        title={device.name}
-        subtitle={`${device.device_id} · ${hwModel} · ${device.firmware_channel || 'stable'}`}
+        title={device?.name || device?.device_id || 'Device'}
+        subtitle={`${device?.device_id} · ${hwModel} · ${device?.firmware_channel || 'stable'}`}
         action={
           <div className="flex items-center gap-2">
             <StatusBadge status={device.status} />
@@ -345,7 +345,7 @@ export default function AdminDeviceDetailPage() {
       </div>
 
       {/* Sheets: Command Form & Release Selector */}
-      <Sheet open={commandOpen} onClose={() => setCommandOpen(false)} title={`Send command to ${device.name}`}>
+      <Sheet open={commandOpen} onClose={() => setCommandOpen(false)} title={`Send command to ${device?.name || 'device'}`}>
         <CommandForm
           commands={COMMAND_DEFINITIONS.map((c) => ({ command: c.command, label: c.label }))}
           busy={sendMut.isPending}
@@ -356,7 +356,7 @@ export default function AdminDeviceDetailPage() {
       <Sheet
         open={updateOpen}
         onClose={() => setUpdateOpen(false)}
-        title={`Force firmware update on ${device.name}`}
+        title={`Force firmware update on ${device?.name || 'device'}`}
       >
         <div className="flex flex-col gap-4">
           <Select

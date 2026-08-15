@@ -97,7 +97,7 @@ export default function AdminContentPage() {
   const openEmotionForm = (e?: ContentEmotion) => {
     if (e) {
       setEditingEmotion(e);
-      setName(e.name);
+      setName(e.name || '');
       setExpression(e.expression);
       setSound(e.sound || '');
       setHaptic(e.haptic || '');
@@ -183,8 +183,8 @@ export default function AdminContentPage() {
             <Sparkles size={16} />
           </div>
           <div>
-            <p className="font-extrabold">{e.name}</p>
-            {e.description && <p className="text-micro-label text-on-surface-variant">{e.description}</p>}
+            <p className="font-extrabold">{e?.name || 'Emotion'}</p>
+            {e?.description && <p className="text-micro-label text-on-surface-variant">{e.description}</p>}
           </div>
         </div>
       ),
@@ -219,8 +219,8 @@ export default function AdminContentPage() {
             <FolderArchive size={16} />
           </div>
           <div>
-            <p className="font-extrabold">{a.name}</p>
-            <p className="text-micro-label font-mono text-on-surface-variant">{a.storage_path || '—'}</p>
+            <p className="font-extrabold">{a?.name || 'Asset'}</p>
+            <p className="text-micro-label font-mono text-on-surface-variant">{a?.storage_path || '—'}</p>
           </div>
         </div>
       ),
@@ -316,7 +316,7 @@ export default function AdminContentPage() {
       <Sheet
         open={emotionOpen}
         onClose={() => setEmotionOpen(false)}
-        title={editingEmotion ? `Edit Emotion: ${editingEmotion.name}` : 'Add Emotion to Catalog'}
+        title={editingEmotion ? `Edit Emotion: ${editingEmotion?.name || ''}` : 'Add Emotion to Catalog'}
       >
         <form onSubmit={saveEmotion} className="flex flex-col gap-4">
           <Input label="Name" value={name} onChange={(e) => setName(e.target.value)} required placeholder="happy" />

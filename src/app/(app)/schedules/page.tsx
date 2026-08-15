@@ -166,12 +166,12 @@ export default function SchedulesPage() {
           >
             {partnerDevice && (
               <option value={partnerDevice.device_id}>
-                Partner&apos;s PUZO ({partnerDevice.name})
+                Partner&apos;s PUZO ({partnerDevice.name || partnerDevice.device_id})
               </option>
             )}
             {(devices ?? []).map((d) => (
               <option key={d.device_id} value={d.device_id}>
-                My PUZO ({d.name})
+                My PUZO ({d.name || d.device_id})
               </option>
             ))}
           </Select>
@@ -180,7 +180,7 @@ export default function SchedulesPage() {
             <option value="">None</option>
             {(devices ?? []).map((d) => (
               <option key={d.device_id} value={d.device_id}>
-                {d.name} ({d.device_id})
+                {d.name || d.device_id} ({d.device_id})
               </option>
             ))}
           </Select>

@@ -165,8 +165,8 @@ export default function DevicesPage() {
         <div className="flex items-center gap-3">
           <Cpu size={18} className="text-primary-container" />
           <div>
-            <p className="font-extrabold">{device.name}</p>
-            <p className="text-micro-label text-on-surface-variant">{device.device_id}</p>
+            <p className="font-extrabold">{device?.name || device?.device_id || 'Device'}</p>
+            <p className="text-micro-label text-on-surface-variant">{device?.device_id}</p>
           </div>
         </div>
       ),

@@ -113,7 +113,7 @@ export default function InteractionsPage() {
       />
 
       <Card className="mb-4">
-        <CardHeader title="Quick Reactions" subtitle={partnerDevice ? `Targeting ${partnerDevice.name}` : 'Pair a partner companion first'} />
+        <CardHeader title="Quick Reactions" subtitle={partnerDevice ? `Targeting ${partnerDevice.name || partnerDevice.device_id}` : 'Pair a partner companion first'} />
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-6">
           {EMOTION_PRESETS.map(({ key, label, icon }) => (
             <Button
@@ -249,12 +249,12 @@ export default function InteractionsPage() {
           >
             {partnerDevice && (
               <option value={partnerDevice.device_id}>
-                Partner&apos;s PUZO ({partnerDevice.name})
+                Partner&apos;s PUZO ({partnerDevice.name || partnerDevice.device_id})
               </option>
             )}
             {(devices ?? []).map((d) => (
               <option key={d.device_id} value={d.device_id}>
-                My PUZO ({d.name})
+                My PUZO ({d.name || d.device_id})
               </option>
             ))}
           </Select>

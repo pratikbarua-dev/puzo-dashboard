@@ -120,8 +120,8 @@ export default function AdminDevicesPage() {
         <div className="flex items-center gap-3">
           <Cpu size={18} className="text-primary-container" />
           <div>
-            <p className="font-extrabold">{d.name}</p>
-            <p className="text-micro-label text-on-surface-variant font-mono">{d.device_id}</p>
+            <p className="font-extrabold">{d?.name || d?.device_id || 'Device'}</p>
+            <p className="text-micro-label text-on-surface-variant font-mono">{d?.device_id}</p>
           </div>
         </div>
       ),
@@ -220,8 +220,8 @@ export default function AdminDevicesPage() {
         <TokenModal
           open={!!tokenResult}
           onClose={() => setTokenResult(null)}
-          deviceName={tokenResult.device.name}
-          deviceId={tokenResult.device.device_id}
+          deviceName={tokenResult.device?.name || tokenResult.device?.device_id || 'Device'}
+          deviceId={tokenResult.device?.device_id || ''}
           token={tokenResult.token}
         />
       )}
