@@ -25,6 +25,7 @@ import {
 import { cn } from '@/lib/utils';
 import { useAuth, isAdmin } from '@/lib/auth-store';
 import { Button, Sheet } from './ui';
+import { PuzoLogo } from './PuzoLogo';
 import { authClient } from '@/lib/auth-client';
 import { toast } from './Toast';
 
@@ -102,10 +103,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         {/* Desktop sidebar */}
         <aside className="sticky top-0 hidden h-dvh w-60 shrink-0 flex-col border-r border-outline-variant bg-surface-container-lowest p-4 md:flex">
           <Link href="/overview" className="mb-6 flex items-center gap-2">
-            <span className="grid h-9 w-9 place-items-center rounded-md bg-primary-container font-extrabold text-white">
-              P
-            </span>
-            <span className="text-headline-md">PUZO</span>
+            <PuzoLogo size={36} />
+            <span className="text-headline-md font-extrabold">PUZO</span>
           </Link>
 
           <nav className="flex flex-col gap-1">
@@ -144,10 +143,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           {/* Mobile top bar */}
           <header className="sticky top-0 z-30 flex items-center justify-between border-b border-outline-variant bg-surface-container-lowest/90 px-4 py-2 pt-safe backdrop-blur md:hidden">
             <Link href="/overview" className="flex items-center gap-2">
-              <span className="grid h-8 w-8 place-items-center rounded-md bg-primary-container font-extrabold text-white">
-                P
-              </span>
-              <span className="text-headline-md">PUZO</span>
+              <PuzoLogo size={32} />
+              <span className="text-headline-md font-extrabold">PUZO</span>
             </Link>
             <button
               onClick={() => setMoreOpen(true)}

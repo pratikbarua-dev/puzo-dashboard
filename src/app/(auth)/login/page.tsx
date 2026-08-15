@@ -2,6 +2,7 @@
 
 import { authClient } from '@/lib/auth-client';
 import { Button } from '@/components/ui';
+import { PuzoLogo } from '@/components/PuzoLogo';
 
 export default function LoginPage() {
   const signIn = () => {
@@ -14,10 +15,8 @@ export default function LoginPage() {
   return (
     <div className="grid min-h-dvh place-items-center bg-background-base px-4">
       <div className="w-full max-w-sm">
-        <div className="mb-8 flex items-center gap-2">
-          <span className="grid h-11 w-11 place-items-center rounded-lg bg-primary-container text-headline-md font-extrabold text-white">
-            P
-          </span>
+        <div className="mb-8 flex items-center gap-3">
+          <PuzoLogo size={48} />
           <div>
             <h1 className="text-headline-lg">PUZO</h1>
             <p className="text-label-caps text-on-surface-variant">SMART DESK COMPANION</p>

@@ -1,24 +1,16 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
-import { Home, ArrowLeft } from 'lucide-react';
+import { Home } from 'lucide-react';
 import { Button } from '@/components/ui';
+import { PuzoLogo } from '@/components/PuzoLogo';
 
 export default function NotFound() {
   return (
     <div className="flex min-h-dvh flex-col items-center justify-center bg-background-base p-6 text-center">
       <div className="relative mb-6 flex items-center justify-center">
         <div className="absolute h-24 w-24 rounded-full bg-primary/20 blur-xl animate-pulse" />
-        <div className="relative flex h-20 w-20 items-center justify-center rounded-2xl bg-surface-container-high shadow-puzo border border-border/50">
-          <Image
-            src="/icons/apple-touch-icon.png"
-            alt="PUZO"
-            width={48}
-            height={48}
-            className="rounded-xl object-contain"
-          />
-        </div>
+        <PuzoLogo size={90} />
       </div>
 
       <h1 className="mb-2 font-display text-3xl font-extrabold tracking-tight text-on-surface">404</h1>
