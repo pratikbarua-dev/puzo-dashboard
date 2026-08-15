@@ -34,13 +34,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   }, [isError, error, router]);
 
   if (isLoading) {
-    return <AppSplash label="Connecting to PUZO companion…" />;
+    return <AppSplash />;
   }
 
   if (isError) {
     const e = error as ApiError;
     if (e.status === 401 || e.status === 403) {
-      return <AppSplash label="Redirecting to login…" />;
+      return <AppSplash />;
     }
     return (
       <AppSplash
