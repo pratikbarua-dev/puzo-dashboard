@@ -87,14 +87,15 @@ function AddPuzoSheet() {
             className="flex flex-col gap-4"
           >
             <p className="text-sm text-on-surface-variant">
-              Turn on an unconfigured PUZO. Its screen shows a setup ID. Enter it here to generate a
-              one-time code.
+              Turn on your PUZO. Its screen displays a short 4-character setup code (e.g. <strong className="font-mono text-primary">921C</strong>).
             </p>
             <Input
-              label="PUZO setup ID"
+              label="PUZO setup code"
               value={setupId}
               onChange={(event) => setSetupId(event.target.value)}
-              placeholder="PUZO-C05D89DD921C"
+              placeholder="921C"
+              maxLength={15}
+              className="font-mono uppercase text-lg tracking-wider"
               autoCapitalize="characters"
               required
             />

@@ -1,25 +1,51 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Cpu, Link2, CreditCard, Plus, Heart, Zap, Sparkles } from 'lucide-react';
-import { myDevices, myRelationships, sendInteraction } from '@/lib/api';
+import { myDevices, myRelationships, myInteractions, sendInteraction } from '@/lib/api';
 import { useAuth } from '@/lib/auth-store';
 import { PageHeader } from '@/components/PageHeader';
 import { StatCard } from '@/components/StatCard';
 import { StatusBadge } from '@/components/StatusBadge';
 import { Card, CardHeader, Button, CardSkeleton, TableSkeleton, EmptyState } from '@/components/ui';
+import { WelcomeModal } from '@/components/WelcomeModal';
+import { OnboardingChecklist } from '@/components/OnboardingChecklist';
 import { toast } from '@/components/Toast';
 import { timeAgo, extractError } from '@/lib/utils';
 
 export default function OverviewPage() {
+  const router = useRouter();
   const queryClient = useQueryClient();
   const { profile, subscription, entitlements } = useAuth();
   const { data: devices, isLoading: loadingDevices } = useQuery({ queryKey: ['devices'], queryFn: myDevices });
   const { data: relationships, isLoading: loadingRelationships } = useQuery({ queryKey: ['relationships'], queryFn: myRelationships });
+  const { data: interactions } = useQuery({ queryKey: ['interactions'], queryFn: myInteractions });
+
+  const [welcomeOpen, setWelcomeOpen] = useState(false);
 
   const activeRelationship = (relationships ?? []).find((r) => r.status === 'active');
   const partnerDevice = activeRelationship?.devices?.find((d) => !devices?.some((mine) => mine.device_id === d.device_id));
+  const hasDevices = Boolean(devices?.length);
+  const hasPartner = Boolean(activeRelationship);
+  const hasInteractions = Boolean(interactions?.length);
+
+  useEffect(() => {
+    // Show welcome modal for new users with 0 devices who haven't dismissed it in session
+    if (!loadingDevices && !loadingRelationships && !hasDevices && !hasPartner) {
+      const dismissed = sessionStorage.getItem('puzo_welcome_dismissed');
+      if (!dismissed) {
+        setWelcomeOpen(true);
+      }
+    }
+  }, [loadingDevices, loadingRelationships, hasDevices, hasPartner]);
+
+  const handleCloseWelcome = () => {
+    setWelcomeOpen(false);
+    sessionStorage.setItem('puzo_welcome_dismissed', 'true');
+  };
 
   const sendQuickReaction = useMutation({
     mutationFn: (emotion: string) => {
@@ -43,6 +69,13 @@ export default function OverviewPage() {
 
   return (
     <div>
+      <WelcomeModal
+        open={welcomeOpen}
+        onClose={handleCloseWelcome}
+        onStartDeviceSetup={() => router.push('/devices')}
+        onStartPairing={() => router.push('/pairing')}
+      />
+
       <PageHeader
         title={`Hey, ${profile?.display_name || profile?.username || 'friend'}`}
         subtitle={`${entitlements ? 'Companion account' : 'Free plan'}${subscription ? ' · ' + (subscription.plan?.name || subscription.status) : ''}`}
@@ -53,6 +86,16 @@ export default function OverviewPage() {
             </Button>
           </Link>
         }
+      />
+
+      {/* Interactive 3-step Onboarding Checklist for new/partial setups */}
+      <OnboardingChecklist
+        hasDevices={hasDevices}
+        hasPartner={hasPartner}
+        hasInteractions={hasInteractions}
+        onOpenDeviceSetup={() => router.push('/devices')}
+        onOpenPairing={() => router.push('/pairing')}
+        onOpenInteractions={() => router.push('/interactions')}
       />
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
