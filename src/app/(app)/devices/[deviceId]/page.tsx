@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { ArrowLeft, Cpu, Trash2, Send } from 'lucide-react';
-import { myDevice, deviceHistory, transferDevice, removeMyDevice, ApiError } from '@/lib/api';
+import { ArrowLeft, Cpu, Trash2, Edit3, Send } from 'lucide-react';
+import { myDevice, deviceHistory, updateMyDevice, transferDevice, removeMyDevice, ApiError } from '@/lib/api';
 import { PageHeader } from '@/components/PageHeader';
 import { StatusBadge } from '@/components/StatusBadge';
 import {
@@ -35,14 +35,28 @@ export default function DeviceDetailPage() {
     queryFn: () => deviceHistory(deviceId),
   });
 
+  const [renameOpen, setRenameOpen] = useState(false);
+  const [newName, setNewName] = useState('');
   const [transferOpen, setTransferOpen] = useState(false);
+  const [transferConfirmOpen, setTransferConfirmOpen] = useState(false);
   const [username, setUsername] = useState('');
   const [removeOpen, setRemoveOpen] = useState(false);
+
+  const renameMut = useMutation({
+    mutationFn: () => updateMyDevice(deviceId, { name: newName.trim() }),
+    onSuccess: () => {
+      toast.success('Device renamed');
+      setRenameOpen(false);
+      void queryClient.invalidateQueries({ queryKey: ['devices'] });
+    },
+    onError: (e) => toast.error(extractError(e).message),
+  });
 
   const transferMut = useMutation({
     mutationFn: () => transferDevice(deviceId, username.trim().replace(/^@/, '')),
     onSuccess: () => {
       toast.success('Device transferred');
+      setTransferConfirmOpen(false);
       setTransferOpen(false);
       setUsername('');
       void queryClient.invalidateQueries({ queryKey: ['devices'] });
@@ -104,6 +118,15 @@ export default function DeviceDetailPage() {
           </dl>
 
           <div className="mt-4 flex flex-col gap-2">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setNewName(device.name);
+                setRenameOpen(true);
+              }}
+            >
+              <Edit3 size={16} /> Rename device
+            </Button>
             <Button variant="outline" onClick={() => setTransferOpen(true)}>
               Transfer ownership
             </Button>
@@ -135,6 +158,27 @@ export default function DeviceDetailPage() {
         </Card>
       </div>
 
+      <Sheet open={renameOpen} onClose={() => setRenameOpen(false)} title="Rename device">
+        <form
+          className="flex flex-col gap-4"
+          onSubmit={(e) => {
+            e.preventDefault();
+            renameMut.mutate();
+          }}
+        >
+          <Input
+            label="Device name"
+            value={newName}
+            onChange={(e) => setNewName(e.target.value)}
+            placeholder="e.g. Living Room PUZO"
+            required
+          />
+          <Button type="submit" isLoading={renameMut.isPending}>
+            Save name
+          </Button>
+        </form>
+      </Sheet>
+
       <Sheet open={transferOpen} onClose={() => setTransferOpen(false)} title="Transfer device">
         <p className="mb-4 text-on-surface-variant">
           The recipient must already have a PUZO account. The device will be relinked to them.
@@ -143,7 +187,7 @@ export default function DeviceDetailPage() {
           className="flex flex-col gap-4"
           onSubmit={(e) => {
             e.preventDefault();
-            transferMut.mutate();
+            setTransferConfirmOpen(true);
           }}
         >
           <Input
@@ -153,11 +197,22 @@ export default function DeviceDetailPage() {
             placeholder="@username"
             required
           />
-          <Button type="submit" disabled={transferMut.isPending}>
-            {transferMut.isPending ? 'Transferring…' : 'Transfer'}
+          <Button type="submit">
+            Transfer device
           </Button>
         </form>
       </Sheet>
+
+      <ConfirmDialog
+        open={transferConfirmOpen}
+        onClose={() => setTransferConfirmOpen(false)}
+        title="Confirm ownership transfer"
+        message={`Are you sure you want to transfer "${device.name}" to @${username.replace(/^@/, '')}? You will lose access to this device immediately.`}
+        confirmLabel="Transfer now"
+        danger
+        onConfirm={() => transferMut.mutate()}
+        busy={transferMut.isPending}
+      />
 
       <ConfirmDialog
         open={removeOpen}

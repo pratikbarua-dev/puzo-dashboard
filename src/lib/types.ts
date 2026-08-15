@@ -24,7 +24,6 @@ export interface Entitlements {
   expressions?: boolean;
   vibrations?: boolean;
   sounds?: boolean;
-  rgb?: boolean;
   messages?: boolean;
   emotions?: boolean;
   animations?: boolean;
@@ -161,7 +160,6 @@ export type InteractionType =
   | 'expression'
   | 'vibration'
   | 'sound'
-  | 'rgb'
   | 'message'
   | 'animation'
   | 'animation_pack';

@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { Providers } from './providers';
+import { ToastHost } from '@/components/Toast';
 
 export const metadata: Metadata = {
   title: 'PUZO Companion',
@@ -42,7 +43,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
       </head>
       <body className="antialiased">
-        <Providers>{children}</Providers>
+        <Providers>
+          {children}
+          <ToastHost />
+        </Providers>
       </body>
     </html>
   );

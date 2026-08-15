@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link2, Plus, Trash2, Copy, Check } from 'lucide-react';
 import {
@@ -15,6 +16,7 @@ import { toast } from '@/components/Toast';
 import { formatDate, extractError } from '@/lib/utils';
 
 export default function PairingPage() {
+  const router = useRouter();
   const queryClient = useQueryClient();
   const { data: codes, isLoading } = useQuery({
     queryKey: ['pairing'],
@@ -32,6 +34,8 @@ export default function PairingPage() {
     mutationFn: () => createPairingCode(relType),
     onSuccess: (data) => {
       setNewCode(data.code);
+      setCreateOpen(false);
+      toast.success('Pairing code created!');
       void queryClient.invalidateQueries({ queryKey: ['pairing'] });
     },
     onError: (e) => toast.error(extractError(e).message),
@@ -44,6 +48,7 @@ export default function PairingPage() {
       setJoinOpen(false);
       setJoinCode('');
       void queryClient.invalidateQueries({ queryKey: ['relationships'] });
+      router.push('/relationships');
     },
     onError: (e) => toast.error(extractError(e).message),
   });

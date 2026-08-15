@@ -50,16 +50,6 @@ export const COMMAND_DEFINITIONS: CommandDef[] = [
     fields: [{ name: 'animation', label: 'Animation name', type: 'text', max: 80 }],
   },
   {
-    command: 'rgb',
-    label: 'RGB color',
-    interactionType: 'rgb',
-    fields: [
-      { name: 'r', label: 'Red', type: 'number', min: 0, max: 255, default: 255 },
-      { name: 'g', label: 'Green', type: 'number', min: 0, max: 255, default: 0 },
-      { name: 'b', label: 'Blue', type: 'number', min: 0, max: 255, default: 0 },
-    ],
-  },
-  {
     command: 'vibration',
     label: 'Vibration',
     interactionType: 'vibration',

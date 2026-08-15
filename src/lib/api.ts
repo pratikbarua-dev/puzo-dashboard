@@ -105,6 +105,8 @@ export const transferDevice = (deviceId: string, newOwnerUsername: string) =>
   request<{ device: Device }>('POST', `/devices/${deviceId}/transfer`, {
     new_owner_username: newOwnerUsername,
   });
+export const updateMyDevice = (deviceId: string, input: { name?: string; firmware_channel?: string }) =>
+  request<{ device: Device }>('PATCH', `/devices/${deviceId}`, input).then((d) => d.device);
 export const removeMyDevice = (deviceId: string) =>
   request<{ device: Device }>('DELETE', `/devices/${deviceId}`);
 

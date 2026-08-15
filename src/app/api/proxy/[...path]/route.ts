@@ -46,9 +46,10 @@ async function proxy(
   if (token) {
     headers.set('authorization', `Bearer ${token}`);
   }
-  // Legacy admin-key support for admin routes (requireAdmin accepts either).
+  // Legacy admin-key support for admin routes (only attach if session has admin/super_admin role).
   const isAdminPath = path[0] === 'admin';
-  if (isAdminPath && process.env.ADMIN_API_KEY) {
+  const userRole = (session?.user as { role?: string } | undefined)?.role;
+  if (isAdminPath && process.env.ADMIN_API_KEY && (userRole === 'admin' || userRole === 'super_admin')) {
     headers.set('x-admin-key', process.env.ADMIN_API_KEY);
   }
 

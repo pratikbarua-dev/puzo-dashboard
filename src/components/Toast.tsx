@@ -1,7 +1,7 @@
 'use client';
 
 import { create } from 'zustand';
-import { CheckCircle2, AlertTriangle, Info, X, XCircle } from 'lucide-react';
+import { CheckCircle2, Info, X, XCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 type ToastKind = 'success' | 'error' | 'info';
@@ -19,11 +19,19 @@ interface ToastState {
 
 let nextId = 1;
 
-export const useToast = create<ToastState>((set) => ({
+export const useToast = create<ToastState>((set, get) => ({
   toasts: [],
   push: (kind, message) => {
+    const existing = get().toasts;
+    // Deduplicate identical message within active toasts
+    if (existing.some((t) => t.kind === kind && t.message === message)) {
+      return;
+    }
     const id = nextId++;
-    set((s) => ({ toasts: [...s.toasts, { id, kind, message }] }));
+    // Keep max 4 toasts visible
+    const newToasts = [...existing.slice(-3), { id, kind, message }];
+    set({ toasts: newToasts });
+
     setTimeout(() => {
       set((s) => ({ toasts: s.toasts.filter((t) => t.id !== id) }));
     }, 4500);

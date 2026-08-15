@@ -11,16 +11,21 @@ type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
 export function Button({
   variant = 'primary',
   size = 'md',
+  isLoading = false,
+  disabled,
+  children,
   className,
   ...props
 }: React.ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: ButtonVariant;
   size?: 'sm' | 'md' | 'lg';
+  isLoading?: boolean;
 }) {
   return (
     <button
+      disabled={disabled || isLoading}
       className={cn(
-        'inline-flex items-center justify-center gap-2 rounded-md font-extrabold transition-fast disabled:cursor-not-allowed disabled:opacity-40 min-h-[44px] px-4',
+        'inline-flex items-center justify-center gap-2 rounded-md font-extrabold transition-fast disabled:cursor-not-allowed disabled:opacity-40 min-h-[44px] px-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
         size === 'sm' && 'min-h-[36px] px-3 text-[11px]',
         size === 'lg' && 'min-h-[52px] px-6',
         variant === 'primary' &&
@@ -28,15 +33,24 @@ export function Button({
         variant === 'secondary' &&
           'bg-secondary text-on-secondary hover:opacity-90 active:opacity-80',
         variant === 'outline' &&
-          'border border-outline-variant bg-transparent text-on-surface hover:bg-surface-container-high',
+          'border border-outline-variant bg-transparent text-on-surface hover:bg-surface-container-high active:bg-surface-container-highest',
         variant === 'ghost' &&
-          'bg-transparent text-on-surface-variant hover:bg-surface-container-high',
+          'bg-transparent text-on-surface-variant hover:bg-surface-container-high active:bg-surface-container-highest',
         variant === 'danger' &&
-          'bg-error-container text-on-error-container hover:opacity-90',
+          'bg-error-container text-on-error-container hover:opacity-90 active:opacity-80',
         className,
       )}
       {...props}
-    />
+    >
+      {isLoading ? (
+        <>
+          <Spinner className="h-4 w-4 border-white/40 border-t-white" />
+          <span>{children}</span>
+        </>
+      ) : (
+        children
+      )}
+    </button>
   );
 }
 
@@ -252,8 +266,33 @@ export function Spinner({ className }: { className?: string }) {
 export function Skeleton({ className }: { className?: string }) {
   return (
     <div
-      className={cn('animate-pulse rounded-md bg-surface-container-high', className)}
+      className={cn('animate-pulse rounded-md bg-surface-container-high/60', className)}
     />
+  );
+}
+
+export function CardSkeleton({ count = 1 }: { count?: number }) {
+  return (
+    <div className="flex flex-col gap-3">
+      {Array.from({ length: count }).map((_, i) => (
+        <div key={i} className="rounded-lg bg-surface-container p-md shadow-puzo flex flex-col gap-3">
+          <Skeleton className="h-5 w-1/3" />
+          <Skeleton className="h-4 w-2/3" />
+          <Skeleton className="h-10 w-full" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export function TableSkeleton({ rows = 4 }: { rows?: number }) {
+  return (
+    <div className="flex flex-col gap-2 p-md">
+      <Skeleton className="h-8 w-full rounded-md" />
+      {Array.from({ length: rows }).map((_, i) => (
+        <Skeleton key={i} className="h-12 w-full rounded-md" />
+      ))}
+    </div>
   );
 }
 

@@ -1,18 +1,19 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Zap, Plus, Trash2 } from 'lucide-react';
+import { Zap, Plus, Trash2, Send, ArrowUpRight, ArrowDownLeft, Heart, Smile, Sparkles, Volume2 } from 'lucide-react';
 import { myInteractions, sendInteraction, deleteInteraction, myDevices, myRelationships } from '@/lib/api';
 import { commandDef, INTERACTION_TYPES } from '@/lib/registry';
+import { useAuth } from '@/lib/auth-store';
 import { PageHeader } from '@/components/PageHeader';
-import { Card, CardHeader, Button, Input, Select, Sheet, Loading, EmptyState } from '@/components/ui';
+import { Card, CardHeader, Button, Input, Select, Sheet, CardSkeleton, EmptyState } from '@/components/ui';
 import { toast } from '@/components/Toast';
 import { formatDate, extractError } from '@/lib/utils';
-import type { Interaction } from '@/lib/types';
 
 export default function InteractionsPage() {
   const queryClient = useQueryClient();
+  const { profile } = useAuth();
   const { data: interactions, isLoading } = useQuery({
     queryKey: ['interactions'],
     queryFn: myInteractions,
@@ -25,7 +26,7 @@ export default function InteractionsPage() {
   const [target, setTarget] = useState('');
   const [source, setSource] = useState('');
   const [relationshipId, setRelationshipId] = useState('');
-  const [payload, setPayload] = useState<Record<string, unknown>>({ emotion: '' });
+  const [payload, setPayload] = useState<Record<string, unknown>>({ emotion: 'thinking_of_you', message: 'Thinking of you' });
 
   const def = commandDef(type === 'message' ? 'display' : type);
 
@@ -33,6 +34,12 @@ export default function InteractionsPage() {
     .filter((relationship) => relationship.status === 'active')
     .flatMap((relationship) => relationship.devices ?? [])
     .find((device) => !devices?.some((mine) => mine.device_id === device.device_id));
+
+  useEffect(() => {
+    if (partnerDevice?.device_id && !target) {
+      setTarget(partnerDevice.device_id);
+    }
+  }, [partnerDevice, target]);
 
   const presetMut = useMutation({
     mutationFn: (emotion: string) => {
@@ -52,10 +59,12 @@ export default function InteractionsPage() {
 
   function labelForEmotion(emotion: string) {
     return {
-      thinking_of_you: 'Thinking of you',
-      happy: "I'm feeling happy",
-      miss_you: 'I miss you',
-      love: 'I love you',
+      thinking_of_you: 'Thinking of you ❤️',
+      happy: "I'm feeling happy 😊",
+      miss_you: 'I miss you 🥺',
+      love: 'I love you 💕',
+      hug: 'Sending a warm hug 🌸',
+      heartbeat: 'Sending my heartbeat ⚡',
     }[emotion] || emotion;
   }
 
@@ -82,84 +91,116 @@ export default function InteractionsPage() {
     onError: (e) => toast.error(extractError(e).message),
   });
 
+  const EMOTION_PRESETS = [
+    { key: 'thinking_of_you', label: 'Thinking of you', icon: '❤️' },
+    { key: 'happy', label: 'Happy', icon: '😊' },
+    { key: 'miss_you', label: 'Miss you', icon: '🥺' },
+    { key: 'love', label: 'I love you', icon: '💕' },
+    { key: 'hug', label: 'Warm hug', icon: '🌸' },
+    { key: 'heartbeat', label: 'Heartbeat', icon: '⚡' },
+  ];
+
   return (
     <div>
       <PageHeader
         title="Interactions"
-        subtitle="Send a moment to your partner's PUZO"
+        subtitle="Send emotions, expressions, and vibrations to your partner's companion"
         action={
           <Button onClick={() => setOpen(true)}>
-            <Plus size={16} /> Send
+            <Plus size={16} /> Send moment
           </Button>
         }
       />
 
       <Card className="mb-4">
-        <CardHeader title="Quick reactions" subtitle={partnerDevice ? `To ${partnerDevice.name}` : 'Pair a partner PUZO first'} />
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-          {[
-            ['thinking_of_you', '❤️ Thinking of you'],
-            ['happy', '😊 Happy'],
-            ['miss_you', '🥺 Miss you'],
-            ['love', '💕 I love you'],
-          ].map(([emotion, label]) => (
+        <CardHeader title="Quick Reactions" subtitle={partnerDevice ? `Targeting ${partnerDevice.name}` : 'Pair a partner companion first'} />
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-6">
+          {EMOTION_PRESETS.map(({ key, label, icon }) => (
             <Button
-              key={emotion}
+              key={key}
               variant="outline"
-              disabled={!partnerDevice || presetMut.isPending}
-              onClick={() => presetMut.mutate(emotion)}
+              disabled={!partnerDevice}
+              isLoading={presetMut.isPending && presetMut.variables === key}
+              onClick={() => presetMut.mutate(key)}
+              className="flex-col py-3 gap-1 min-h-[56px]"
             >
-              {label}
+              <span className="text-lg">{icon}</span>
+              <span className="text-[11px] font-semibold">{label}</span>
             </Button>
           ))}
         </div>
       </Card>
 
       {isLoading ? (
-        <Loading />
+        <CardSkeleton count={3} />
       ) : !interactions?.length ? (
         <EmptyState
           icon={<Zap size={28} />}
-          title="No interactions yet"
-          message="Send your first emotion, message, or animation to a paired device."
+          title="No moments shared yet"
+          message="Send your first emotion, message, sound, or animation to your partner's PUZO."
           action={
             <Button variant="outline" onClick={() => setOpen(true)}>
-              Send one
+              Send first moment
             </Button>
           }
         />
       ) : (
         <Card>
-          <CardHeader title="History" subtitle="Tap a row to keep it tidy — long-press not needed, just delete" />
+          <CardHeader title="Timeline" subtitle="Moments shared between companion devices" />
           <div className="flex flex-col gap-2">
-            {interactions.map((i) => (
-              <div
-                key={i.id}
-                className="flex flex-wrap items-center justify-between gap-2 rounded-md bg-surface-container-low px-3 py-2"
-              >
-                <div>
-                  <p className="text-label-caps">
-                    {i.type === 'emotion' && i.payload?.emotion ? String(i.payload.emotion) : i.type}
-                    {i.payload?.message
-                      ? ` · ${String(i.payload.message).slice(0, 80)}`
-                      : i.payload?.text
-                        ? ` · ${String(i.payload.text).slice(0, 40)}`
-                        : ''}
-                  </p>
-                  <p className="text-micro-label text-on-surface-variant">
-                    {i.status} · {formatDate(i.created_at)} · to {i.target_device_id || '—'}
-                  </p>
+            {interactions.map((i) => {
+              const isSent = !i.sender_id || i.sender_id === profile?.id;
+              const emotionKey = i.payload?.emotion ? String(i.payload.emotion) : null;
+              const displayText = i.payload?.message
+                ? String(i.payload.message)
+                : i.payload?.text
+                ? String(i.payload.text)
+                : emotionKey
+                ? labelForEmotion(emotionKey)
+                : i.type;
+
+              return (
+                <div
+                  key={i.id}
+                  className="flex items-center justify-between gap-3 rounded-lg bg-surface-container-low px-4 py-3 border border-border/20 hover:bg-surface-container-high transition-fast"
+                >
+                  <div className="flex items-center gap-3">
+                    <div
+                      className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${
+                        isSent ? 'bg-primary/10 text-primary' : 'bg-secondary/10 text-secondary'
+                      }`}
+                    >
+                      {isSent ? <ArrowUpRight size={18} /> : <ArrowDownLeft size={18} />}
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-extrabold text-on-surface text-sm">{displayText}</span>
+                        <span className="rounded-full bg-surface-container-highest px-2 py-0.5 text-[10px] font-bold uppercase text-on-surface-variant">
+                          {i.type}
+                        </span>
+                      </div>
+                      <p className="text-micro-label text-on-surface-variant mt-0.5">
+                        {isSent ? 'Sent' : 'Received'} · {formatDate(i.created_at)} · {i.status}
+                      </p>
+                    </div>
+                  </div>
+
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    disabled={delMut.isPending}
+                    onClick={() => delMut.mutate(i.id)}
+                  >
+                    <Trash2 size={14} />
+                  </Button>
                 </div>
-                <Button variant="ghost" size="sm" onClick={() => delMut.mutate(i.id)}>
-                  <Trash2 size={14} />
-                </Button>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </Card>
       )}
 
-      <Sheet open={open} onClose={() => setOpen(false)} title="Send an interaction">
+      <Sheet open={open} onClose={() => setOpen(false)} title="Send a moment">
         <form
           className="flex flex-col gap-4"
           onSubmit={(e) => {
@@ -167,7 +208,7 @@ export default function InteractionsPage() {
             sendMut.mutate();
           }}
         >
-          <Select label="Type" value={type} onChange={(e) => setType(e.target.value)}>
+          <Select label="Type of interaction" value={type} onChange={(e) => setType(e.target.value)}>
             {INTERACTION_TYPES.map((t) => (
               <option key={t} value={t}>
                 {t}
@@ -175,36 +216,47 @@ export default function InteractionsPage() {
             ))}
           </Select>
 
-          <Input
-            label="Target device ID"
-            value={target}
-            onChange={(e) => setTarget(e.target.value)}
-            placeholder="A device owned by your partner"
-            required
-          />
-
-          <Select label="Source device (yours, optional)" value={source} onChange={(e) => setSource(e.target.value)}>
-            <option value="">None</option>
-            {(devices ?? []).map((d) => (
-              <option key={d.device_id} value={d.device_id}>
-                {d.name} ({d.device_id})
-              </option>
-            ))}
-          </Select>
+          {type === 'emotion' && (
+            <div>
+              <label className="mb-2 block text-label-caps text-on-surface-variant">Pick emotion swatch</label>
+              <div className="grid grid-cols-3 gap-2 mb-3">
+                {EMOTION_PRESETS.map(({ key, label, icon }) => (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() =>
+                      setPayload({ emotion: key, message: labelForEmotion(key) })
+                    }
+                    className={`flex items-center gap-2 rounded-lg border p-2.5 text-xs font-bold transition-fast ${
+                      payload.emotion === key
+                        ? 'border-primary bg-primary/10 text-primary'
+                        : 'border-border/40 bg-surface-container-low hover:bg-surface-container-high'
+                    }`}
+                  >
+                    <span>{icon}</span>
+                    <span>{label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           <Select
-            label="Relationship (optional)"
-            value={relationshipId}
-            onChange={(e) => setRelationshipId(e.target.value)}
+            label="Target companion device"
+            value={target}
+            onChange={(e) => setTarget(e.target.value)}
+            required
           >
-            <option value="">Auto-detect</option>
-            {(relationships ?? [])
-              .filter((r) => r.status === 'active')
-              .map((r) => (
-                <option key={r.id} value={r.id}>
-                  {r.relationship_type}
-                </option>
-              ))}
+            {partnerDevice && (
+              <option value={partnerDevice.device_id}>
+                Partner&apos;s PUZO ({partnerDevice.name})
+              </option>
+            )}
+            {(devices ?? []).map((d) => (
+              <option key={d.device_id} value={d.device_id}>
+                My PUZO ({d.name})
+              </option>
+            ))}
           </Select>
 
           {def?.fields.map((f) => (
@@ -222,8 +274,8 @@ export default function InteractionsPage() {
             />
           ))}
 
-          <Button type="submit" disabled={sendMut.isPending}>
-            {sendMut.isPending ? 'Sending…' : 'Send interaction'}
+          <Button type="submit" isLoading={sendMut.isPending}>
+            Send moment now
           </Button>
         </form>
       </Sheet>

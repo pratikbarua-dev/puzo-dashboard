@@ -7,15 +7,14 @@ import { me, ApiError } from '@/lib/api';
 import type { MeResponse } from '@/lib/types';
 import { useAuth } from '@/lib/auth-store';
 import { AppShell } from '@/components/AppShell';
-import { ToastHost } from '@/components/Toast';
 import { RealtimeWatcher } from '@/components/RealtimeWatcher';
-import { Loading } from '@/components/ui';
+import { AppSplash } from '@/components/AppSplash';
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const { setIdentity } = useAuth();
 
-  const { data, isError, error } = useQuery<MeResponse>({
+  const { data, isLoading, isError, error, refetch } = useQuery<MeResponse>({
     queryKey: ['me'],
     queryFn: me,
     retry: false,
@@ -34,11 +33,20 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     }
   }, [isError, error, router]);
 
+  if (isLoading) {
+    return <AppSplash label="Connecting to PUZO companion…" />;
+  }
+
   if (isError) {
+    const e = error as ApiError;
+    if (e.status === 401 || e.status === 403) {
+      return <AppSplash label="Redirecting to login…" />;
+    }
     return (
-      <div className="grid min-h-dvh place-items-center bg-background-base">
-        <Loading label="Checking session…" />
-      </div>
+      <AppSplash
+        error={e.message || 'Could not load companion session.'}
+        onRetry={() => refetch()}
+      />
     );
   }
 
@@ -46,7 +54,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     <>
       <AppShell>{children}</AppShell>
       <RealtimeWatcher />
-      <ToastHost />
     </>
   );
 }

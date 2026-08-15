@@ -1,19 +1,41 @@
 'use client';
 
 import Link from 'next/link';
-import { useQuery } from '@tanstack/react-query';
-import { Cpu, Link2, CreditCard, Plus } from 'lucide-react';
-import { myDevices } from '@/lib/api';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Cpu, Link2, CreditCard, Plus, Heart, Zap, Sparkles } from 'lucide-react';
+import { myDevices, myRelationships, sendInteraction } from '@/lib/api';
 import { useAuth } from '@/lib/auth-store';
 import { PageHeader } from '@/components/PageHeader';
 import { StatCard } from '@/components/StatCard';
 import { StatusBadge } from '@/components/StatusBadge';
-import { Card, CardHeader, Button, Loading, EmptyState } from '@/components/ui';
-import { timeAgo } from '@/lib/utils';
+import { Card, CardHeader, Button, CardSkeleton, TableSkeleton, EmptyState } from '@/components/ui';
+import { toast } from '@/components/Toast';
+import { timeAgo, extractError } from '@/lib/utils';
 
 export default function OverviewPage() {
+  const queryClient = useQueryClient();
   const { profile, subscription, entitlements } = useAuth();
-  const { data: devices, isLoading } = useQuery({ queryKey: ['devices'], queryFn: myDevices });
+  const { data: devices, isLoading: loadingDevices } = useQuery({ queryKey: ['devices'], queryFn: myDevices });
+  const { data: relationships, isLoading: loadingRelationships } = useQuery({ queryKey: ['relationships'], queryFn: myRelationships });
+
+  const activeRelationship = (relationships ?? []).find((r) => r.status === 'active');
+  const partnerDevice = activeRelationship?.devices?.find((d) => !devices?.some((mine) => mine.device_id === d.device_id));
+
+  const sendQuickReaction = useMutation({
+    mutationFn: (emotion: string) => {
+      if (!partnerDevice) throw new Error('No partner device available');
+      return sendInteraction({
+        type: 'emotion',
+        payload: { emotion, message: emotion === 'thinking_of_you' ? 'Thinking of you' : 'Sent with love' },
+        target_device_id: partnerDevice.device_id,
+      });
+    },
+    onSuccess: () => {
+      toast.success('Sent reaction to partner!');
+      void queryClient.invalidateQueries({ queryKey: ['interactions'] });
+    },
+    onError: (e) => toast.error(extractError(e).message),
+  });
 
   const online = devices?.filter((d) => d.status === 'online').length ?? 0;
   const updating = devices?.filter((d) => d.status === 'updating').length ?? 0;
@@ -23,7 +45,7 @@ export default function OverviewPage() {
     <div>
       <PageHeader
         title={`Hey, ${profile?.display_name || profile?.username || 'friend'}`}
-        subtitle={`${entitlements ? 'Free plan' : ''}${subscription ? ' · ' + (subscription.plan?.name || subscription.status) : ''}`}
+        subtitle={`${entitlements ? 'Companion account' : 'Free plan'}${subscription ? ' · ' + (subscription.plan?.name || subscription.status) : ''}`}
         action={
           <Link href="/devices">
             <Button>
@@ -37,30 +59,31 @@ export default function OverviewPage() {
         <StatCard label="Devices" value={devices?.length ?? '—'} icon={Cpu} accent="purple" />
         <StatCard label="Online" value={online} accent="white" />
         <StatCard label="Updating" value={updating} accent="yellow" />
-        <StatCard label="Offline" value={offline} accent="white" />
+        <StatCard label="Partner Linked" value={partnerDevice ? 'Connected' : 'None'} accent="white" />
       </div>
 
       <div className="mt-5 grid gap-4 lg:grid-cols-3">
+        {/* Main companion devices view */}
         <Card className="lg:col-span-2">
           <CardHeader
-            title="Your devices"
-            subtitle="Realtime status from your fleet"
+            title="Your PUZO devices"
+            subtitle="Realtime hardware status"
             action={
               <Link href="/pairing" className="text-label-caps text-primary-container">
-                PAIR →
+                PAIR PARTNER →
               </Link>
             }
           />
-          {isLoading ? (
-            <Loading />
+          {loadingDevices ? (
+            <TableSkeleton rows={3} />
           ) : !devices?.length ? (
             <EmptyState
               icon={<Cpu size={28} />}
-              title="No devices yet"
-              message="Register your first PUZO to start sending it commands."
+              title="No PUZO added yet"
+              message="Register your physical PUZO hardware to start sharing emotions and haptics."
               action={
                 <Link href="/devices">
-                  <Button variant="outline">Register a device</Button>
+                  <Button variant="outline">Register PUZO</Button>
                 </Link>
               }
             />
@@ -70,7 +93,7 @@ export default function OverviewPage() {
                 <Link
                   key={d.device_id}
                   href={`/devices/${d.device_id}`}
-                  className="flex items-center justify-between rounded-md bg-surface-container-low px-3 py-3 transition-fast hover:bg-surface-container-high"
+                  className="flex items-center justify-between rounded-md bg-surface-container-low px-3 py-3 transition-fast hover:bg-surface-container-high border border-border/20"
                 >
                   <div className="flex items-center gap-3">
                     <Cpu size={18} className="text-primary-container" />
@@ -91,32 +114,58 @@ export default function OverviewPage() {
           )}
         </Card>
 
+        {/* Partner companion status & quick actions */}
         <div className="flex flex-col gap-4">
+          <Card className="border-primary/20 bg-primary/5">
+            <CardHeader title="Partner Companion" subtitle={partnerDevice ? partnerDevice.name : 'Not paired yet'} />
+            {loadingRelationships ? (
+              <CardSkeleton count={1} />
+            ) : partnerDevice ? (
+              <div className="flex flex-col gap-3">
+                <div className="flex items-center justify-between rounded-lg bg-surface-container/60 p-3">
+                  <div>
+                    <p className="font-extrabold text-on-surface">{partnerDevice.name}</p>
+                    <p className="text-micro-label text-on-surface-variant">{partnerDevice.device_id}</p>
+                  </div>
+                  <StatusBadge status={partnerDevice.status} />
+                </div>
+                <Button
+                  variant="primary"
+                  className="w-full"
+                  isLoading={sendQuickReaction.isPending}
+                  onClick={() => sendQuickReaction.mutate('thinking_of_you')}
+                >
+                  <Heart size={16} className="fill-current text-white" /> Send ❤️ moment
+                </Button>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-3 text-center">
+                <p className="text-body-base text-on-surface-variant">
+                  Link with your partner&apos;s PUZO to share presence, OLED animations, and haptics.
+                </p>
+                <Link href="/pairing">
+                  <Button variant="outline" className="w-full">
+                    <Link2 size={16} /> Pair with Partner
+                  </Button>
+                </Link>
+              </div>
+            )}
+          </Card>
+
           <Card>
             <CardHeader title="Quick actions" />
             <div className="flex flex-col gap-2">
-              <Link href="/pairing">
-                <Button variant="outline" className="w-full">
-                  <Link2 size={16} /> Pair with a partner
+              <Link href="/interactions">
+                <Button variant="outline" className="w-full justify-start">
+                  <Sparkles size={16} /> Send custom emotion / animation
                 </Button>
               </Link>
               <Link href="/subscription">
-                <Button variant="outline" className="w-full">
+                <Button variant="outline" className="w-full justify-start">
                   <CreditCard size={16} /> Manage subscription
                 </Button>
               </Link>
             </div>
-          </Card>
-          <Card>
-            <CardHeader title="Your plan" />
-            <p className="text-headline-md">
-              {subscription?.plan?.name ? `Plus` : subscription ? subscription.status : 'Free'}
-            </p>
-            <p className="mt-1 text-on-surface-variant">
-              {entitlements?.scheduled_emotions
-                ? 'Scheduled interactions & animation packs unlocked.'
-                : 'Upgrade to unlock scheduled interactions and animation packs.'}
-            </p>
           </Card>
         </div>
       </div>

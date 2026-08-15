@@ -7,7 +7,7 @@ import { mySchedules, createSchedule, cancelSchedule, myDevices, myRelationships
 import { commandDef, INTERACTION_TYPES } from '@/lib/registry';
 import { useAuth } from '@/lib/auth-store';
 import { PageHeader } from '@/components/PageHeader';
-import { Card, CardHeader, Button, Input, Select, Sheet, Loading, EmptyState } from '@/components/ui';
+import { Card, CardHeader, Button, Input, Select, Sheet, CardSkeleton, EmptyState } from '@/components/ui';
 import { toast } from '@/components/Toast';
 import { formatDate, extractError } from '@/lib/utils';
 
@@ -28,12 +28,17 @@ export default function SchedulesPage() {
   const [when, setWhen] = useState('');
   const [text, setText] = useState('');
 
+  const partnerDevice = (relationships ?? [])
+    .filter((relationship) => relationship.status === 'active')
+    .flatMap((relationship) => relationship.devices ?? [])
+    .find((device) => !devices?.some((mine) => mine.device_id === device.device_id));
+
   const createMut = useMutation({
     mutationFn: () =>
       createSchedule({
         type,
         payload: { text },
-        target_device_id: target,
+        target_device_id: target || partnerDevice?.device_id || '',
         source_device_id: source || undefined,
         scheduled_for: new Date(when).toISOString(),
       }),
@@ -84,7 +89,7 @@ export default function SchedulesPage() {
           }
         />
       ) : isLoading ? (
-        <Loading />
+        <CardSkeleton count={2} />
       ) : !schedules?.length ? (
         <EmptyState
           icon={<CalendarClock size={28} />}
@@ -98,10 +103,10 @@ export default function SchedulesPage() {
             {schedules.map((s) => (
               <div
                 key={s.id}
-                className="flex flex-wrap items-center justify-between gap-2 rounded-md bg-surface-container-low px-3 py-2"
+                className="flex flex-wrap items-center justify-between gap-2 rounded-md bg-surface-container-low px-3 py-2 border border-border/20"
               >
                 <div>
-                  <p className="text-label-caps">
+                  <p className="text-label-caps font-bold">
                     {s.type}
                     {s.payload?.text ? ` · ${String(s.payload.text).slice(0, 40)}` : ''}
                   </p>
@@ -110,7 +115,12 @@ export default function SchedulesPage() {
                   </p>
                 </div>
                 {s.status === 'pending' ? (
-                  <Button variant="ghost" size="sm" onClick={() => cancelMut.mutate(s.id)}>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    disabled={cancelMut.isPending}
+                    onClick={() => cancelMut.mutate(s.id)}
+                  >
                     <Trash2 size={14} /> Cancel
                   </Button>
                 ) : (
@@ -148,13 +158,24 @@ export default function SchedulesPage() {
             />
           )}
 
-          <Input
-            label="Target device ID"
+          <Select
+            label="Target companion device"
             value={target}
             onChange={(e) => setTarget(e.target.value)}
-            placeholder="A device owned by your partner"
             required
-          />
+          >
+            {partnerDevice && (
+              <option value={partnerDevice.device_id}>
+                Partner&apos;s PUZO ({partnerDevice.name})
+              </option>
+            )}
+            {(devices ?? []).map((d) => (
+              <option key={d.device_id} value={d.device_id}>
+                My PUZO ({d.name})
+              </option>
+            ))}
+          </Select>
+
           <Select label="Source device (yours, optional)" value={source} onChange={(e) => setSource(e.target.value)}>
             <option value="">None</option>
             {(devices ?? []).map((d) => (
@@ -172,8 +193,8 @@ export default function SchedulesPage() {
             required
           />
 
-          <Button type="submit" disabled={createMut.isPending}>
-            {createMut.isPending ? 'Scheduling…' : 'Schedule'}
+          <Button type="submit" isLoading={createMut.isPending}>
+            Schedule moment
           </Button>
         </form>
       </Sheet>
