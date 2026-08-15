@@ -21,6 +21,7 @@ import {
   MoreHorizontal,
   LogOut,
   Menu,
+  ArrowLeftRight,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth, isAdmin } from '@/lib/auth-store';
@@ -64,8 +65,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const { profile } = useAuth();
   const [moreOpen, setMoreOpen] = useState(false);
   const admin = isAdmin(profile?.role);
+  const isAdminView = pathname === '/admin' || pathname.startsWith('/admin/');
 
-  const allNav = [...USER_NAV, ...ADMIN_NAV.filter((n) => !n.adminOnly || admin)];
+  const activeNav = isAdminView ? ADMIN_NAV : USER_NAV;
 
   const signOut = async () => {
     await authClient.signOut();
@@ -102,26 +104,38 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <div className="flex">
         {/* Desktop sidebar */}
         <aside className="sticky top-0 hidden h-dvh w-60 shrink-0 flex-col border-r border-outline-variant bg-surface-container-lowest p-4 md:flex">
-          <Link href="/overview" className="mb-6 flex items-center gap-2">
+          <Link href={isAdminView ? '/admin' : '/overview'} className="mb-6 flex items-center gap-2">
             <PuzoLogo size={36} />
-            <span className="text-headline-md font-extrabold">PUZO</span>
+            <div className="flex flex-col">
+              <span className="text-headline-md font-extrabold leading-none">PUZO</span>
+              {isAdminView && (
+                <span className="text-[10px] font-bold tracking-widest text-primary uppercase">
+                  Admin Console
+                </span>
+              )}
+            </div>
           </Link>
 
           <nav className="flex flex-col gap-1">
-            <p className="px-3 pb-1 text-micro-label text-on-surface-variant">MENU</p>
-            {USER_NAV.map(renderItem)}
-            {admin && (
-              <>
-                <p className="px-3 pb-1 pt-4 text-micro-label text-on-surface-variant">
-                  ADMIN
-                </p>
-                {ADMIN_NAV.filter((n) => !n.adminOnly || admin).map(renderItem)}
-              </>
-            )}
+            <p className="px-3 pb-1 text-micro-label text-on-surface-variant">
+              {isAdminView ? 'ADMINISTRATION' : 'COMPANION MENU'}
+            </p>
+            {activeNav.map(renderItem)}
           </nav>
 
-          <div className="mt-auto">
-            <div className="mb-3 rounded-md bg-surface-container p-3">
+          <div className="mt-auto flex flex-col gap-3">
+            {/* View Switcher Button */}
+            {admin && (
+              <Link
+                href={isAdminView ? '/overview' : '/admin'}
+                className="flex min-h-[40px] items-center justify-between rounded-md border border-primary/30 bg-primary/10 px-3 text-xs font-extrabold text-primary hover:bg-primary/20 transition-fast"
+              >
+                <span>{isAdminView ? 'User Companion View' : 'Admin Console'}</span>
+                <ArrowLeftRight size={14} />
+              </Link>
+            )}
+
+            <div className="rounded-md bg-surface-container p-3">
               <p className="text-label-caps">{profile?.display_name || profile?.username || 'User'}</p>
               <p className="text-micro-label text-on-surface-variant">
                 {profile?.role}
@@ -142,9 +156,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <div className="flex min-w-0 flex-1 flex-col">
           {/* Mobile top bar */}
           <header className="sticky top-0 z-30 flex items-center justify-between border-b border-outline-variant bg-surface-container-lowest/90 px-4 py-2 pt-safe backdrop-blur md:hidden">
-            <Link href="/overview" className="flex items-center gap-2">
+            <Link href={isAdminView ? '/admin' : '/overview'} className="flex items-center gap-2">
               <PuzoLogo size={32} />
-              <span className="text-headline-md font-extrabold">PUZO</span>
+              <span className="text-headline-md font-extrabold">
+                {isAdminView ? 'PUZO Admin' : 'PUZO'}
+              </span>
             </Link>
             <button
               onClick={() => setMoreOpen(true)}
@@ -163,7 +179,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
       {/* Mobile bottom tab bar */}
       <nav className="fixed inset-x-0 bottom-0 z-40 flex border-t border-outline-variant bg-surface-container-lowest/95 pb-safe backdrop-blur md:hidden">
-        {USER_NAV.slice(0, 4).map((item) => {
+        {activeNav.slice(0, 4).map((item) => {
           const active = pathname === item.href;
           return (
             <Link
@@ -189,12 +205,22 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </nav>
 
       {/* Mobile "More" sheet */}
-      <Sheet open={moreOpen} onClose={() => setMoreOpen(false)} title="Menu">
+      <Sheet open={moreOpen} onClose={() => setMoreOpen(false)} title={isAdminView ? 'Admin Menu' : 'Companion Menu'}>
         <div className="flex flex-col gap-1">
-          {allNav.map(renderItem)}
+          {activeNav.map(renderItem)}
+          {admin && (
+            <Link
+              href={isAdminView ? '/overview' : '/admin'}
+              onClick={() => setMoreOpen(false)}
+              className="flex min-h-[44px] items-center justify-between rounded-md border border-primary/30 bg-primary/10 px-3 text-body-base font-extrabold text-primary"
+            >
+              <span>{isAdminView ? 'Switch to User View' : 'Switch to Admin Console'}</span>
+              <ArrowLeftRight size={16} />
+            </Link>
+          )}
           <button
             onClick={signOut}
-            className="flex min-h-[44px] items-center gap-3 rounded-md px-3 text-error"
+            className="flex min-h-[44px] items-center gap-3 rounded-md px-3 text-error mt-2"
           >
             <LogOut size={18} />
             Sign out
