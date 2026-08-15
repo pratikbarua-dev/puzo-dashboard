@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { BellOff, ListOrdered, MapPin, Timer, Vibrate, Volume2 } from 'lucide-react';
+import { BellOff, ListOrdered, Locate, MapPin, Search, Timer, Vibrate, Volume2, X } from 'lucide-react';
 import { getDeviceSettings, getProfileLocation, updateDeviceSettings, updateProfileLocation } from '@/lib/api';
 import type { DeviceSettings, DeviceSettingsPatch } from '@/lib/types';
 import { useAuth } from '@/lib/auth-store';
@@ -148,6 +148,100 @@ export function DeviceSettingsCard({ deviceId }: { deviceId: string }) {
     onError: (e) => toast.error(extractError(e).message),
   });
 
+  const [searchQuery, setSearchQuery] = useState('');
+  const [suggestions, setSuggestions] = useState<{ id: number; name: string; latitude: number; longitude: number; country?: string; admin1?: string }[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [isGeolocating, setIsGeolocating] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setShowDropdown(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    const q = searchQuery.trim();
+    if (q.length < 2) {
+      setSuggestions([]);
+      setIsSearching(false);
+      return;
+    }
+    setIsSearching(true);
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch(
+          `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(q)}&count=5&language=en&format=json`
+        );
+        if (res.ok) {
+          const data = (await res.json()) as { results?: { id: number; name: string; latitude: number; longitude: number; country?: string; admin1?: string }[] };
+          setSuggestions(data.results || []);
+          setShowDropdown(true);
+        }
+      } catch (err) {
+        console.error('Geocoding error:', err);
+      } finally {
+        setIsSearching(false);
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  const handleSelectCity = (item: { name: string; latitude: number; longitude: number; country?: string; admin1?: string }) => {
+    const parts = [item.name, item.admin1, item.country].filter(Boolean);
+    const fullName = parts.join(', ');
+    setLocCity(fullName);
+    setLocLat(String(item.latitude));
+    setLocLng(String(item.longitude));
+    setSearchQuery('');
+    setShowDropdown(false);
+    locMut.mutate({ city: fullName, latitude: item.latitude, longitude: item.longitude });
+  };
+
+  const handleDetectLocation = () => {
+    if (typeof window === 'undefined' || !navigator.geolocation) {
+      toast.error('Geolocation is not supported by your browser');
+      return;
+    }
+    setIsGeolocating(true);
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const lat = Math.round(pos.coords.latitude * 10000) / 10000;
+        const lng = Math.round(pos.coords.longitude * 10000) / 10000;
+        let name = `Location (${lat}, ${lng})`;
+        try {
+          const res = await fetch(
+            `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=en`
+          );
+          if (res.ok) {
+            const data = (await res.json()) as { city?: string; locality?: string; countryName?: string };
+            const cityName = data.city || data.locality || '';
+            if (cityName) {
+              name = data.countryName ? `${cityName}, ${data.countryName}` : cityName;
+            }
+          }
+        } catch {
+          // ignore fallback
+        }
+        setLocCity(name);
+        setLocLat(String(lat));
+        setLocLng(String(lng));
+        setIsGeolocating(false);
+        locMut.mutate({ city: name, latitude: lat, longitude: lng });
+      },
+      (err) => {
+        setIsGeolocating(false);
+        toast.error(`Geolocation failed: ${err.message}`);
+      },
+      { timeout: 10000, enableHighAccuracy: true }
+    );
+  };
+
   const handleToggle = (key: keyof ToggleDraft, value: boolean) => {
     setDraft((d) => (d ? { ...d, [key]: value } : d));
     toggleMut.mutate({ [key]: value });
@@ -231,81 +325,101 @@ export function DeviceSettingsCard({ deviceId }: { deviceId: string }) {
         Save settings
       </Button>
 
-<div className="mt-5 border-t border-outline-variant/40 pt-4">
+      <div className="mt-5 border-t border-outline-variant/40 pt-4">
+        <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 text-on-surface-variant">
             <MapPin size={14} />
             <span className="text-label-caps">DEVICE LOCATION</span>
           </div>
-          <p className="mt-1 text-micro-label text-on-surface-variant">
-            Used for local time and weather on your companion. Set city name and
-            coordinates so the backend can fetch live weather.
-          </p>
-          <form
-            className="mt-3 flex flex-col gap-3"
-            onSubmit={(e) => {
-              e.preventDefault();
-              const lat = locLat.trim() ? Number(locLat) : null;
-              const lng = locLng.trim() ? Number(locLng) : null;
-              if (!locCity.trim() && lat == null && lng == null) return;
-              if ((lat == null) !== (lng == null)) {
-                toast.error('Latitude and longitude must both be set together');
-                return;
-              }
-              if (lat != null && (Number.isNaN(lat) || lat < -90 || lat > 90)) {
-                toast.error('Latitude must be between -90 and 90');
-                return;
-              }
-              if (lng != null && (Number.isNaN(lng) || lng < -180 || lng > 180)) {
-                toast.error('Longitude must be between -180 and 180');
-                return;
-              }
-              locMut.mutate({ city: locCity.trim(), latitude: lat, longitude: lng });
-            }}
+          <button
+            type="button"
+            onClick={handleDetectLocation}
+            disabled={isGeolocating}
+            className="flex items-center gap-1.5 text-micro-label text-primary hover:underline disabled:opacity-50"
           >
-            <Input
-              label="City"
-              value={locCity}
-              maxLength={120}
-              onChange={(e) => setLocCity(e.target.value)}
-              placeholder="e.g. Dhaka, Bangladesh"
-            />
-            <div className="grid gap-3 sm:grid-cols-2">
-              <Input
-                label="Latitude"
-                type="number"
-                step="any"
-                min={-90}
-                max={90}
-                value={locLat}
-                onChange={(e) => setLocLat(e.target.value)}
-                placeholder="e.g. 23.8103"
-              />
-              <Input
-                label="Longitude"
-                type="number"
-                step="any"
-                min={-180}
-                max={180}
-                value={locLng}
-                onChange={(e) => setLocLng(e.target.value)}
-                placeholder="e.g. 90.4125"
-              />
-            </div>
-            <div className="flex items-center justify-between gap-3">
-              <span className="text-micro-label text-on-surface-variant">
-                {locCity.length}/120 characters
-              </span>
-              <Button
-                type="submit"
-                size="sm"
-                disabled={!locCity.trim() && !locLat.trim() && !locLng.trim()}
-                isLoading={locMut.isPending}
-              >
-                Save location
-              </Button>
-            </div>
-          </form>
+            <Locate size={12} className={isGeolocating ? 'animate-spin' : ''} />
+            {isGeolocating ? 'Detecting…' : 'Detect my location'}
+          </button>
         </div>
+        <p className="mt-1 text-micro-label text-on-surface-variant">
+          Used for local weather on your companion. Search a city to auto-detect coordinates.
+        </p>
+
+        {locCity && (
+          <div className="mt-3 flex items-center justify-between rounded-md border border-outline-variant/60 bg-surface-container-low px-3 py-2 text-body-base">
+            <div className="flex items-center gap-2 overflow-hidden">
+              <MapPin size={16} className="shrink-0 text-primary" />
+              <div className="truncate">
+                <span className="font-medium text-on-surface">{locCity}</span>
+                {locLat && locLng && (
+                  <span className="ml-2 text-micro-label text-on-surface-variant">
+                    ({Number(locLat).toFixed(2)}°, {Number(locLng).toFixed(2)}°)
+                  </span>
+                )}
+              </div>
+            </div>
+            <button
+              type="button"
+              title="Clear location"
+              onClick={() => {
+                setLocCity('');
+                setLocLat('');
+                setLocLng('');
+                locMut.mutate({ city: '', latitude: null, longitude: null });
+              }}
+              className="ml-2 text-on-surface-variant hover:text-on-surface"
+            >
+              <X size={14} />
+            </button>
+          </div>
+        )}
+
+        <div className="relative mt-3" ref={dropdownRef}>
+          <div className="relative">
+            <Input
+              label={locCity ? 'Change location' : 'Search city'}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onFocus={() => {
+                if (suggestions.length > 0) setShowDropdown(true);
+              }}
+              placeholder="Start typing a city (e.g. Dhaka, New York, London)..."
+            />
+            {isSearching && (
+              <div className="absolute right-3 top-9 flex items-center">
+                <span className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+              </div>
+            )}
+          </div>
+
+          {showDropdown && suggestions.length > 0 && (
+            <div className="absolute z-20 mt-1 max-h-60 w-full overflow-y-auto rounded-md border border-outline-variant/60 bg-surface-container-high py-1 shadow-lg backdrop-blur-md">
+              {suggestions.map((item) => {
+                const region = [item.admin1, item.country].filter(Boolean).join(', ');
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => handleSelectCity(item)}
+                    className="flex w-full flex-col text-left px-3 py-2 hover:bg-surface-container-highest transition-colors"
+                  >
+                    <span className="font-medium text-on-surface">{item.name}</span>
+                    {region && (
+                      <span className="text-micro-label text-on-surface-variant">{region}</span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
+          {showDropdown && !isSearching && searchQuery.trim().length >= 2 && suggestions.length === 0 && (
+            <div className="absolute z-20 mt-1 w-full rounded-md border border-outline-variant/60 bg-surface-container-high p-3 text-center text-micro-label text-on-surface-variant shadow-lg">
+              No matching cities found
+            </div>
+          )}
+        </div>
+      </div>
     </Card>
   );
 }
