@@ -5,6 +5,8 @@ import type {
   BlockEntry,
   CommandRecord,
   Device,
+  DeviceSettings,
+  DeviceSettingsPatch,
   DeviceSetupSession,
   DeviceEvent,
   DeviceStatus,
@@ -71,8 +73,26 @@ async function request<T>(
 /* ---- identity & profile ---- */
 
 export const me = () => request<MeResponse>('GET', '/me');
+export const getProfile = () =>
+  request<MeResponse>('GET', '/me').then((d) => d.profile);
 export const updateMe = (patch: { display_name?: string; username?: string; timezone?: string }) =>
   request<{ profile: Profile }>('PATCH', '/me', patch).then((d) => d.profile);
+export interface ProfileLocationInput {
+  location?: string | null;
+  city?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+}
+export interface ProfileLocation {
+  location: string | null;
+  city: string | null;
+  latitude: number | null;
+  longitude: number | null;
+}
+export const getProfileLocation = () =>
+  request<ProfileLocation>('GET', '/me/location').then((d) => d);
+export const updateProfileLocation = (input: ProfileLocationInput) =>
+  request<ProfileLocation>('PUT', '/me/location', input).then((d) => d);
 export const deleteMe = () => request<{ deleted: boolean }>('DELETE', '/me');
 export const searchUsers = (q: string) =>
   request<{ users: ProfileLite[] }>('GET', `/users/search?q=${encodeURIComponent(q)}`).then(
@@ -107,6 +127,14 @@ export const transferDevice = (deviceId: string, newOwnerUsername: string) =>
   });
 export const updateMyDevice = (deviceId: string, input: { name?: string; firmware_channel?: string }) =>
   request<{ device: Device }>('PATCH', `/devices/${deviceId}`, input).then((d) => d.device);
+export const getDeviceSettings = (deviceId: string) =>
+  request<{ settings: DeviceSettings }>('GET', `/devices/${deviceId}/settings`).then(
+    (d) => d.settings,
+  );
+export const updateDeviceSettings = (deviceId: string, patch: DeviceSettingsPatch) =>
+  request<{ settings: DeviceSettings }>('PUT', `/devices/${deviceId}/settings`, patch).then(
+    (d) => d.settings,
+  );
 export const removeMyDevice = (deviceId: string) =>
   request<{ device: Device }>('DELETE', `/devices/${deviceId}`);
 

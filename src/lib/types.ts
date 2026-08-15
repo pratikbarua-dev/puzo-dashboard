@@ -14,6 +14,10 @@ export interface Profile {
   username: string | null;
   avatar_url: string | null;
   timezone: string;
+  location?: string | null;
+  city?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
   role: Role;
   deleted_at: string | null;
   created_at: string;
@@ -78,6 +82,22 @@ export interface Device {
 }
 
 export type DeviceSetupStatus = 'pending' | 'claimed' | 'expired' | 'cancelled';
+
+/**
+ * Firmware-configurable device settings. Key names are the NVS `set_config`
+ * keys the ESP32 firmware reads (see firmware/src/services/config_service.cpp).
+ */
+export interface DeviceSettings {
+  sleep_timeout_min: number;
+  focus_duration_min: number;
+  timezone_offset_min: number;
+  wake_sound_enabled: boolean;
+  wake_vibration_enabled: boolean;
+  quiet_mode_enabled: boolean;
+  random_text_tap_count: number;
+}
+
+export type DeviceSettingsPatch = Partial<DeviceSettings>;
 
 export interface DeviceSetupSession {
   session_id: string;

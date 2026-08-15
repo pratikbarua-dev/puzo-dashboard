@@ -7,6 +7,7 @@ import { ArrowLeft, Cpu, Trash2, Edit3, Send } from 'lucide-react';
 import { myDevice, deviceHistory, updateMyDevice, transferDevice, removeMyDevice, ApiError } from '@/lib/api';
 import { PageHeader } from '@/components/PageHeader';
 import { StatusBadge } from '@/components/StatusBadge';
+import { DeviceSettingsCard } from '@/components/DeviceSettingsCard';
 import {
   Card,
   CardHeader,
@@ -156,6 +157,10 @@ export default function DeviceDetailPage() {
             </div>
           )}
         </Card>
+      </div>
+
+      <div className="mt-4">
+        <DeviceSettingsCard deviceId={deviceId} />
       </div>
 
       <Sheet open={renameOpen} onClose={() => setRenameOpen(false)} title="Rename device">
