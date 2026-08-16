@@ -3,22 +3,21 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { Cpu, Link2, CreditCard, Plus, Heart, Zap, Sparkles } from 'lucide-react';
-import { myDevices, myRelationships, myInteractions, sendInteraction } from '@/lib/api';
+import { myDevices, myRelationships, myInteractions } from '@/lib/api';
 import { useAuth } from '@/lib/auth-store';
+import { useSendInteraction } from '@/hooks/useSendInteraction';
 import { PageHeader } from '@/components/PageHeader';
 import { StatCard } from '@/components/StatCard';
 import { StatusBadge } from '@/components/StatusBadge';
 import { Card, CardHeader, Button, CardSkeleton, TableSkeleton, EmptyState } from '@/components/ui';
 import { WelcomeModal } from '@/components/WelcomeModal';
 import { OnboardingChecklist } from '@/components/OnboardingChecklist';
-import { toast } from '@/components/Toast';
-import { timeAgo, extractError } from '@/lib/utils';
+import { timeAgo } from '@/lib/utils';
 
 export default function OverviewPage() {
   const router = useRouter();
-  const queryClient = useQueryClient();
   const { profile, subscription, entitlements } = useAuth();
   const { data: devices, isLoading: loadingDevices } = useQuery({ queryKey: ['devices'], queryFn: myDevices });
   const { data: relationships, isLoading: loadingRelationships } = useQuery({ queryKey: ['relationships'], queryFn: myRelationships });
@@ -27,7 +26,7 @@ export default function OverviewPage() {
   const [welcomeOpen, setWelcomeOpen] = useState(false);
 
   const activeRelationship = (relationships ?? []).find((r) => r.status === 'active');
-  const partnerDevice = activeRelationship?.devices?.find((d) => !devices?.some((mine) => mine.device_id === d.device_id));
+  const { partnerDevice, send: sendInteractionNow, isSending } = useSendInteraction();
   const hasDevices = Boolean(devices?.length);
   const hasPartner = Boolean(activeRelationship);
   const hasInteractions = Boolean(interactions?.length);
@@ -47,21 +46,14 @@ export default function OverviewPage() {
     sessionStorage.setItem('puzo_welcome_dismissed', 'true');
   };
 
-  const sendQuickReaction = useMutation({
-    mutationFn: (emotion: string) => {
-      if (!partnerDevice) throw new Error('No partner device available');
-      return sendInteraction({
-        type: 'emotion',
-        payload: { emotion, message: emotion === 'thinking_of_you' ? 'Thinking of you' : 'Sent with love' },
-        target_device_id: partnerDevice.device_id,
-      });
-    },
-    onSuccess: () => {
-      toast.success('Sent reaction to partner!');
-      void queryClient.invalidateQueries({ queryKey: ['interactions'] });
-    },
-    onError: (e) => toast.error(extractError(e).message),
-  });
+  const sendQuickReaction = (emotion: string) => {
+    if (!partnerDevice) return;
+    sendInteractionNow.mutate({
+      type: 'emotion',
+      payload: { emotion, message: emotion === 'thinking_of_you' ? 'Thinking of you' : 'Sent with love' },
+      target_device_id: partnerDevice.device_id,
+    });
+  };
 
   const online = devices?.filter((d) => d.status === 'online').length ?? 0;
   const updating = devices?.filter((d) => d.status === 'updating').length ?? 0;
@@ -175,8 +167,8 @@ export default function OverviewPage() {
                 <Button
                   variant="primary"
                   className="w-full"
-                  isLoading={sendQuickReaction.isPending}
-                  onClick={() => sendQuickReaction.mutate('thinking_of_you')}
+                  isLoading={isSending}
+                  onClick={() => sendQuickReaction('thinking_of_you')}
                 >
                   <Heart size={16} className="fill-current text-white" /> Send ❤️ moment
                 </Button>

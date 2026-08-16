@@ -48,6 +48,15 @@ const USER_NAV: NavItem[] = [
   { href: '/settings', label: 'Settings', icon: Settings },
 ];
 
+/**
+ * Mobile bottom-bar priority: the 3 emotionally-critical destinations get a
+ * permanent slot (Home, Interactions, Devices); everything else lives behind
+ * the "More" sheet. Schedules/Pairing/Subscription/Relationships/Settings are
+ * reachable via More — nothing is removed, just demoted so the couple-action
+ * (Interactions) is always one tap away on the smallest screen.
+ */
+const MOBILE_TAB_HREFS = ['/overview', '/interactions', '/devices'];
+
 const ADMIN_NAV: NavItem[] = [
   { href: '/admin', label: 'Overview', icon: LayoutDashboard, adminOnly: true },
   { href: '/admin/devices', label: 'Devices', icon: Cpu, adminOnly: true },
@@ -179,22 +188,25 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
       {/* Mobile bottom tab bar */}
       <nav className="fixed inset-x-0 bottom-0 z-40 flex border-t border-outline-variant bg-surface-container-lowest/95 pb-safe backdrop-blur md:hidden">
-        {activeNav.slice(0, 4).map((item) => {
-          const active = pathname === item.href;
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                'flex min-h-[56px] flex-1 flex-col items-center justify-center gap-1',
-                active ? 'text-white' : 'text-on-surface-variant',
-              )}
-            >
-              <item.icon size={20} />
-              <span className="text-micro-label">{item.label}</span>
-            </Link>
-          );
-        })}
+        {MOBILE_TAB_HREFS
+          .map((href) => activeNav.find((n) => n.href === href))
+          .filter((item): item is NavItem => Boolean(item))
+          .map((item) => {
+            const active = pathname === item.href;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  'flex min-h-[56px] flex-1 flex-col items-center justify-center gap-1',
+                  active ? 'text-white' : 'text-on-surface-variant',
+                )}
+              >
+                <item.icon size={20} />
+                <span className="text-micro-label">{item.label}</span>
+              </Link>
+            );
+          })}
         <button
           onClick={() => setMoreOpen(true)}
           className="flex min-h-[56px] flex-1 flex-col items-center justify-center gap-1 text-on-surface-variant"
