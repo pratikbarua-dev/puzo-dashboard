@@ -193,3 +193,215 @@ body {
     scroll-behavior: auto !important;
   }
 }
+
+/* ---------- PUZO controls ---------- */
+
+.puzo-control-surface {
+  border: 1px solid rgba(255, 255, 255, 0.055);
+  border-radius: 1.75rem;
+  background: rgba(29, 29, 32, 0.96);
+  padding: 1.25rem;
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.18);
+}
+
+.puzo-eyebrow {
+  color: var(--color-primary);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  line-height: 1rem;
+  text-transform: uppercase;
+}
+
+.puzo-section-title {
+  color: var(--color-on-surface);
+  font-size: clamp(1.35rem, 4vw, 1.6rem);
+  font-weight: 650;
+  letter-spacing: -0.035em;
+  line-height: 1.15;
+  margin-top: 0.3rem;
+}
+
+.puzo-current-pill {
+  align-items: center;
+  background: rgba(197, 192, 255, 0.08);
+  border-radius: 999px;
+  color: var(--color-primary);
+  display: inline-flex;
+  flex: 0 0 auto;
+  font-size: 0.68rem;
+  font-weight: 700;
+  gap: 0.4rem;
+  padding: 0.45rem 0.65rem;
+}
+
+.puzo-current-dot {
+  background: var(--color-primary);
+  border-radius: 999px;
+  box-shadow: 0 0 0 3px rgba(197, 192, 255, 0.1);
+  height: 0.35rem;
+  width: 0.35rem;
+}
+
+.puzo-mode-tile,
+.puzo-mood-tile {
+  min-height: 7.2rem;
+  position: relative;
+  text-align: left;
+  transition: background-color 200ms ease, box-shadow 200ms ease, transform 200ms ease, border-color 200ms ease;
+}
+
+.puzo-mode-tile {
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid transparent;
+  border-radius: 1.15rem;
+  padding: 0.9rem;
+}
+
+.puzo-mode-tile:hover,
+.puzo-mood-tile:hover {
+  background: rgba(255, 255, 255, 0.065);
+}
+
+.puzo-mode-tile:active,
+.puzo-mood-tile:active,
+.puzo-send-button:active {
+  transform: scale(0.975);
+}
+
+.puzo-mode-tile:focus-visible,
+.puzo-mood-tile:focus-visible,
+.puzo-send-button:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 3px;
+}
+
+.puzo-mode-tile:disabled {
+  cursor: wait;
+  opacity: 0.62;
+}
+
+.puzo-mode-tile-selected {
+  background: rgba(197, 192, 255, 0.13);
+  border-color: rgba(197, 192, 255, 0.3);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.puzo-mode-icon {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.055);
+  border-radius: 0.8rem;
+  color: var(--color-on-surface-variant);
+  display: inline-flex;
+  height: 2.4rem;
+  justify-content: center;
+  transition: background-color 200ms ease, color 200ms ease, transform 200ms ease;
+  width: 2.4rem;
+}
+
+.puzo-mode-tile-selected .puzo-mode-icon {
+  background: rgba(197, 192, 255, 0.18);
+  color: var(--color-primary);
+  transform: scale(1.04);
+}
+
+.puzo-selection-check {
+  align-items: center;
+  background: var(--color-primary);
+  border-radius: 999px;
+  color: var(--color-on-primary);
+  display: flex;
+  height: 1.25rem;
+  justify-content: center;
+  opacity: 0;
+  position: absolute;
+  right: 0.65rem;
+  top: 0.65rem;
+  transform: scale(0.7);
+  transition: opacity 200ms ease, transform 200ms ease;
+  width: 1.25rem;
+}
+
+.puzo-mode-tile-selected .puzo-selection-check {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.puzo-mood-tile {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid transparent;
+  border-radius: 1.15rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0.75rem 0.5rem;
+  text-align: center;
+}
+
+.puzo-mood-tile-selected {
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.13);
+  transform: translateY(-2px) scale(1.02);
+}
+
+.puzo-mood-icon {
+  display: block;
+  font-size: 2rem;
+  line-height: 1;
+  transition: transform 200ms ease;
+}
+
+.puzo-mood-tile-selected .puzo-mood-icon {
+  animation: puzo-mood-pop 300ms ease-out both;
+}
+
+.puzo-mood-tone-happy.puzo-mood-tile-selected { background: rgba(246, 189, 96, 0.12); }
+.puzo-mood-tone-sad.puzo-mood-tile-selected { background: rgba(122, 162, 247, 0.12); }
+.puzo-mood-tone-angry.puzo-mood-tile-selected { background: rgba(247, 118, 142, 0.12); }
+.puzo-mood-tone-love.puzo-mood-tile-selected { background: rgba(243, 139, 168, 0.12); }
+.puzo-mood-tone-sleepy.puzo-mood-tile-selected { background: rgba(192, 153, 255, 0.12); }
+.puzo-mood-tone-curious.puzo-mood-tile-selected { background: rgba(125, 207, 255, 0.12); }
+.puzo-mood-tone-excited.puzo-mood-tile-selected { background: rgba(224, 175, 104, 0.12); }
+
+.puzo-send-button {
+  align-items: center;
+  background: var(--color-primary);
+  border-radius: 0.95rem;
+  color: var(--color-on-primary);
+  display: flex;
+  font-size: 0.8rem;
+  font-weight: 750;
+  gap: 0.55rem;
+  justify-content: flex-start;
+  min-height: 3rem;
+  padding: 0.75rem 0.9rem;
+  transition: opacity 200ms ease, transform 200ms ease;
+  width: 100%;
+}
+
+.puzo-send-button:hover { opacity: 0.9; }
+.puzo-send-button:disabled { cursor: wait; opacity: 0.65; }
+
+.puzo-button-spinner {
+  animation: puzo-spin 700ms linear infinite;
+  border: 2px solid rgba(36, 0, 162, 0.25);
+  border-radius: 999px;
+  border-top-color: var(--color-on-primary);
+  height: 1rem;
+  width: 1rem;
+}
+
+@keyframes puzo-mood-pop {
+  0% { transform: scale(0.78) rotate(-5deg); }
+  65% { transform: scale(1.12) rotate(2deg); }
+  100% { transform: scale(1); }
+}
+
+@keyframes puzo-spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (min-width: 640px) {
+  .puzo-control-surface { padding: 1.5rem; }
+}
