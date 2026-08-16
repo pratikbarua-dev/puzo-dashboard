@@ -87,7 +87,7 @@ function AddPuzoSheet() {
             className="flex flex-col gap-4"
           >
             <p className="text-sm text-on-surface-variant">
-              Turn on your PUZO. Its screen displays a short 4-character setup code (e.g. <strong className="font-mono text-primary">921C</strong>).
+              Turn on your PUZO. Its screen displays a short 4-character setup code prefixed with <code className="font-mono text-primary">PUZO-</code> (e.g. <strong className="font-mono text-primary">PUZO-921C</strong>). Enter only the 4 characters that follow <code className="font-mono text-primary">PUZO-</code>.
             </p>
             <Input
               label="PUZO setup code"

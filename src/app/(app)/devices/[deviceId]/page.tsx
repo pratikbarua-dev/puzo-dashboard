@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, Cpu, Trash2, Edit3, Send } from 'lucide-react';
-import { myDevice, deviceHistory, updateMyDevice, transferDevice, removeMyDevice, ApiError } from '@/lib/api';
+import { myDevice, updateMyDevice, transferDevice, removeMyDevice, ApiError } from '@/lib/api';
 import { PageHeader } from '@/components/PageHeader';
 import { StatusBadge } from '@/components/StatusBadge';
 import { DeviceSettingsCard } from '@/components/DeviceSettingsCard';
@@ -30,10 +30,6 @@ export default function DeviceDetailPage() {
   const { data: device, isLoading, isError, error, refetch } = useQuery({
     queryKey: ['devices', deviceId],
     queryFn: () => myDevice(deviceId),
-  });
-  const { data: history } = useQuery({
-    queryKey: ['devices', deviceId, 'history'],
-    queryFn: () => deviceHistory(deviceId),
   });
 
   const [renameOpen, setRenameOpen] = useState(false);
@@ -83,9 +79,6 @@ export default function DeviceDetailPage() {
 
   const rows: { label: string; value: string }[] = [
     { label: 'Device ID', value: device.device_id },
-    { label: 'Type', value: device.device_type },
-    { label: 'Model', value: device.hardware_model || '—' },
-    { label: 'Firmware channel', value: device.firmware_channel },
     { label: 'Status', value: device.status },
     { label: 'Last seen', value: timeAgo((device.last_seen || device.last_seen_at) as string) },
     { label: 'Created', value: formatDate(device.created_at) },
@@ -106,7 +99,7 @@ export default function DeviceDetailPage() {
         action={<StatusBadge status={device.status} />}
       />
 
-      <div className="grid gap-4 lg:grid-cols-3">
+      <div className="grid gap-4">
         <Card>
           <CardHeader title="Details" />
           <dl className="flex flex-col gap-2">
@@ -135,27 +128,6 @@ export default function DeviceDetailPage() {
               <Trash2 size={16} /> Remove device
             </Button>
           </div>
-        </Card>
-
-        <Card className="lg:col-span-2">
-          <CardHeader title="Ownership history" />
-          {!history?.length ? (
-            <p className="text-on-surface-variant">You are the original owner of this device.</p>
-          ) : (
-            <div className="flex flex-col gap-2">
-              {history.map((h) => (
-                <div
-                  key={h.id}
-                  className="flex items-center justify-between rounded-md bg-surface-container-low px-3 py-2"
-                >
-                  <span className="text-label-caps">{h.action}</span>
-                  <span className="text-micro-label text-on-surface-variant">
-                    {formatDate(h.created_at)}
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
         </Card>
       </div>
 
