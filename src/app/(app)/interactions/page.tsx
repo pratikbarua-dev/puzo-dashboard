@@ -3,10 +3,12 @@
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Zap, Plus, Trash2, Send, ArrowUpRight, ArrowDownLeft, Heart, Smile, Sparkles, Volume2 } from 'lucide-react';
-import { myInteractions, sendInteraction, deleteInteraction, myDevices, myRelationships } from '@/lib/api';
+import { myInteractions, deleteInteraction, myDevices } from '@/lib/api';
 import { commandDef, INTERACTION_TYPES } from '@/lib/registry';
 import { useAuth } from '@/lib/auth-store';
+import { useSendInteraction } from '@/hooks/useSendInteraction';
 import { PageHeader } from '@/components/PageHeader';
+import { InteractionStatus } from '@/components/InteractionStatus';
 import { Card, CardHeader, Button, Input, Select, Sheet, CardSkeleton, EmptyState } from '@/components/ui';
 import { toast } from '@/components/Toast';
 import { formatDate, extractError } from '@/lib/utils';
@@ -18,8 +20,9 @@ export default function InteractionsPage() {
     queryKey: ['interactions'],
     queryFn: myInteractions,
   });
+  const { partnerDevice, send: sendMut, sendingKey, isSending } = useSendInteraction();
+  // The user's own PUZOs — populate the "source device" picker in the composer.
   const { data: devices } = useQuery({ queryKey: ['devices'], queryFn: myDevices });
-  const { data: relationships } = useQuery({ queryKey: ['relationships'], queryFn: myRelationships });
 
   const [open, setOpen] = useState(false);
   const [type, setType] = useState('emotion');
@@ -30,32 +33,11 @@ export default function InteractionsPage() {
 
   const def = commandDef(type === 'message' ? 'display' : type);
 
-  const partnerDevice = (relationships ?? [])
-    .filter((relationship) => relationship.status === 'active')
-    .flatMap((relationship) => relationship.devices ?? [])
-    .find((device) => !devices?.some((mine) => mine.device_id === device.device_id));
-
   useEffect(() => {
     if (partnerDevice?.device_id && !target) {
       setTarget(partnerDevice.device_id);
     }
   }, [partnerDevice, target]);
-
-  const presetMut = useMutation({
-    mutationFn: (emotion: string) => {
-      if (!partnerDevice) throw new Error('No partner PUZO is available');
-      return sendInteraction({
-        type: 'emotion',
-        payload: { emotion, message: labelForEmotion(emotion) },
-        target_device_id: partnerDevice.device_id,
-      });
-    },
-    onSuccess: () => {
-      toast.success('Reaction sent');
-      void queryClient.invalidateQueries({ queryKey: ['interactions'] });
-    },
-    onError: (e) => toast.error(extractError(e).message),
-  });
 
   function labelForEmotion(emotion: string) {
     return {
@@ -67,23 +49,6 @@ export default function InteractionsPage() {
       heartbeat: 'Sending my heartbeat ⚡',
     }[emotion] || emotion;
   }
-
-  const sendMut = useMutation({
-    mutationFn: () =>
-      sendInteraction({
-        type,
-        payload,
-        target_device_id: target,
-        source_device_id: source || undefined,
-        relationship_id: relationshipId || undefined,
-      }),
-    onSuccess: () => {
-      toast.success('Interaction sent');
-      setOpen(false);
-      void queryClient.invalidateQueries({ queryKey: ['interactions'] });
-    },
-    onError: (e) => toast.error(extractError(e).message),
-  });
 
   const delMut = useMutation({
     mutationFn: (id: string) => deleteInteraction(id),
@@ -120,8 +85,15 @@ export default function InteractionsPage() {
               key={key}
               variant="outline"
               disabled={!partnerDevice}
-              isLoading={presetMut.isPending && presetMut.variables === key}
-              onClick={() => presetMut.mutate(key)}
+              isLoading={isSending && sendingKey === key}
+              onClick={() =>
+                partnerDevice &&
+                sendMut.mutate({
+                  type: 'emotion',
+                  payload: { emotion: key, message: labelForEmotion(key) },
+                  target_device_id: partnerDevice.device_id,
+                })
+              }
               className="flex-col py-3 gap-1 min-h-[56px]"
             >
               <span className="text-lg">{icon}</span>
@@ -178,9 +150,15 @@ export default function InteractionsPage() {
                         <span className="rounded-full bg-surface-container-highest px-2 py-0.5 text-[10px] font-bold uppercase text-on-surface-variant">
                           {i.type}
                         </span>
+                        {isSent && (
+                          <InteractionStatus
+                            interaction={i}
+                            optimistic={i.id.startsWith('optimistic:')}
+                          />
+                        )}
                       </div>
                       <p className="text-micro-label text-on-surface-variant mt-0.5">
-                        {isSent ? 'Sent' : 'Received'} · {formatDate(i.created_at)} · {i.status}
+                        {isSent ? 'Sent' : 'Received'} · {formatDate(i.created_at)}
                       </p>
                     </div>
                   </div>
@@ -205,7 +183,14 @@ export default function InteractionsPage() {
           className="flex flex-col gap-4"
           onSubmit={(e) => {
             e.preventDefault();
-            sendMut.mutate();
+            sendMut.mutate({
+              type,
+              payload,
+              target_device_id: target,
+              source_device_id: source || undefined,
+              relationship_id: relationshipId || undefined,
+            });
+            setOpen(false);
           }}
         >
           <Select label="Type of interaction" value={type} onChange={(e) => setType(e.target.value)}>
@@ -274,7 +259,7 @@ export default function InteractionsPage() {
             />
           ))}
 
-          <Button type="submit" isLoading={sendMut.isPending}>
+          <Button type="submit" isLoading={isSending}>
             Send moment now
           </Button>
         </form>

@@ -11,6 +11,11 @@ const STATUS_STYLES: Record<string, string> = {
   published: 'bg-secondary text-on-secondary',
   failed: 'bg-error-container text-on-error-container',
   completed: 'bg-primary-container text-white',
+  // Interaction lifecycle — kept distinct so they never fall through to "unknown".
+  queued: 'bg-surface-container-highest text-on-surface-variant',
+  sent: 'bg-primary/20 text-primary',
+  delivered: 'bg-primary-container text-white',
+  acknowledged: 'bg-secondary text-on-secondary',
 };
 
 export function StatusBadge({
@@ -32,11 +37,17 @@ export function StatusBadge({
       <span
         className={cn(
           'h-1.5 w-1.5 rounded-full',
-          key === 'online' || key === 'active' || key === 'published' || key === 'completed'
+          key === 'online' ||
+          key === 'active' ||
+          key === 'published' ||
+          key === 'completed' ||
+          key === 'delivered'
             ? 'bg-white'
-            : key === 'updating'
+            : key === 'updating' || key === 'acknowledged'
               ? 'bg-on-secondary'
-              : 'bg-on-surface/50',
+              : key === 'sent'
+                ? 'bg-primary'
+                : 'bg-on-surface/50',
         )}
       />
       {titleCase(key)}
