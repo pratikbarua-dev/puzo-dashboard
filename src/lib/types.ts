@@ -97,6 +97,8 @@ export interface DeviceSettings {
   random_text_tap_count: number;
 }
 
+export type DeviceMode = 'normal' | 'focus' | 'clock' | 'weather';
+
 export type DeviceSettingsPatch = Partial<DeviceSettings>;
 
 export interface DeviceSetupSession {

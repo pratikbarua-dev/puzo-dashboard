@@ -83,7 +83,6 @@ export const COMMAND_DEFINITIONS: CommandDef[] = [
           { value: 'display_brightness', label: 'Display brightness' },
           { value: 'sound_enabled', label: 'Sound enabled' },
           { value: 'vibration_enabled', label: 'Vibration enabled' },
-          { value: 'rgb_enabled', label: 'RGB enabled' },
         ],
       },
       { name: 'value', label: 'Value', type: 'text' },

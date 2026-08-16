@@ -8,6 +8,7 @@ import { myDevice, updateMyDevice, transferDevice, removeMyDevice, ApiError } fr
 import { PageHeader } from '@/components/PageHeader';
 import { StatusBadge } from '@/components/StatusBadge';
 import { DeviceSettingsCard } from '@/components/DeviceSettingsCard';
+import { DeviceModeCard, DeviceMoodCard } from '@/components/DeviceModeCard';
 import {
   Card,
   CardHeader,
@@ -132,6 +133,10 @@ export default function DeviceDetailPage() {
       </div>
 
       <div className="mt-4">
+        <div className="mb-4 grid gap-4 lg:grid-cols-2">
+          <DeviceModeCard deviceId={deviceId} />
+          <DeviceMoodCard deviceId={deviceId} />
+        </div>
         <DeviceSettingsCard deviceId={deviceId} />
       </div>
 

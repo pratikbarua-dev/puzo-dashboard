@@ -7,6 +7,7 @@ import type {
   Device,
   DeviceSettings,
   DeviceSettingsPatch,
+  DeviceMode,
   DeviceSetupSession,
   DeviceEvent,
   DeviceStatus,
@@ -135,6 +136,12 @@ export const updateDeviceSettings = (deviceId: string, patch: DeviceSettingsPatc
   request<{ settings: DeviceSettings }>('PUT', `/devices/${deviceId}/settings`, patch).then(
     (d) => d.settings,
   );
+export const getDeviceMode = (deviceId: string) =>
+  request<{ mode: DeviceMode }>('GET', `/devices/${deviceId}/mode`).then((d) => d.mode);
+export const setDeviceMode = (deviceId: string, mode: DeviceMode) =>
+  request<{ mode: DeviceMode; command: CommandRecord }>('PUT', `/devices/${deviceId}/mode`, { mode });
+export const sendDeviceMood = (deviceId: string, emotion: string) =>
+  request<{ emotion: string; command: CommandRecord }>('POST', `/devices/${deviceId}/mood`, { emotion });
 export const removeMyDevice = (deviceId: string) =>
   request<{ device: Device }>('DELETE', `/devices/${deviceId}`);
 
@@ -247,6 +254,12 @@ export const adminSendCommand = (deviceId: string, command: string, payload: unk
     command,
     payload,
   });
+export const adminGetDeviceMode = (deviceId: string) =>
+  request<{ mode: DeviceMode }>('GET', `/admin/devices/${deviceId}/mode`).then((d) => d.mode);
+export const adminSetDeviceMode = (deviceId: string, mode: DeviceMode) =>
+  request<{ mode: DeviceMode; command: CommandRecord }>('PUT', `/admin/devices/${deviceId}/mode`, { mode });
+export const adminSendDeviceMood = (deviceId: string, emotion: string) =>
+  request<{ emotion: string; command: CommandRecord }>('POST', `/admin/devices/${deviceId}/mood`, { emotion });
 export const adminProvision = (deviceId: string) =>
   request<{ device: Device; token: string; note: string }>(
     'POST',
