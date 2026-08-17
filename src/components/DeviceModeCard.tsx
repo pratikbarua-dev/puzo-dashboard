@@ -14,13 +14,17 @@ import {
 } from 'lucide-react';
 import {
   adminGetDeviceMode,
+  adminGetDeviceMood,
   adminSendDeviceMood,
+  adminSetDeviceMood,
   adminSetDeviceMode,
+  getDeviceMood,
   getDeviceMode,
+  setDeviceMood,
   sendDeviceMood,
   setDeviceMode,
 } from '@/lib/api';
-import type { DeviceMode } from '@/lib/types';
+import type { DeviceMode, DeviceMood } from '@/lib/types';
 import { Card, Loading, ErrorState } from '@/components/ui';
 import { toast } from '@/components/Toast';
 import { extractError } from '@/lib/utils';
@@ -56,6 +60,89 @@ const MOOD_ACCENTS: Record<string, string> = {
   curious: 'puzo-mood-tone-curious',
   excited: 'puzo-mood-tone-excited',
 };
+
+const EMOTIONAL_MODES: readonly [DeviceMood, string, string, string][] = [
+  ['curious', 'Curious', 'Notices the world', '🤔'],
+  ['calm', 'Calm', 'Quiet and gentle', '😌'],
+  ['playful', 'Playful', 'Bright and silly', '😜'],
+  ['sleepy', 'Sleepy', 'Soft and slow', '😴'],
+  ['happy', 'Happy', 'Warm and joyful', '😊'],
+  ['love', 'Loving', 'Affectionate and close', '❤️'],
+  ['sad', 'Tender', 'Quiet and sensitive', '😢'],
+  ['excited', 'Excited', 'Energetic and expressive', '🤩'],
+  ['angry', 'Grumpy', 'Blunt and fiery', '😡'],
+];
+
+export function DeviceEmotionalModeCard({ deviceId, admin = false }: { deviceId: string; admin?: boolean }) {
+  const queryClient = useQueryClient();
+  const [pendingMood, setPendingMood] = useState<DeviceMood | null>(null);
+  const queryKey = [admin ? 'admin' : 'devices', deviceId, 'emotional-mode'];
+  const { data: mood, isLoading, isError, error, refetch } = useQuery({
+    queryKey,
+    queryFn: () => (admin ? adminGetDeviceMood(deviceId) : getDeviceMood(deviceId)),
+  });
+  const moodMut = useMutation({
+    mutationFn: (next: DeviceMood) => (admin ? adminSetDeviceMood(deviceId, next) : setDeviceMood(deviceId, next)),
+    onSuccess: (result) => {
+      queryClient.setQueryData(queryKey, result.mood);
+      setPendingMood(null);
+      toast.success(result.command?.status === 'queued' ? 'Emotional mode queued until PUZO reconnects' : 'Emotional mode updated');
+    },
+    onError: (e) => {
+      setPendingMood(null);
+      toast.error(extractError(e).message);
+    },
+  });
+
+  if (isLoading) return <Card><Loading label="Loading emotional mode…" /></Card>;
+  if (isError || !mood) return <Card><ErrorState message={extractError(error).message} onRetry={() => void refetch()} /></Card>;
+
+  const activeMood = pendingMood || mood;
+  const selected = EMOTIONAL_MODES.find((item) => item[0] === activeMood) || EMOTIONAL_MODES[0];
+  return (
+    <section className="puzo-control-surface" aria-labelledby="puzo-emotional-mode-title">
+      <div className="mb-5 flex items-start justify-between gap-4">
+        <div>
+          <p className="puzo-eyebrow">PUZO emotional mode</p>
+          <h2 id="puzo-emotional-mode-title" className="puzo-section-title">Choose how PUZO feels</h2>
+          <p className="mt-1.5 max-w-[28rem] text-[12px] leading-5 text-on-surface-variant">A persistent personality that shapes PUZO&apos;s idle expressions and touch reactions.</p>
+        </div>
+        <div className="puzo-current-pill" aria-live="polite">
+          <span className="puzo-current-dot" />
+          {selected[1]}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3" role="group" aria-label="PUZO emotional modes">
+        {EMOTIONAL_MODES.map(([value, label, description, emoji]) => {
+          const isSelected = activeMood === value;
+          return (
+            <button
+              key={value}
+              type="button"
+              aria-pressed={isSelected}
+              aria-label={`${label}: ${description}`}
+              disabled={moodMut.isPending}
+              onClick={() => {
+                if (value === activeMood) return;
+                setPendingMood(value);
+                moodMut.mutate(value);
+              }}
+              className={`puzo-mood-tile ${isSelected ? 'puzo-mood-tile-selected' : ''} ${MOOD_ACCENTS[value] || ''}`}
+            >
+              <span className="puzo-mood-icon" aria-hidden="true">{emoji}</span>
+              <span className="mt-2 block text-[12px] font-semibold text-on-surface">{label}</span>
+              <span className="mt-1 block text-[10px] leading-4 text-on-surface-variant">{description}</span>
+              <span className="puzo-selection-check" aria-hidden="true"><Check size={12} strokeWidth={3} /></span>
+            </button>
+          );
+        })}
+      </div>
+
+      <p className="mt-4 max-w-[38rem] text-[11px] leading-4 text-on-surface-variant">Saved to this PUZO. One-time moods and system reactions can briefly appear, then return to {selected[1]}.</p>
+    </section>
+  );
+}
 
 export function DeviceModeCard({ deviceId, admin = false }: { deviceId: string; admin?: boolean }) {
   const queryClient = useQueryClient();

@@ -98,6 +98,7 @@ export interface DeviceSettings {
 }
 
 export type DeviceMode = 'normal' | 'focus' | 'clock' | 'weather';
+export type DeviceMood = 'curious' | 'calm' | 'playful' | 'sleepy' | 'happy' | 'love' | 'sad' | 'excited' | 'angry';
 
 export type DeviceSettingsPatch = Partial<DeviceSettings>;
 

@@ -15,7 +15,7 @@ import { WelcomeModal } from '@/components/WelcomeModal';
 import { OnboardingChecklist } from '@/components/OnboardingChecklist';
 import { toast } from '@/components/Toast';
 import { timeAgo, extractError } from '@/lib/utils';
-import { DeviceModeCard } from '@/components/DeviceModeCard';
+import { DeviceEmotionalModeCard } from '@/components/DeviceModeCard';
 
 export default function OverviewPage() {
   const router = useRouter();
@@ -235,7 +235,7 @@ export default function OverviewPage() {
             )}
           </Card>
 
-          {selectedDevice && <DeviceModeCard deviceId={selectedDevice.device_id} />}
+          {selectedDevice && <DeviceEmotionalModeCard deviceId={selectedDevice.device_id} />}
 
           <Link href="/subscription" className="flex items-center justify-center gap-2 py-1 text-xs text-on-surface-variant transition-colors hover:text-on-surface">
             <CreditCard size={14} /> Manage subscription

@@ -30,7 +30,7 @@ import { COMMAND_DEFINITIONS } from '@/lib/registry';
 import { PageHeader } from '@/components/PageHeader';
 import { StatusBadge } from '@/components/StatusBadge';
 import { CommandForm } from '@/components/CommandForm';
-import { DeviceModeCard, DeviceMoodCard } from '@/components/DeviceModeCard';
+import { DeviceEmotionalModeCard, DeviceMoodCard } from '@/components/DeviceModeCard';
 import { Card, CardHeader, Button, Select, Sheet, Loading, ErrorState } from '@/components/ui';
 import { toast } from '@/components/Toast';
 import { timeAgo, formatDate, extractError, formatBytes } from '@/lib/utils';
@@ -280,7 +280,7 @@ export default function AdminDeviceDetailPage() {
       </div>
 
       <div className="mb-6 grid gap-4 lg:grid-cols-2">
-        <DeviceModeCard deviceId={deviceId} admin />
+        <DeviceEmotionalModeCard deviceId={deviceId} admin />
         <DeviceMoodCard deviceId={deviceId} admin />
       </div>
 
