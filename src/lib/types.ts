@@ -102,6 +102,32 @@ export type DeviceMood = 'curious' | 'calm' | 'playful' | 'sleepy' | 'happy' | '
 
 export type DeviceSettingsPatch = Partial<DeviceSettings>;
 
+export type EmotionIntensity = 'low' | 'normal' | 'expressive';
+export interface EmotionEngineSettings {
+  emotion_engine_enabled: boolean;
+  emotion_intensity: EmotionIntensity;
+  weather_reactions_enabled: boolean;
+  weather_messages_enabled: boolean;
+  partner_context_enabled: boolean;
+  emotion_quiet_hours_start: string | null;
+  emotion_quiet_hours_end: string | null;
+  emotion_minimum_interval_seconds: number;
+}
+
+export interface EmotionDecision {
+  id: string;
+  device_id: string;
+  trigger_type: string;
+  emotion: string;
+  message: string | null;
+  priority: string;
+  reason_codes: string[];
+  status: string;
+  suppression_reason?: string | null;
+  created_at: string;
+  delivered_at?: string | null;
+}
+
 export interface DeviceSetupSession {
   session_id: string;
   setup_id: string;

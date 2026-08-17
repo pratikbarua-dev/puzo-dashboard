@@ -27,6 +27,8 @@ import type {
   Subscription,
   ContentEmotion,
   ContentAsset,
+  EmotionEngineSettings,
+  EmotionDecision,
 } from './types';
 
 export class ApiError extends Error {
@@ -147,6 +149,12 @@ export const setDeviceMood = (deviceId: string, mood: DeviceMood) =>
   request<{ mood: DeviceMood; command: CommandRecord }>('PUT', `/devices/${deviceId}/mood`, { mood });
 export const sendDeviceMood = (deviceId: string, emotion: string) =>
   request<{ emotion: string; command: CommandRecord }>('POST', `/devices/${deviceId}/mood`, { emotion });
+export const getEmotionEngineSettings = (deviceId: string) =>
+  request<{ settings: EmotionEngineSettings }>('GET', `/devices/${deviceId}/emotion-engine`).then((d) => d.settings);
+export const updateEmotionEngineSettings = (deviceId: string, patch: Partial<EmotionEngineSettings>) =>
+  request<{ settings: EmotionEngineSettings }>('PATCH', `/devices/${deviceId}/emotion-engine`, patch).then((d) => d.settings);
+export const getEmotionDecisions = (deviceId: string) =>
+  request<{ decisions: EmotionDecision[] }>('GET', `/devices/${deviceId}/emotion-decisions?limit=8`).then((d) => d.decisions);
 export const removeMyDevice = (deviceId: string) =>
   request<{ device: Device }>('DELETE', `/devices/${deviceId}`);
 

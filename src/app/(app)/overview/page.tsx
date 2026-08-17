@@ -16,6 +16,7 @@ import { OnboardingChecklist } from '@/components/OnboardingChecklist';
 import { toast } from '@/components/Toast';
 import { timeAgo, extractError } from '@/lib/utils';
 import { DeviceEmotionalModeCard } from '@/components/DeviceModeCard';
+import { EmotionEngineCard } from '@/components/EmotionEngineCard';
 
 export default function OverviewPage() {
   const router = useRouter();
@@ -236,6 +237,7 @@ export default function OverviewPage() {
           </Card>
 
           {selectedDevice && <DeviceEmotionalModeCard deviceId={selectedDevice.device_id} />}
+          {selectedDevice && <EmotionEngineCard deviceId={selectedDevice.device_id} />}
 
           <Link href="/subscription" className="flex items-center justify-center gap-2 py-1 text-xs text-on-surface-variant transition-colors hover:text-on-surface">
             <CreditCard size={14} /> Manage subscription
