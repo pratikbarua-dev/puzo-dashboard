@@ -251,6 +251,8 @@ export const adminDeviceStatus = (deviceId: string) =>
         heap_free: d.state?.heap_free,
         uptime: d.state?.uptime,
         temperature: d.state?.temperature,
+        battery_voltage: d.device?.battery_voltage,
+        battery_percentage: d.device?.battery_percentage,
       },
     },
   }));

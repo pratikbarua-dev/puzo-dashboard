@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Cpu, Link2, CreditCard, Plus, Heart } from 'lucide-react';
+import { Battery, Cpu, Link2, CreditCard, Plus, Heart } from 'lucide-react';
 import { myDevices, myRelationships, myInteractions, sendInteraction } from '@/lib/api';
 import { useAuth } from '@/lib/auth-store';
 import { PageHeader } from '@/components/PageHeader';
@@ -167,6 +167,10 @@ export default function OverviewPage() {
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
+                    <div className="hidden items-center gap-1.5 text-micro-label text-on-surface-variant sm:flex" title="Estimated battery">
+                      <Battery size={15} />
+                      {typeof d.battery_percentage === 'number' ? `${Math.round(d.battery_percentage)}%` : '—'}
+                    </div>
                     <span className="hidden text-micro-label text-on-surface-variant sm:inline">
                       {timeAgo((d.last_seen || d.last_seen_at) as string)}
                     </span>

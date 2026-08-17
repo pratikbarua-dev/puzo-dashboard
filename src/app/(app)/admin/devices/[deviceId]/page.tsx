@@ -271,7 +271,12 @@ export default function AdminDeviceDetailPage() {
               <div>
                 <span className="text-micro-label text-on-surface-variant">BATTERY / TEMP</span>
                 <p className="text-body-base font-extrabold">
-                  {telemetry?.temperature != null ? `${telemetry.temperature}°C` : 'Normal'}
+                  {typeof telemetry?.battery_percentage === 'number'
+                    ? `${Math.round(telemetry.battery_percentage)}%${typeof telemetry.battery_voltage === 'number' ? ` · ${Number(telemetry.battery_voltage).toFixed(2)}V` : ''}`
+                    : '—'}
+                </p>
+                <p className="text-micro-label text-on-surface-variant">
+                  {telemetry?.temperature != null ? `${telemetry.temperature}°C` : 'Temperature unavailable'}
                 </p>
               </div>
             </div>

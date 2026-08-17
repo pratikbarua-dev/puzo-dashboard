@@ -81,6 +81,12 @@ export default function DeviceDetailPage() {
   const rows: { label: string; value: string }[] = [
     { label: 'Device ID', value: device.device_id },
     { label: 'Status', value: device.status },
+    {
+      label: 'Battery',
+      value: typeof device.battery_percentage === 'number'
+        ? `${Math.round(device.battery_percentage)}%${typeof device.battery_voltage === 'number' ? ` · ${device.battery_voltage.toFixed(2)} V` : ''} (estimated)`
+        : 'No telemetry yet',
+    },
     { label: 'Last seen', value: timeAgo((device.last_seen || device.last_seen_at) as string) },
     { label: 'Created', value: formatDate(device.created_at) },
   ];

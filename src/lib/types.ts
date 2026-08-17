@@ -72,6 +72,8 @@ export interface Device {
   firmware_channel: string;
   firmware_version?: string | null;
   firmware_build?: number | null;
+  battery_voltage?: number | null;
+  battery_percentage?: number | null;
   status: 'unknown' | 'online' | 'offline' | 'updating';
   owner_id: string | null;
   last_seen?: string | null;
@@ -142,7 +144,7 @@ export interface DeviceSetupSession {
 export interface DeviceTelemetry {
   rssi?: number;
   battery_voltage?: number;
-  battery_percent?: number;
+  battery_percentage?: number;
   temperature?: number;
   heap_free?: number;
   uptime_seconds?: number;
