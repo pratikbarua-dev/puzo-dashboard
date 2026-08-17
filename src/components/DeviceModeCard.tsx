@@ -123,7 +123,7 @@ export function DeviceModeCard({ deviceId, admin = false }: { deviceId: string; 
         })}
       </div>
 
-      <p className="mt-4 max-w-[38rem] text-[11px] leading-4 text-on-surface-variant">{selected.description}. Focus, clock, and weather still follow their normal local timeout rules.</p>
+      <p className="mt-4 max-w-[38rem] text-[11px] leading-4 text-on-surface-variant">Saved to this PUZO. Local moments can briefly take over, then return to your selected mode.</p>
     </section>
   );
 }

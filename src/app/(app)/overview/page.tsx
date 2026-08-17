@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Cpu, Link2, CreditCard, Plus, Heart, Zap, Sparkles } from 'lucide-react';
+import { Cpu, Link2, CreditCard, Plus, Heart } from 'lucide-react';
 import { myDevices, myRelationships, myInteractions, sendInteraction } from '@/lib/api';
 import { useAuth } from '@/lib/auth-store';
 import { PageHeader } from '@/components/PageHeader';
@@ -15,6 +15,7 @@ import { WelcomeModal } from '@/components/WelcomeModal';
 import { OnboardingChecklist } from '@/components/OnboardingChecklist';
 import { toast } from '@/components/Toast';
 import { timeAgo, extractError } from '@/lib/utils';
+import { DeviceModeCard } from '@/components/DeviceModeCard';
 
 export default function OverviewPage() {
   const router = useRouter();
@@ -25,12 +26,31 @@ export default function OverviewPage() {
   const { data: interactions } = useQuery({ queryKey: ['interactions'], queryFn: myInteractions });
 
   const [welcomeOpen, setWelcomeOpen] = useState(false);
+  const [selectedDeviceId, setSelectedDeviceId] = useState('');
 
   const activeRelationship = (relationships ?? []).find((r) => r.status === 'active');
   const partnerDevice = activeRelationship?.devices?.find((d) => !devices?.some((mine) => mine.device_id === d.device_id));
   const hasDevices = Boolean(devices?.length);
   const hasPartner = Boolean(activeRelationship);
   const hasInteractions = Boolean(interactions?.length);
+
+  useEffect(() => {
+    if (!devices?.length) {
+      setSelectedDeviceId('');
+      return;
+    }
+    const saved = window.localStorage.getItem('puzo_overview_device');
+    const savedDevice = devices.find((device) => device.device_id === saved);
+    const currentDevice = devices.find((device) => device.device_id === selectedDeviceId);
+    const preferred = currentDevice || savedDevice || devices.find((device) => device.status === 'online') || devices[0];
+    if (preferred && preferred.device_id !== selectedDeviceId) setSelectedDeviceId(preferred.device_id);
+  }, [devices, selectedDeviceId]);
+
+  useEffect(() => {
+    if (selectedDeviceId) window.localStorage.setItem('puzo_overview_device', selectedDeviceId);
+  }, [selectedDeviceId]);
+
+  const selectedDevice = devices?.find((device) => device.device_id === selectedDeviceId);
 
   useEffect(() => {
     // Show welcome modal for new users with 0 devices who haven't dismissed it in session
@@ -157,7 +177,7 @@ export default function OverviewPage() {
           )}
         </Card>
 
-        {/* Partner companion status & quick actions */}
+        {/* Partner companion status & persistent device mode */}
         <div className="flex flex-col gap-4">
           <Card className="border-primary/20 bg-primary/5">
             <CardHeader title="Partner Companion" subtitle={partnerDevice ? (partnerDevice.name || partnerDevice.device_id) : 'Not paired yet'} />
@@ -196,20 +216,30 @@ export default function OverviewPage() {
           </Card>
 
           <Card>
-            <CardHeader title="Quick actions" />
-            <div className="flex flex-col gap-2">
-              <Link href="/interactions">
-                <Button variant="outline" className="w-full justify-start">
-                  <Sparkles size={16} /> Send custom emotion / animation
-                </Button>
-              </Link>
-              <Link href="/subscription">
-                <Button variant="outline" className="w-full justify-start">
-                  <CreditCard size={16} /> Manage subscription
-                </Button>
-              </Link>
-            </div>
+            <CardHeader title="Set a PUZO mode" subtitle="Choose which device to control" />
+            {devices?.length ? (
+              <select
+                aria-label="Device to control"
+                value={selectedDeviceId}
+                onChange={(event) => setSelectedDeviceId(event.target.value)}
+                className="w-full rounded-lg border border-border/40 bg-surface-container-low px-3 py-2.5 text-sm text-on-surface outline-none transition-colors focus:border-primary-container"
+              >
+                {devices.map((device) => (
+                  <option key={device.device_id} value={device.device_id}>
+                    {device.name || device.device_id} · {device.status}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <p className="text-body-base text-on-surface-variant">Add a PUZO to choose its persistent mode.</p>
+            )}
           </Card>
+
+          {selectedDevice && <DeviceModeCard deviceId={selectedDevice.device_id} />}
+
+          <Link href="/subscription" className="flex items-center justify-center gap-2 py-1 text-xs text-on-surface-variant transition-colors hover:text-on-surface">
+            <CreditCard size={14} /> Manage subscription
+          </Link>
         </div>
       </div>
     </div>
