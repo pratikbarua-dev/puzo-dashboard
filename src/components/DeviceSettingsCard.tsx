@@ -6,7 +6,7 @@ import { BellOff, ListOrdered, Locate, MapPin, Search, Timer, Vibrate, Volume2, 
 import { getDeviceSettings, getProfileLocation, updateDeviceSettings, updateProfileLocation } from '@/lib/api';
 import type { DeviceSettings, DeviceSettingsPatch } from '@/lib/types';
 import { useAuth } from '@/lib/auth-store';
-import { Card, CardHeader, Button, Input, Toggle, Loading, ErrorState } from '@/components/ui';
+import { Card, CardHeader, Button, Input, Toggle, Select, Loading, ErrorState } from '@/components/ui';
 import { toast } from '@/components/Toast';
 import { extractError } from '@/lib/utils';
 
@@ -19,6 +19,7 @@ type SettingsDraft = Pick<
   | 'wake_sound_enabled'
   | 'wake_vibration_enabled'
   | 'quiet_mode_enabled'
+  | 'eye_pack'
 >;
 
 type ToggleDraft = Pick<SettingsDraft, 'wake_sound_enabled' | 'wake_vibration_enabled' | 'quiet_mode_enabled'>;
@@ -100,6 +101,7 @@ export function DeviceSettingsCard({ deviceId }: { deviceId: string }) {
         wake_sound_enabled: settings.wake_sound_enabled,
         wake_vibration_enabled: settings.wake_vibration_enabled,
         quiet_mode_enabled: settings.quiet_mode_enabled,
+        eye_pack: settings.eye_pack,
       });
     }
   }, [settings, draft]);
@@ -259,6 +261,15 @@ export function DeviceSettingsCard({ deviceId }: { deviceId: string }) {
     saveNumericMut.mutate(patch);
   };
 
+  const eyePackMut = useMutation({
+    mutationFn: (eye_pack: DeviceSettings['eye_pack']) => updateDeviceSettings(deviceId, { eye_pack }),
+    onSuccess: () => {
+      toast.success('OLED eye style updated');
+      void queryClient.invalidateQueries({ queryKey: ['devices', deviceId, 'settings'] });
+    },
+    onError: (e) => toast.error(extractError(e).message),
+  });
+
   if (isLoading) return <Loading label="Loading device settings…" />;
   if (isError || !draft) {
     return (
@@ -288,6 +299,23 @@ export function DeviceSettingsCard({ deviceId }: { deviceId: string }) {
             />
           </div>
         ))}
+      </div>
+
+      <div className="mb-4 max-w-sm">
+        <Select
+          label="OLED eye style"
+          value={draft.eye_pack}
+          disabled={eyePackMut.isPending}
+          onChange={(event) => {
+            const value = event.target.value as DeviceSettings['eye_pack'];
+            setDraft((d) => (d ? { ...d, eye_pack: value } : d));
+            eyePackMut.mutate(value);
+          }}
+        >
+          <option value="classic">PUZO Classic</option>
+          <option value="iris_oled">IrisOLED Expressions</option>
+        </Select>
+        <p className="mt-1 text-[10px] text-on-surface-variant">IrisOLED is an MIT-licensed SSD1306 eye pack with bitmap reactions.</p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
