@@ -34,6 +34,7 @@ import { DeviceEmotionalModeCard, DeviceMoodCard } from '@/components/DeviceMode
 import { Card, CardHeader, Button, Select, Sheet, Loading, ErrorState } from '@/components/ui';
 import { toast } from '@/components/Toast';
 import { timeAgo, formatDate, extractError, formatBytes } from '@/lib/utils';
+import { batteryLabel, batteryStatus } from '@/lib/battery';
 import type { FirmwareRelease } from '@/lib/types';
 
 export default function AdminDeviceDetailPage() {
@@ -99,6 +100,9 @@ export default function AdminDeviceDetailPage() {
   if (isError || !device) return <ErrorState message={extractError(error).message} onRetry={() => void refetch()} />;
 
   const telemetry = status?.presence?.telemetry as Record<string, unknown> | undefined;
+  const batteryPercentage = typeof telemetry?.battery_percentage === 'number' ? telemetry.battery_percentage : null;
+  const batteryVoltage = typeof telemetry?.battery_voltage === 'number' ? telemetry.battery_voltage : null;
+  const currentBatteryStatus = batteryStatus(batteryPercentage, batteryVoltage);
 
   // Compare device firmware against published releases
   const hwModel = device.hardware_model || 'ESP32-WROOM-32';
@@ -271,10 +275,15 @@ export default function AdminDeviceDetailPage() {
               <div>
                 <span className="text-micro-label text-on-surface-variant">BATTERY / TEMP</span>
                 <p className="text-body-base font-extrabold">
-                  {typeof telemetry?.battery_percentage === 'number'
-                    ? `${Math.round(telemetry.battery_percentage)}%${typeof telemetry.battery_voltage === 'number' ? ` · ${Number(telemetry.battery_voltage).toFixed(2)}V` : ''}`
-                    : '—'}
+                  {currentBatteryStatus !== 'unavailable' && batteryPercentage !== null
+                    ? `${Math.round(batteryPercentage)}%${batteryVoltage !== null ? ` · ${batteryVoltage.toFixed(2)}V` : ''}`
+                    : batteryLabel(currentBatteryStatus)}
                 </p>
+                {(currentBatteryStatus === 'low' || currentBatteryStatus === 'critical') && (
+                  <p className={currentBatteryStatus === 'critical' ? 'text-micro-label text-error' : 'text-micro-label text-secondary'}>
+                    {batteryLabel(currentBatteryStatus)}
+                  </p>
+                )}
                 <p className="text-micro-label text-on-surface-variant">
                   {telemetry?.temperature != null ? `${telemetry.temperature}°C` : 'Temperature unavailable'}
                 </p>

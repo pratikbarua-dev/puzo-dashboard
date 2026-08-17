@@ -269,6 +269,11 @@ export const adminSendCommand = (deviceId: string, command: string, payload: unk
     command,
     payload,
   });
+export const sendDeviceCommand = (deviceId: string, command: string, payload: unknown) =>
+  request<{ command: CommandRecord }>('POST', `/owned-devices/${deviceId}/commands`, {
+    command,
+    payload,
+  });
 export const adminGetDeviceMode = (deviceId: string) =>
   request<{ mode: DeviceMode }>('GET', `/admin/devices/${deviceId}/mode`).then((d) => d.mode);
 export const adminSetDeviceMode = (deviceId: string, mode: DeviceMode) =>

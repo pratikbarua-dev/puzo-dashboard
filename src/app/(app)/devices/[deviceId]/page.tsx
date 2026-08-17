@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { ArrowLeft, Cpu, Trash2, Edit3, Send } from 'lucide-react';
-import { myDevice, updateMyDevice, transferDevice, removeMyDevice, ApiError } from '@/lib/api';
+import { ArrowLeft, Trash2, Edit3, WifiOff } from 'lucide-react';
+import { myDevice, updateMyDevice, transferDevice, removeMyDevice, sendDeviceCommand } from '@/lib/api';
 import { PageHeader } from '@/components/PageHeader';
 import { StatusBadge } from '@/components/StatusBadge';
 import { DeviceSettingsCard } from '@/components/DeviceSettingsCard';
@@ -21,6 +21,7 @@ import {
 } from '@/components/ui';
 import { toast } from '@/components/Toast';
 import { timeAgo, formatDate, extractError } from '@/lib/utils';
+import { batteryLabel, batteryStatus } from '@/lib/battery';
 
 export default function DeviceDetailPage() {
   const params = useParams<{ deviceId: string }>();
@@ -39,6 +40,7 @@ export default function DeviceDetailPage() {
   const [transferConfirmOpen, setTransferConfirmOpen] = useState(false);
   const [username, setUsername] = useState('');
   const [removeOpen, setRemoveOpen] = useState(false);
+  const [wifiResetOpen, setWifiResetOpen] = useState(false);
 
   const renameMut = useMutation({
     mutationFn: () => updateMyDevice(deviceId, { name: newName.trim() }),
@@ -71,6 +73,15 @@ export default function DeviceDetailPage() {
     onError: (e) => toast.error(extractError(e).message),
   });
 
+  const wifiResetMut = useMutation({
+    mutationFn: () => sendDeviceCommand(deviceId, 'wifi_reset_warning', {}),
+    onSuccess: () => {
+      toast.success('Reset warning sent. Hold the B3F button for 5 seconds on PUZO to confirm.');
+      setWifiResetOpen(false);
+    },
+    onError: (e) => toast.error(extractError(e).message),
+  });
+
   if (isLoading) return <Loading />;
   if (isError || !device) {
     return (
@@ -83,9 +94,9 @@ export default function DeviceDetailPage() {
     { label: 'Status', value: device.status },
     {
       label: 'Battery',
-      value: typeof device.battery_percentage === 'number'
+      value: batteryStatus(device.battery_percentage, device.battery_voltage) !== 'unavailable' && typeof device.battery_percentage === 'number'
         ? `${Math.round(device.battery_percentage)}%${typeof device.battery_voltage === 'number' ? ` · ${device.battery_voltage.toFixed(2)} V` : ''} (estimated)`
-        : 'No telemetry yet',
+        : batteryLabel(batteryStatus(device.battery_percentage, device.battery_voltage)),
     },
     { label: 'Last seen', value: timeAgo((device.last_seen || device.last_seen_at) as string) },
     { label: 'Created', value: formatDate(device.created_at) },
@@ -109,6 +120,11 @@ export default function DeviceDetailPage() {
       <div className="grid gap-4">
         <Card>
           <CardHeader title="Details" />
+          {(batteryStatus(device.battery_percentage, device.battery_voltage) === 'low' || batteryStatus(device.battery_percentage, device.battery_voltage) === 'critical') && (
+            <div className={`mb-4 rounded-lg px-3 py-2 text-sm ${batteryStatus(device.battery_percentage, device.battery_voltage) === 'critical' ? 'bg-error/15 text-error' : 'bg-secondary/15 text-secondary'}`} role="status">
+              {batteryLabel(batteryStatus(device.battery_percentage, device.battery_voltage))} — recharge PUZO soon.
+            </div>
+          )}
           <dl className="flex flex-col gap-2">
             {rows.map((r) => (
               <div key={r.label} className="flex justify-between gap-3 border-b border-outline-variant/40 pb-2 last:border-0">
@@ -130,6 +146,9 @@ export default function DeviceDetailPage() {
             </Button>
             <Button variant="outline" onClick={() => setTransferOpen(true)}>
               Transfer ownership
+            </Button>
+            <Button variant="outline" onClick={() => setWifiResetOpen(true)}>
+              <WifiOff size={16} /> Request Wi-Fi reset
             </Button>
             <Button variant="danger" onClick={() => setRemoveOpen(true)}>
               <Trash2 size={16} /> Remove device
@@ -210,6 +229,17 @@ export default function DeviceDetailPage() {
         confirmLabel="Remove"
         onConfirm={() => removeMut.mutate()}
         busy={removeMut.isPending}
+      />
+
+      <ConfirmDialog
+        open={wifiResetOpen}
+        onClose={() => setWifiResetOpen(false)}
+        title="Request Wi-Fi reset?"
+        message="PUZO will show a reset warning. Wi-Fi credentials are erased only after you hold the physical B3F button for 5 seconds."
+        confirmLabel="Show reset warning"
+        danger
+        onConfirm={() => wifiResetMut.mutate()}
+        busy={wifiResetMut.isPending}
       />
     </div>
   );

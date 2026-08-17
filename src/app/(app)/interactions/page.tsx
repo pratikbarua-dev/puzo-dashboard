@@ -252,11 +252,6 @@ export default function InteractionsPage() {
                 Partner&apos;s PUZO ({partnerDevice.name || partnerDevice.device_id})
               </option>
             )}
-            {(devices ?? []).map((d) => (
-              <option key={d.device_id} value={d.device_id}>
-                My PUZO ({d.name || d.device_id})
-              </option>
-            ))}
           </Select>
 
           {def?.fields.map((f) => (
@@ -274,7 +269,7 @@ export default function InteractionsPage() {
             />
           ))}
 
-          <Button type="submit" isLoading={sendMut.isPending}>
+          <Button type="submit" isLoading={sendMut.isPending} disabled={!partnerDevice}>
             Send moment now
           </Button>
         </form>

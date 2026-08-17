@@ -15,7 +15,6 @@ type SettingsDraft = Pick<
   | 'sleep_timeout_min'
   | 'focus_duration_min'
   | 'timezone_offset_min'
-  | 'random_text_tap_count'
   | 'wake_sound_enabled'
   | 'wake_vibration_enabled'
   | 'quiet_mode_enabled'
@@ -27,7 +26,7 @@ type ToggleDraft = Pick<SettingsDraft, 'wake_sound_enabled' | 'wake_vibration_en
 const NUMERIC_FIELDS: {
   key: keyof Pick<
     DeviceSettings,
-    'sleep_timeout_min' | 'focus_duration_min' | 'timezone_offset_min' | 'random_text_tap_count'
+    'sleep_timeout_min' | 'focus_duration_min' | 'timezone_offset_min'
   >;
   label: string;
   min: number;
@@ -38,7 +37,6 @@ const NUMERIC_FIELDS: {
   { key: 'sleep_timeout_min', label: 'Auto-sleep timeout (min)', min: 0, max: 480, hint: '0 = never' },
   { key: 'focus_duration_min', label: 'Focus duration (min)', min: 5, max: 240 },
   { key: 'timezone_offset_min', label: 'Timezone offset (min)', min: -840, max: 840, step: 15 },
-  { key: 'random_text_tap_count', label: 'Random-text tap count', min: 5, max: 20 },
 ];
 
 const TOGGLE_FIELDS: { key: keyof ToggleDraft; label: string; icon: React.ReactNode }[] = [
@@ -97,7 +95,6 @@ export function DeviceSettingsCard({ deviceId }: { deviceId: string }) {
         sleep_timeout_min: settings.sleep_timeout_min,
         focus_duration_min: settings.focus_duration_min,
         timezone_offset_min: settings.timezone_offset_min,
-        random_text_tap_count: settings.random_text_tap_count,
         wake_sound_enabled: settings.wake_sound_enabled,
         wake_vibration_enabled: settings.wake_vibration_enabled,
         quiet_mode_enabled: settings.quiet_mode_enabled,

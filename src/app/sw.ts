@@ -15,7 +15,21 @@ const serwist = new Serwist({
   skipWaiting: true,
   clientsClaim: true,
   navigationPreload: true,
-  runtimeCaching: defaultCache,
+  // Cloudflare Insights is optional analytics. A blocked/offline beacon must
+  // never become an uncaught Serwist `no-response` failure in the app.
+  runtimeCaching: [
+    {
+      matcher: ({ url }) => url.hostname === 'static.cloudflareinsights.com',
+      handler: async ({ request }) => {
+        try {
+          return await fetch(request);
+        } catch {
+          return new Response(null, { status: 204 });
+        }
+      },
+    },
+    ...defaultCache,
+  ],
   fallbacks: {
     entries: [
       {

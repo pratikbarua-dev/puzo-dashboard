@@ -71,6 +71,12 @@ export const COMMAND_DEFINITIONS: CommandDef[] = [
     fields: [],
   },
   {
+    command: 'wifi_reset_warning',
+    label: 'Request Wi-Fi reset',
+    interactionType: undefined,
+    fields: [],
+  },
+  {
     command: 'set_config',
     label: 'Set config',
     interactionType: undefined,

@@ -17,6 +17,7 @@ import { toast } from '@/components/Toast';
 import { timeAgo, extractError } from '@/lib/utils';
 import { DeviceEmotionalModeCard } from '@/components/DeviceModeCard';
 import { EmotionEngineCard } from '@/components/EmotionEngineCard';
+import { batteryLabel, batteryStatus } from '@/lib/battery';
 
 export default function OverviewPage() {
   const router = useRouter();
@@ -87,6 +88,10 @@ export default function OverviewPage() {
   const online = devices?.filter((d) => d.status === 'online').length ?? 0;
   const updating = devices?.filter((d) => d.status === 'updating').length ?? 0;
   const offline = (devices?.length ?? 0) - online - updating;
+  const batteryWarnings = (devices ?? []).filter((device) => {
+    const status = batteryStatus(device.battery_percentage, device.battery_voltage);
+    return status === 'low' || status === 'critical';
+  });
 
   return (
     <div>
@@ -125,6 +130,20 @@ export default function OverviewPage() {
         <StatCard label="Updating" value={updating} accent="yellow" />
         <StatCard label="Partner Linked" value={partnerDevice ? 'Connected' : 'None'} accent="white" />
       </div>
+
+      {batteryWarnings.length > 0 && (
+        <div className="mt-4 rounded-lg border border-secondary/40 bg-secondary/10 px-4 py-3 text-sm text-on-surface" role="status">
+          <p className="font-extrabold">Battery attention needed</p>
+          <p className="mt-1 text-on-surface-variant">
+            {batteryWarnings.map((device) => {
+              const status = batteryStatus(device.battery_percentage, device.battery_voltage);
+              const name = device.name || device.device_id;
+              const value = typeof device.battery_percentage === 'number' ? ` · ${Math.round(device.battery_percentage)}%` : '';
+              return `${name}: ${batteryLabel(status)}${value}`;
+            }).join('  ')}
+          </p>
+        </div>
+      )}
 
       <div className="mt-5 grid gap-4 lg:grid-cols-3">
         {/* Main companion devices view */}
@@ -167,9 +186,17 @@ export default function OverviewPage() {
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
-                    <div className="hidden items-center gap-1.5 text-micro-label text-on-surface-variant sm:flex" title="Estimated battery">
+                    <div className={`hidden items-center gap-1.5 text-micro-label sm:flex ${
+                      batteryStatus(d.battery_percentage, d.battery_voltage) === 'critical'
+                        ? 'text-error'
+                        : batteryStatus(d.battery_percentage, d.battery_voltage) === 'low'
+                          ? 'text-secondary'
+                          : 'text-on-surface-variant'
+                    }`} title={batteryLabel(batteryStatus(d.battery_percentage, d.battery_voltage))}>
                       <Battery size={15} />
-                      {typeof d.battery_percentage === 'number' ? `${Math.round(d.battery_percentage)}%` : '—'}
+                      {typeof d.battery_percentage === 'number' && batteryStatus(d.battery_percentage, d.battery_voltage) !== 'unavailable'
+                        ? `${Math.round(d.battery_percentage)}%`
+                        : '—'}
                     </div>
                     <span className="hidden text-micro-label text-on-surface-variant sm:inline">
                       {timeAgo((d.last_seen || d.last_seen_at) as string)}

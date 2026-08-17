@@ -96,7 +96,6 @@ export interface DeviceSettings {
   wake_sound_enabled: boolean;
   wake_vibration_enabled: boolean;
   quiet_mode_enabled: boolean;
-  random_text_tap_count: number;
   eye_pack: 'classic' | 'iris_oled';
 }
 
