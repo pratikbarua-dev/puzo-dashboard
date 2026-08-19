@@ -4,70 +4,45 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
-  LayoutDashboard,
-  Cpu,
-  Link2,
-  HeartHandshake,
-  Zap,
-  CalendarClock,
-  CreditCard,
-  Settings,
-  Shield,
-  FolderCog,
-  UploadCloud,
-  Users,
-  ScrollText,
-  Sparkles,
+  Home,
+  History as HistoryIcon,
+  Radio,
+  User,
+  Wifi,
   MoreHorizontal,
   LogOut,
-  Menu,
   ArrowLeftRight,
+  Shield,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth, isAdmin } from '@/lib/auth-store';
-import { Button, Sheet } from './ui';
-import { PuzoLogo } from './PuzoLogo';
+import { Sheet } from './ui';
 import { authClient } from '@/lib/auth-client';
 import { toast } from './Toast';
+import { NotificationCenter } from './NotificationCenter';
 
 interface NavItem {
   href: string;
   label: string;
   icon: React.ComponentType<{ size?: number | string; className?: string }>;
-  adminOnly?: boolean;
 }
 
-const USER_NAV: NavItem[] = [
-  { href: '/overview', label: 'Overview', icon: LayoutDashboard },
-  { href: '/devices', label: 'Devices', icon: Cpu },
-  { href: '/pairing', label: 'Pairing', icon: Link2 },
-  { href: '/relationships', label: 'Relationships', icon: HeartHandshake },
-  { href: '/interactions', label: 'Interactions', icon: Zap },
-  { href: '/schedules', label: 'Schedules', icon: CalendarClock },
-  { href: '/subscription', label: 'Subscription', icon: CreditCard },
-  { href: '/settings', label: 'Settings', icon: Settings },
-];
-
-const ADMIN_NAV: NavItem[] = [
-  { href: '/admin', label: 'Overview', icon: LayoutDashboard, adminOnly: true },
-  { href: '/admin/devices', label: 'Devices', icon: Cpu, adminOnly: true },
-  { href: '/admin/firmware', label: 'Firmware', icon: FolderCog, adminOnly: true },
-  { href: '/admin/ota', label: 'OTA jobs', icon: UploadCloud, adminOnly: true },
-  { href: '/admin/content', label: 'Content', icon: Sparkles, adminOnly: true },
-  { href: '/admin/users', label: 'Users', icon: Users, adminOnly: true },
-  { href: '/admin/subscriptions', label: 'Subscriptions', icon: CreditCard, adminOnly: true },
-  { href: '/admin/audit', label: 'Audit log', icon: ScrollText, adminOnly: true },
+const PRIMARY_TABS: NavItem[] = [
+  { href: '/overview', label: 'Home', icon: Home },
+  { href: '/history', label: 'History', icon: HistoryIcon },
+  { href: '/devices', label: 'Devices', icon: Radio },
+  { href: '/settings', label: 'Me', icon: User },
 ];
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const { profile } = useAuth();
-  const [moreOpen, setMoreOpen] = useState(false);
+  const [adminSheetOpen, setAdminSheetOpen] = useState(false);
   const admin = isAdmin(profile?.role);
   const isAdminView = pathname === '/admin' || pathname.startsWith('/admin/');
 
-  const activeNav = isAdminView ? ADMIN_NAV : USER_NAV;
+  const isHistoryView = pathname === '/history' || pathname.startsWith('/history');
 
   const signOut = async () => {
     await authClient.signOut();
@@ -76,157 +51,184 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     router.refresh();
   };
 
-  const renderItem = (item: NavItem) => {
-    const active =
-      item.href === '/admin'
-        ? pathname === '/admin'
-        : pathname === item.href || pathname.startsWith(item.href + '/');
-    return (
-      <Link
-        key={item.href}
-        href={item.href}
-        onClick={() => setMoreOpen(false)}
-        className={cn(
-          'flex min-h-[44px] items-center gap-3 rounded-md px-3 text-body-base transition-fast',
-          active
-            ? 'bg-primary-container font-extrabold text-white'
-            : 'text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface',
-        )}
-      >
-        <item.icon size={18} />
-        {item.label}
-      </Link>
-    );
+  const getTabActive = (href: string) => {
+    if (href === '/overview') return pathname === '/overview' || pathname === '/';
+    if (href === '/history') return pathname === '/history' || pathname.startsWith('/history');
+    if (href === '/devices') return pathname === '/devices' || pathname.startsWith('/devices') || pathname === '/pairing';
+    if (href === '/settings') return pathname === '/settings' || pathname === '/subscription' || pathname === '/relationships' || pathname === '/interactions' || pathname === '/schedules';
+    return pathname === href;
   };
 
   return (
-    <div className="min-h-dvh bg-background-base">
-      <div className="flex">
-        {/* Desktop sidebar */}
-        <aside className="sticky top-0 hidden h-dvh w-60 shrink-0 flex-col border-r border-outline-variant bg-surface-container-lowest p-4 md:flex">
-          <Link href={isAdminView ? '/admin' : '/overview'} className="mb-6 flex items-center gap-2">
-            <PuzoLogo size={36} />
-            <div className="flex flex-col">
-              <span className="text-headline-md font-extrabold leading-none">PUZO</span>
-              {isAdminView && (
-                <span className="text-[10px] font-bold tracking-widest text-primary uppercase">
-                  Admin Console
-                </span>
-              )}
-            </div>
-          </Link>
-
-          <nav className="flex flex-col gap-1">
-            <p className="px-3 pb-1 text-micro-label text-on-surface-variant">
-              {isAdminView ? 'ADMINISTRATION' : 'COMPANION MENU'}
-            </p>
-            {activeNav.map(renderItem)}
-          </nav>
-
-          <div className="mt-auto flex flex-col gap-3">
-            {/* View Switcher Button */}
-            {admin && (
-              <Link
-                href={isAdminView ? '/overview' : '/admin'}
-                className="flex min-h-[40px] items-center justify-between rounded-md border border-primary/30 bg-primary/10 px-3 text-xs font-extrabold text-primary hover:bg-primary/20 transition-fast"
-              >
-                <span>{isAdminView ? 'User Companion View' : 'Admin Console'}</span>
-                <ArrowLeftRight size={14} />
-              </Link>
+    <div
+      className={cn(
+        'min-h-dvh flex flex-col justify-between transition-colors duration-300 select-none',
+        isHistoryView ? 'bg-[#191C21] text-white' : 'bg-[#F3F6FA] text-[#1E232B]',
+      )}
+    >
+      {/* Top Bar matching screenshot */}
+      <header
+        className={cn(
+          'sticky top-0 z-30 flex items-center justify-between px-5 py-3.5 pt-safe transition-colors duration-300',
+          isHistoryView
+            ? 'bg-[#191C21]/95 border-b border-white/5'
+            : 'bg-[#F3F6FA]/90 backdrop-blur-md',
+        )}
+      >
+        {/* Left: User Avatar */}
+        <Link href="/settings" className="flex items-center gap-2 group">
+          <div className="relative h-9 w-9 overflow-hidden rounded-full ring-2 ring-white/60 shadow-sm bg-gradient-to-tr from-amber-200 to-rose-300">
+            {profile?.avatar_url ? (
+              <img
+                src={profile.avatar_url}
+                alt={profile.display_name || 'User'}
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <div className="grid h-full w-full place-items-center text-xs font-black text-[#A82835]">
+                {(profile?.display_name || profile?.username || 'P')[0].toUpperCase()}
+              </div>
             )}
+          </div>
+        </Link>
 
-            <div className="rounded-md bg-surface-container p-3">
-              <p className="text-label-caps">{profile?.display_name || profile?.username || 'User'}</p>
-              <p className="text-micro-label text-on-surface-variant">
-                {profile?.role}
-                {profile?.username ? ` · @${profile.username}` : ''}
-              </p>
-            </div>
+        {/* Center: Coral PUZO Wordmark */}
+        <Link href="/overview" className="flex items-center gap-1.5">
+          <span
+            className={cn(
+              'text-xl font-black tracking-wide',
+              isHistoryView ? 'text-[#FF656A]' : 'text-[#D93845]',
+            )}
+          >
+            PUZO
+          </span>
+        </Link>
+
+        {/* Right: Realtime Beacon & Notification */}
+        <div className="flex items-center gap-2">
+          <NotificationCenter />
+          <div
+            className={cn(
+              'grid h-8 w-8 place-items-center rounded-full transition-colors',
+              isHistoryView ? 'text-white/80 hover:bg-white/10' : 'text-[#1E232B]/80 hover:bg-black/5',
+            )}
+            title="PUZO Fleet Connected"
+          >
+            <Wifi size={19} className="text-emerald-500 animate-pulse" />
+          </div>
+        </div>
+      </header>
+
+      {/* Main Screen Content */}
+      <main className="mx-auto w-full max-w-md flex-1 px-4 pt-2 pb-28 sm:px-6">
+        {children}
+      </main>
+
+      {/* Fixed Bottom Navigation matching screenshots */}
+      <nav
+        className={cn(
+          'fixed inset-x-0 bottom-0 z-40 mx-auto max-w-md border-t pb-safe backdrop-blur-2xl transition-colors duration-300',
+          isHistoryView
+            ? 'bg-[#15171C]/95 border-white/10 text-white/70'
+            : 'bg-white/95 border-[#EAEFF5] text-[#64748B] shadow-lg shadow-slate-900/5',
+        )}
+      >
+        <div className="flex h-16 items-center justify-around px-2">
+          {PRIMARY_TABS.map((item) => {
+            const active = getTabActive(item.href);
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  'flex flex-1 flex-col items-center justify-center gap-1 transition-all group py-1',
+                  active
+                    ? isHistoryView
+                      ? 'text-[#FF656A] font-bold'
+                      : 'text-[#D93845] font-bold'
+                    : isHistoryView
+                    ? 'text-white/60 hover:text-white'
+                    : 'text-[#64748B] hover:text-[#1E232B]',
+                )}
+              >
+                <item.icon
+                  size={20}
+                  className={cn(
+                    'transition-transform duration-200',
+                    active ? 'scale-110' : 'group-hover:scale-105',
+                  )}
+                />
+                <span className="text-[11px] font-mono tracking-tight">{item.label}</span>
+                {active && (
+                  <span
+                    className={cn(
+                      'h-1.5 w-1.5 rounded-full -mt-0.5',
+                      isHistoryView ? 'bg-[#FF656A]' : 'bg-[#D93845]',
+                    )}
+                  />
+                )}
+              </Link>
+            );
+          })}
+
+          {admin && (
+            <button
+              onClick={() => setAdminSheetOpen(true)}
+              className={cn(
+                'flex flex-1 flex-col items-center justify-center gap-1 transition-all py-1',
+                isAdminView
+                  ? 'text-[#FF656A] font-bold'
+                  : isHistoryView
+                  ? 'text-white/60 hover:text-white'
+                  : 'text-[#64748B] hover:text-[#1E232B]',
+              )}
+              title="Admin Menu"
+            >
+              <Shield size={18} />
+              <span className="text-[11px] font-mono tracking-tight">Admin</span>
+            </button>
+          )}
+        </div>
+      </nav>
+
+      {/* Admin Operations Modal */}
+      {admin && (
+        <Sheet open={adminSheetOpen} onClose={() => setAdminSheetOpen(false)} title="Admin Fleet Console">
+          <div className="flex flex-col gap-2 py-2">
+            <Link
+              href="/admin"
+              onClick={() => setAdminSheetOpen(false)}
+              className="flex min-h-[44px] items-center justify-between rounded-2xl bg-[#F8FAFC] border border-[#E2E8F0] px-4 text-sm font-bold text-[#1E232B] hover:bg-[#F1F5F9]"
+            >
+              <span>Overview & Fleet Metrics</span>
+              <ArrowLeftRight size={16} />
+            </Link>
+            <Link
+              href="/admin/firmware"
+              onClick={() => setAdminSheetOpen(false)}
+              className="flex min-h-[44px] items-center justify-between rounded-2xl bg-[#F8FAFC] border border-[#E2E8F0] px-4 text-sm font-bold text-[#1E232B] hover:bg-[#F1F5F9]"
+            >
+              <span>Firmware Binaries & OTA Jobs</span>
+              <ArrowLeftRight size={16} />
+            </Link>
+            <Link
+              href="/admin/users"
+              onClick={() => setAdminSheetOpen(false)}
+              className="flex min-h-[44px] items-center justify-between rounded-2xl bg-[#F8FAFC] border border-[#E2E8F0] px-4 text-sm font-bold text-[#1E232B] hover:bg-[#F1F5F9]"
+            >
+              <span>User Accounts & RBAC Roles</span>
+              <ArrowLeftRight size={16} />
+            </Link>
             <button
               onClick={signOut}
-              className="flex min-h-[44px] w-full items-center gap-3 rounded-md px-3 text-on-surface-variant hover:bg-surface-container-high"
+              className="flex min-h-[44px] items-center gap-3 rounded-2xl px-4 text-sm font-bold text-red-500 hover:bg-red-50 mt-3"
             >
               <LogOut size={18} />
               Sign out
             </button>
           </div>
-        </aside>
-
-        {/* Main column */}
-        <div className="flex min-w-0 flex-1 flex-col">
-          {/* Mobile top bar */}
-          <header className="sticky top-0 z-30 flex items-center justify-between border-b border-outline-variant bg-surface-container-lowest/90 px-4 py-2 pt-safe backdrop-blur md:hidden">
-            <Link href={isAdminView ? '/admin' : '/overview'} className="flex items-center gap-2">
-              <PuzoLogo size={32} />
-              <span className="text-headline-md font-extrabold">
-                {isAdminView ? 'PUZO Admin' : 'PUZO'}
-              </span>
-            </Link>
-            <button
-              onClick={() => setMoreOpen(true)}
-              className="min-h-[44px] min-w-[44px] rounded-md text-on-surface-variant"
-              aria-label="Menu"
-            >
-              <Menu size={22} />
-            </button>
-          </header>
-
-          <main className="mx-auto w-full max-w-5xl flex-1 px-4 pb-28 pt-4 md:px-6 md:pb-8">
-            {children}
-          </main>
-        </div>
-      </div>
-
-      {/* Mobile bottom tab bar */}
-      <nav className="fixed inset-x-0 bottom-0 z-40 flex border-t border-outline-variant bg-surface-container-lowest/95 pb-safe backdrop-blur md:hidden">
-        {activeNav.slice(0, 4).map((item) => {
-          const active = pathname === item.href;
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                'flex min-h-[56px] flex-1 flex-col items-center justify-center gap-1',
-                active ? 'text-white' : 'text-on-surface-variant',
-              )}
-            >
-              <item.icon size={20} />
-              <span className="text-micro-label">{item.label}</span>
-            </Link>
-          );
-        })}
-        <button
-          onClick={() => setMoreOpen(true)}
-          className="flex min-h-[56px] flex-1 flex-col items-center justify-center gap-1 text-on-surface-variant"
-        >
-          <MoreHorizontal size={20} />
-          <span className="text-micro-label">More</span>
-        </button>
-      </nav>
-
-      {/* Mobile "More" sheet */}
-      <Sheet open={moreOpen} onClose={() => setMoreOpen(false)} title={isAdminView ? 'Admin Menu' : 'Companion Menu'}>
-        <div className="flex flex-col gap-1">
-          {activeNav.map(renderItem)}
-          {admin && (
-            <Link
-              href={isAdminView ? '/overview' : '/admin'}
-              onClick={() => setMoreOpen(false)}
-              className="flex min-h-[44px] items-center justify-between rounded-md border border-primary/30 bg-primary/10 px-3 text-body-base font-extrabold text-primary"
-            >
-              <span>{isAdminView ? 'Switch to User View' : 'Switch to Admin Console'}</span>
-              <ArrowLeftRight size={16} />
-            </Link>
-          )}
-          <button
-            onClick={signOut}
-            className="flex min-h-[44px] items-center gap-3 rounded-md px-3 text-error mt-2"
-          >
-            <LogOut size={18} />
-            Sign out
-          </button>
-        </div>
-      </Sheet>
+        </Sheet>
+      )}
     </div>
   );
 }

@@ -11,6 +11,7 @@ import {
   Sparkles,
   SunMedium,
   Target,
+  Eye,
 } from 'lucide-react';
 import {
   adminGetDeviceMode,
@@ -99,21 +100,35 @@ export function DeviceEmotionalModeCard({ deviceId, admin = false }: { deviceId:
 
   const activeMood = pendingMood || mood;
   const selected = EMOTIONAL_MODES.find((item) => item[0] === activeMood) || EMOTIONAL_MODES[0];
+
   return (
     <section className="puzo-control-surface" aria-labelledby="puzo-emotional-mode-title">
-      <div className="mb-5 flex items-start justify-between gap-4">
+      <div className="mb-5 flex flex-col sm:flex-row sm:items-start justify-between gap-4">
         <div>
           <p className="puzo-eyebrow">PUZO emotional mode</p>
           <h2 id="puzo-emotional-mode-title" className="puzo-section-title">Choose how PUZO feels</h2>
-          <p className="mt-1.5 max-w-[28rem] text-[12px] leading-5 text-on-surface-variant">A persistent personality that shapes PUZO&apos;s idle expressions and touch reactions.</p>
+          <p className="mt-1.5 max-w-[28rem] text-[12px] leading-5 text-on-surface-variant">
+            A persistent personality that shapes PUZO&apos;s OLED eye expressions and touch reactions.
+          </p>
         </div>
-        <div className="puzo-current-pill" aria-live="polite">
-          <span className="puzo-current-dot" />
-          {selected[1]}
+
+        {/* OLED Screen Eye Visualizer Simulation */}
+        <div className="flex flex-col items-center gap-1.5">
+          <div className="oled-display-screen h-16 w-36 rounded-xl flex items-center justify-center gap-4 px-3 border border-purple-500/30">
+            <div className="h-7 w-7 rounded-full bg-cyan-400 shadow-[0_0_12px_#22d3ee] flex items-center justify-center animate-pulse">
+              <div className="h-2.5 w-2.5 rounded-full bg-black" />
+            </div>
+            <div className="h-7 w-7 rounded-full bg-cyan-400 shadow-[0_0_12px_#22d3ee] flex items-center justify-center animate-pulse">
+              <div className="h-2.5 w-2.5 rounded-full bg-black" />
+            </div>
+          </div>
+          <span className="text-[10px] font-bold tracking-widest text-purple-400 uppercase flex items-center gap-1">
+            <Eye size={10} /> OLED 128x64 Preview
+          </span>
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3" role="group" aria-label="PUZO emotional modes">
+      <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3" role="group" aria-label="PUZO emotional modes">
         {EMOTIONAL_MODES.map(([value, label, description, emoji]) => {
           const isSelected = activeMood === value;
           return (
@@ -131,15 +146,17 @@ export function DeviceEmotionalModeCard({ deviceId, admin = false }: { deviceId:
               className={`puzo-mood-tile ${isSelected ? 'puzo-mood-tile-selected' : ''} ${MOOD_ACCENTS[value] || ''}`}
             >
               <span className="puzo-mood-icon" aria-hidden="true">{emoji}</span>
-              <span className="mt-2 block text-[12px] font-semibold text-on-surface">{label}</span>
-              <span className="mt-1 block text-[10px] leading-4 text-on-surface-variant">{description}</span>
+              <span className="mt-2 block text-[13px] font-extrabold text-on-surface">{label}</span>
+              <span className="mt-1 block text-[10px] leading-4 text-on-surface-variant/80">{description}</span>
               <span className="puzo-selection-check" aria-hidden="true"><Check size={12} strokeWidth={3} /></span>
             </button>
           );
         })}
       </div>
 
-      <p className="mt-4 max-w-[38rem] text-[11px] leading-4 text-on-surface-variant">Saved to this PUZO. One-time moods and system reactions can briefly appear, then return to {selected[1]}.</p>
+      <p className="mt-4 max-w-[38rem] text-[11px] leading-4 text-on-surface-variant">
+        Saved to this PUZO. One-time moods and system reactions can briefly appear, then return to <strong className="text-white">{selected[1]}</strong>.
+      </p>
     </section>
   );
 }
@@ -202,8 +219,8 @@ export function DeviceModeCard({ deviceId, admin = false }: { deviceId: string; 
               className={`puzo-mode-tile ${isSelected ? 'puzo-mode-tile-selected' : ''}`}
             >
               <span className="puzo-mode-icon" aria-hidden="true"><Icon size={23} strokeWidth={1.8} /></span>
-              <span className="mt-4 block text-[14px] font-semibold tracking-[-0.01em] text-on-surface">{item.label}</span>
-              <span className="mt-1 block text-[11px] leading-4 text-on-surface-variant">{item.description}</span>
+              <span className="mt-4 block text-[14px] font-extrabold tracking-[-0.01em] text-on-surface">{item.label}</span>
+              <span className="mt-1 block text-[11px] leading-4 text-on-surface-variant/80">{item.description}</span>
               <span className="puzo-selection-check" aria-hidden="true"><Check size={12} strokeWidth={3} /></span>
             </button>
           );
@@ -244,7 +261,7 @@ export function DeviceMoodCard({ deviceId, admin = false }: { deviceId: string; 
               className={`group puzo-mood-tile ${isSelected ? 'puzo-mood-tile-selected' : ''} ${MOOD_ACCENTS[value]}`}
             >
               <span className="puzo-mood-icon" aria-hidden="true">{emoji}</span>
-              <span className="mt-2 block text-[12px] font-semibold text-on-surface">{label}</span>
+              <span className="mt-2 block text-[12px] font-extrabold text-on-surface">{label}</span>
             </button>
           );
         })}
@@ -258,7 +275,7 @@ export function DeviceMoodCard({ deviceId, admin = false }: { deviceId: string; 
       >
         {moodMut.isPending ? <span className="puzo-button-spinner" aria-hidden="true" /> : <Send size={16} strokeWidth={2.2} />}
         {moodMut.isPending ? 'Sending…' : `Send ${MOODS.find(([value]) => value === emotion)?.[1] || 'mood'}`}
-        <Heart size={14} className="ml-auto opacity-50" fill="currentColor" />
+        <Heart size={14} className="ml-auto opacity-75 fill-current" />
       </button>
     </section>
   );

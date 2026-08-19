@@ -21,6 +21,10 @@ export function RealtimeWatcher() {
           toast.info(`New interaction received (${String(row.type)})`);
         }
       }
+      if (table === 'notifications' && eventType === 'INSERT' && profile && row?.profile_id === profile.id) {
+        toast.info(`${String(row.title || 'PUZO')}: ${String(row.body || '')}`);
+        void queryClient.invalidateQueries({ queryKey: ['notifications'] });
+      }
 
       const refreshable: Record<string, string[][]> = {
         devices: [['me'], ['devices'], ['admin', 'devices']],
@@ -29,6 +33,7 @@ export function RealtimeWatcher() {
         firmware_releases: [['admin', 'firmware']],
         interactions: [['interactions']],
         schedules: [['schedules']],
+        notifications: [['notifications']],
       };
 
       const keys = refreshable[table];

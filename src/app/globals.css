@@ -1,407 +1,212 @@
 @import "tailwindcss";
 
 /*
- * PUZO Cassettine design system — tokens from docs/DESIGN_SYSTEM.md.
- * Black base, white text, #5137ff purple + #fdf533 yellow, weight-800 Hanken Grotesk.
+ * PUZO Desk Companion Design System
+ * Porcelain-light base (#F3F6FA), pure white elevated cards with soft multi-layer shadows,
+ * vibrant coral accents (#FF5A5F), mint status pills (#2EC4B6), OLED bezel (#1E2228),
+ * and Plus Jakarta Sans typography.
  */
 
 @theme {
   /* Surfaces */
-  --color-surface: #131313;
-  --color-surface-dim: #131313;
-  --color-surface-bright: #393939;
-  --color-surface-container-lowest: #0e0e0e;
-  --color-surface-container-low: #1b1c1c;
-  --color-surface-container: #1f2020;
-  --color-surface-container-high: #2a2a2a;
-  --color-surface-container-highest: #353535;
-  --color-on-surface: #e4e2e1;
-  --color-on-surface-variant: #c8c4da;
-  --color-inverse-surface: #e4e2e1;
-  --color-inverse-on-surface: #303030;
-  --color-outline: #918ea3;
-  --color-outline-variant: #474557;
-  --color-surface-tint: #c5c0ff;
-  --color-surface-variant: #353535;
-  --color-background: #131313;
-  --color-on-background: #e4e2e1;
+  --color-surface: #FFFFFF;
+  --color-surface-dim: #EBF0F5;
+  --color-surface-bright: #FFFFFF;
+  --color-surface-container-lowest: #FFFFFF;
+  --color-surface-container-low: #F8FAFC;
+  --color-surface-container: #F1F4F9;
+  --color-surface-container-high: #E2E8F0;
+  --color-surface-container-highest: #CBD5E1;
+  --color-on-surface: #1E232B;
+  --color-on-surface-variant: #64748B;
+  --color-inverse-surface: #1E232B;
+  --color-inverse-on-surface: #F8FAFC;
+  --color-outline: #E2E8F0;
+  --color-outline-variant: #F1F5F9;
+  --color-surface-tint: #FF5A5F;
+  --color-surface-variant: #F8FAFC;
+  --color-background: #F3F6FA;
+  --color-on-background: #1E232B;
 
-  /* Brand / semantic */
-  --color-background-base: #000000;
-  --color-text-primary: #ffffff;
-  --color-muted-gray: #333333;
+  /* Brand / Semantic */
+  --color-background-base: #F3F6FA;
+  --color-text-primary: #1E232B;
+  --color-muted-gray: #64748B;
 
-  /* Primary (purple) */
-  --color-primary: #c5c0ff;
-  --color-on-primary: #2400a2;
-  --color-primary-container: #5137ff;
-  --color-on-primary-container: #dbd7ff;
-  --color-inverse-primary: #4f34fd;
-  --color-primary-fixed: #e3dfff;
-  --color-primary-fixed-dim: #c5c0ff;
-  --color-on-primary-fixed: #130067;
-  --color-on-primary-fixed-variant: #3600e1;
+  /* Primary (Vibrant Coral / Salmon) */
+  --color-primary: #FF5A5F;
+  --color-on-primary: #FFFFFF;
+  --color-primary-container: #FFEBEF;
+  --color-on-primary-container: #C82D35;
+  --color-inverse-primary: #FF7B80;
 
-  /* Secondary (yellow / attention) */
-  --color-secondary: #fcf431;
-  --color-on-secondary: #343200;
-  --color-secondary-container: #ded700;
-  --color-on-secondary-container: #605c00;
-  --color-secondary-fixed: #f0e822;
-  --color-secondary-fixed-dim: #d3cb00;
-  --color-on-secondary-fixed: #1e1c00;
-  --color-on-secondary-fixed-variant: #4b4900;
+  /* Secondary (Mint / Teal) */
+  --color-secondary: #2EC4B6;
+  --color-on-secondary: #003830;
+  --color-secondary-container: #C7F9CC;
+  --color-on-secondary-container: #065A60;
 
-  /* Tertiary */
-  --color-tertiary: #ffb59d;
-  --color-on-tertiary: #5d1900;
-  --color-tertiary-container: #ae3600;
-  --color-on-tertiary-container: #ffd1c2;
-  --color-tertiary-fixed: #ffdbd0;
-  --color-tertiary-fixed-dim: #ffb59d;
-  --color-on-tertiary-fixed: #390c00;
-  --color-on-tertiary-fixed-variant: #832700;
+  /* Tertiary (Warm Amber / Gold) */
+  --color-tertiary: #FFD166;
+  --color-on-tertiary: #3B2800;
+  --color-tertiary-container: #FFF3CD;
+  --color-on-tertiary-container: #856404;
 
-  /* Error */
-  --color-error: #ffb4ab;
-  --color-on-error: #690005;
-  --color-error-container: #93000a;
-  --color-on-error-container: #ffdad6;
+  /* Error / Maroon */
+  --color-error: #A82835;
+  --color-on-error: #FFFFFF;
+  --color-error-container: #FEE2E2;
+  --color-on-error-container: #7F1D1D;
 
-  /* Typography (Hanken Grotesk, Satori-style) */
-  --font-sans: "Hanken Grotesk", ui-sans-serif, system-ui, sans-serif;
+  /* Typography */
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
   /* Radius */
-  --radius-sm: 0.25rem;
-  --radius-md: 0.75rem;
-  --radius-lg: 1rem;
-  --radius-xl: 1.5rem;
-
-  /* Max width containers */
-  --max-width-xs: 20rem;
-  --max-width-sm: 24rem;
-  --max-width-md: 28rem;
-  --max-width-lg: 32rem;
-  --max-width-xl: 36rem;
+  --radius-sm: 0.5rem;
+  --radius-md: 0.875rem;
+  --radius-lg: 1.25rem;
+  --radius-xl: 1.75rem;
+  --radius-2xl: 2rem;
+  --radius-3xl: 2.25rem;
 
   /* Shadows */
-  --shadow-puzo: 0 10px 40px rgba(0, 0, 0, 0.4);
+  --shadow-puzo: 0 10px 30px -5px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(0, 0, 0, 0.03);
+  --shadow-puzo-card: 0 12px 36px -8px rgba(30, 35, 43, 0.06), 0 2px 8px -2px rgba(30, 35, 43, 0.03);
+  --shadow-puzo-coral: 0 8px 24px -4px rgba(255, 90, 95, 0.35);
+  --shadow-puzo-teal: 0 8px 24px -4px rgba(46, 196, 182, 0.3);
 }
 
 :root {
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 html,
 body {
-  background: var(--color-background-base);
-  color: var(--color-text-primary);
+  background: #F3F6FA;
+  color: #1E232B;
   font-family: var(--font-sans);
-  font-size: var(--text-body-base);
-  line-height: var(--text-body-base--line-height);
-  font-weight: var(--text-body-base--font-weight);
+  font-size: 14px;
+  line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   min-height: 100dvh;
 }
 
 * {
-  border-color: var(--color-outline-variant);
+  border-color: #E6ECF2;
 }
 
-/* PWA safe-area padding for mobile notch & home indicator */
+/* Card Surface Utilities */
+.puzo-card {
+  background: #FFFFFF;
+  border-radius: 1.85rem;
+  box-shadow: 0 10px 30px -4px rgba(20, 30, 45, 0.05), 0 1px 3px rgba(0, 0, 0, 0.02);
+  border: 1px solid #EBF0F5;
+  transition: all 200ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.puzo-card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 36px -6px rgba(20, 30, 45, 0.08), 0 2px 6px rgba(0, 0, 0, 0.03);
+}
+
+/* Dark History Card */
+.puzo-dark-card {
+  background: #23272C;
+  border-radius: 1.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 0 12px 28px -6px rgba(0, 0, 0, 0.4);
+}
+
+/* OLED Screen Bezel & Screen */
+.oled-bezel {
+  background: #1C2026;
+  border-radius: 2.25rem;
+  box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.6), 0 16px 32px -8px rgba(0, 0, 0, 0.15);
+  position: relative;
+  overflow: hidden;
+}
+
+.oled-scanlines::before {
+  content: " ";
+  display: block;
+  position: absolute;
+  top: 0; left: 0; bottom: 0; right: 0;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
+  background-size: 100% 4px;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0.4;
+}
+
+/* Glowing Neon Expression Face */
+.neon-yellow-glow {
+  filter: drop-shadow(0 0 8px rgba(255, 209, 102, 0.8)) drop-shadow(0 0 20px rgba(255, 209, 102, 0.4));
+}
+
+.neon-coral-glow {
+  filter: drop-shadow(0 0 8px rgba(255, 90, 95, 0.8)) drop-shadow(0 0 20px rgba(255, 90, 95, 0.4));
+}
+
+.neon-cyan-glow {
+  filter: drop-shadow(0 0 8px rgba(46, 196, 182, 0.8)) drop-shadow(0 0 20px rgba(46, 196, 182, 0.4));
+}
+
+/* Safe area insets */
 @utility pb-safe {
-  padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
 }
 @utility pt-safe {
-  padding-top: max(0.5rem, env(safe-area-inset-top));
+  padding-top: max(0.75rem, env(safe-area-inset-top));
 }
 
-/* Typography & Spacing Utilities */
-@utility text-headline-lg {
-  font-size: 32px;
-  line-height: 36px;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-}
-
-@utility text-headline-md {
-  font-size: 24px;
-  line-height: 28px;
-  font-weight: 800;
-}
-
-@utility text-body-base {
-  font-size: 13.2px;
-  line-height: 15px;
-  font-weight: 600;
-}
-
-@utility text-label-caps {
-  font-size: 10px;
-  line-height: 12px;
-  font-weight: 800;
-  letter-spacing: 0.05em;
-}
-
-@utility text-micro-label {
-  font-size: 9px;
-  line-height: 11px;
-  font-weight: 800;
-}
-
-@utility p-md {
-  padding: 18px;
-}
-
-@utility py-lg {
-  padding-block: 24px;
-}
-
-@utility py-xl {
-  padding-block: 36px;
-}
-
-/* Motion: 200ms / 500ms transitions */
-@utility transition-fast {
-  transition-duration: 200ms;
-}
-@utility transition-slow {
-  transition-duration: 500ms;
-}
-
-/* Scrollbars */
+/* Custom Scrollbars */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--color-muted-gray);
+  background: #CBD5E1;
   border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 
-/* Reduced motion preference */
-@media (prefers-reduced-motion: reduce) {
-  *,
-  ::before,
-  ::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
-}
-
-/* ---------- PUZO controls ---------- */
-
-.puzo-control-surface {
-  border: 1px solid rgba(255, 255, 255, 0.055);
-  border-radius: 1.75rem;
-  background: rgba(29, 29, 32, 0.96);
-  padding: 1.25rem;
-  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.18);
-}
-
-.puzo-eyebrow {
-  color: var(--color-primary);
-  font-size: 0.66rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  line-height: 1rem;
-  text-transform: uppercase;
-}
-
-.puzo-section-title {
-  color: var(--color-on-surface);
-  font-size: clamp(1.35rem, 4vw, 1.6rem);
-  font-weight: 650;
-  letter-spacing: -0.035em;
-  line-height: 1.15;
-  margin-top: 0.3rem;
-}
-
-.puzo-current-pill {
-  align-items: center;
-  background: rgba(197, 192, 255, 0.08);
-  border-radius: 999px;
-  color: var(--color-primary);
-  display: inline-flex;
-  flex: 0 0 auto;
-  font-size: 0.68rem;
-  font-weight: 700;
-  gap: 0.4rem;
-  padding: 0.45rem 0.65rem;
-}
-
-.puzo-current-dot {
-  background: var(--color-primary);
-  border-radius: 999px;
-  box-shadow: 0 0 0 3px rgba(197, 192, 255, 0.1);
-  height: 0.35rem;
-  width: 0.35rem;
-}
-
-.puzo-mode-tile,
-.puzo-mood-tile {
-  min-height: 7.2rem;
+/* Custom Toggle Switch for PUZO Configuration */
+.puzo-toggle {
   position: relative;
-  text-align: left;
-  transition: background-color 200ms ease, box-shadow 200ms ease, transform 200ms ease, border-color 200ms ease;
-}
-
-.puzo-mode-tile {
-  background: rgba(255, 255, 255, 0.035);
-  border: 1px solid transparent;
-  border-radius: 1.15rem;
-  padding: 0.9rem;
-}
-
-.puzo-mode-tile:hover,
-.puzo-mood-tile:hover {
-  background: rgba(255, 255, 255, 0.065);
-}
-
-.puzo-mode-tile:active,
-.puzo-mood-tile:active,
-.puzo-send-button:active {
-  transform: scale(0.975);
-}
-
-.puzo-mode-tile:focus-visible,
-.puzo-mood-tile:focus-visible,
-.puzo-send-button:focus-visible {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 3px;
-}
-
-.puzo-mode-tile:disabled {
-  cursor: wait;
-  opacity: 0.62;
-}
-
-.puzo-mode-tile-selected {
-  background: rgba(197, 192, 255, 0.13);
-  border-color: rgba(197, 192, 255, 0.3);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.08);
-}
-
-.puzo-mode-icon {
-  align-items: center;
-  background: rgba(255, 255, 255, 0.055);
-  border-radius: 0.8rem;
-  color: var(--color-on-surface-variant);
   display: inline-flex;
-  height: 2.4rem;
-  justify-content: center;
-  transition: background-color 200ms ease, color 200ms ease, transform 200ms ease;
-  width: 2.4rem;
+  height: 1.75rem;
+  width: 3.1rem;
+  flex-shrink: 0;
+  cursor: pointer;
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  transition: background-color 200ms ease-in-out;
 }
-
-.puzo-mode-tile-selected .puzo-mode-icon {
-  background: rgba(197, 192, 255, 0.18);
-  color: var(--color-primary);
-  transform: scale(1.04);
+.puzo-toggle[data-state="checked"] {
+  background-color: #B92B34;
 }
-
-.puzo-selection-check {
-  align-items: center;
-  background: var(--color-primary);
-  border-radius: 999px;
-  color: var(--color-on-primary);
-  display: flex;
-  height: 1.25rem;
-  justify-content: center;
-  opacity: 0;
-  position: absolute;
-  right: 0.65rem;
-  top: 0.65rem;
-  transform: scale(0.7);
-  transition: opacity 200ms ease, transform 200ms ease;
-  width: 1.25rem;
+.puzo-toggle[data-state="unchecked"] {
+  background-color: #CBD5E1;
 }
-
-.puzo-mode-tile-selected .puzo-selection-check {
-  opacity: 1;
-  transform: scale(1);
+.puzo-toggle-thumb {
+  pointer-events: none;
+  display: inline-block;
+  height: 1.45rem;
+  width: 1.45rem;
+  border-radius: 9999px;
+  background-color: #FFFFFF;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: transform 200ms cubic-bezier(0.16, 1, 0.3, 1);
 }
-
-.puzo-mood-tile {
-  align-items: center;
-  background: rgba(255, 255, 255, 0.035);
-  border: 1px solid transparent;
-  border-radius: 1.15rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding: 0.75rem 0.5rem;
-  text-align: center;
+.puzo-toggle[data-state="checked"] .puzo-toggle-thumb {
+  transform: translateX(1.35rem);
 }
-
-.puzo-mood-tile-selected {
-  border-color: rgba(255, 255, 255, 0.12);
-  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.13);
-  transform: translateY(-2px) scale(1.02);
-}
-
-.puzo-mood-icon {
-  display: block;
-  font-size: 2rem;
-  line-height: 1;
-  transition: transform 200ms ease;
-}
-
-.puzo-mood-tile-selected .puzo-mood-icon {
-  animation: puzo-mood-pop 300ms ease-out both;
-}
-
-.puzo-mood-tone-happy.puzo-mood-tile-selected { background: rgba(246, 189, 96, 0.12); }
-.puzo-mood-tone-sad.puzo-mood-tile-selected { background: rgba(122, 162, 247, 0.12); }
-.puzo-mood-tone-angry.puzo-mood-tile-selected { background: rgba(247, 118, 142, 0.12); }
-.puzo-mood-tone-love.puzo-mood-tile-selected { background: rgba(243, 139, 168, 0.12); }
-.puzo-mood-tone-sleepy.puzo-mood-tile-selected { background: rgba(192, 153, 255, 0.12); }
-.puzo-mood-tone-curious.puzo-mood-tile-selected { background: rgba(125, 207, 255, 0.12); }
-.puzo-mood-tone-excited.puzo-mood-tile-selected { background: rgba(224, 175, 104, 0.12); }
-
-.puzo-send-button {
-  align-items: center;
-  background: var(--color-primary);
-  border-radius: 0.95rem;
-  color: var(--color-on-primary);
-  display: flex;
-  font-size: 0.8rem;
-  font-weight: 750;
-  gap: 0.55rem;
-  justify-content: flex-start;
-  min-height: 3rem;
-  padding: 0.75rem 0.9rem;
-  transition: opacity 200ms ease, transform 200ms ease;
-  width: 100%;
-}
-
-.puzo-send-button:hover { opacity: 0.9; }
-.puzo-send-button:disabled { cursor: wait; opacity: 0.65; }
-
-.puzo-button-spinner {
-  animation: puzo-spin 700ms linear infinite;
-  border: 2px solid rgba(36, 0, 162, 0.25);
-  border-radius: 999px;
-  border-top-color: var(--color-on-primary);
-  height: 1rem;
-  width: 1rem;
-}
-
-@keyframes puzo-mood-pop {
-  0% { transform: scale(0.78) rotate(-5deg); }
-  65% { transform: scale(1.12) rotate(2deg); }
-  100% { transform: scale(1); }
-}
-
-@keyframes puzo-spin {
-  to { transform: rotate(360deg); }
-}
-
-@media (min-width: 640px) {
-  .puzo-control-surface { padding: 1.5rem; }
+.puzo-toggle[data-state="unchecked"] .puzo-toggle-thumb {
+  transform: translateX(0);
 }

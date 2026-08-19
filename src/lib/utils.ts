@@ -75,10 +75,43 @@ export function friendlyError(code?: string): string {
   }
 }
 
+const KNOWN_ERROR_CODES = new Set([
+  'FEATURE_LOCKED',
+  'CODE_ALREADY_USED',
+  'INVALID_CODE',
+  'SELF_PAIR',
+  'ACCOUNT_DEACTIVATED',
+  'FORBIDDEN',
+  'UNAUTHORIZED',
+  'PAYLOAD_TOO_LARGE',
+  // RATE_LIMITED is deliberately absent: `request()` builds a message with the
+  // real countdown ("try again in 42s"), which beats the generic copy.
+  'INVALID_SCHEDULED_FOR',
+  'PLAN_NOT_FOUND',
+]);
+
+/**
+ * Normalises anything thrown by the API layer into `{ code, message }`.
+ * Accepts an `ApiError` (or any Error), a raw `{ error: { code, message } }`
+ * envelope, or a bare string.
+ */
 export function extractError(body: unknown): { code?: string; message: string } {
-  const err = (body as { error?: { code?: string; message?: string } })?.error;
-  if (err?.message) {
-    return { code: err.code, message: friendlyError(err.code) || err.message };
+  if (typeof body === 'string' && body.trim()) return { message: body };
+
+  const candidate = body as
+    | { code?: string; message?: string; error?: { code?: string; message?: string } }
+    | null
+    | undefined;
+
+  // Envelope shape: { error: { code, message } }
+  const envelope = candidate?.error;
+  const code = envelope?.code ?? candidate?.code;
+  const message = envelope?.message ?? candidate?.message;
+
+  if (code && KNOWN_ERROR_CODES.has(code)) {
+    return { code, message: friendlyError(code) };
   }
+  if (message) return { code, message };
+  if (code) return { code, message: friendlyError(code) };
   return { message: 'Unexpected error' };
 }

@@ -1,0 +1,14 @@
+'use client';
+import { useEffect, useState } from 'react';
+import { Bell, Check, X } from 'lucide-react';
+import { listNotifications, markNotificationRead } from '@/lib/api';
+import type { NotificationRecord } from '@/lib/types';
+import { enablePushNotifications, isFcmConfigured, listenForForegroundMessages } from '@/lib/fcm';
+import { toast } from './Toast';
+
+export function NotificationCenter() {
+  const [items, setItems] = useState<NotificationRecord[]>([]); const [open, setOpen] = useState(false); const [unread, setUnread] = useState(0); const [push, setPush] = useState(false);
+  const refresh = async () => { try { const result = await listNotifications(); setItems(result.notifications); setUnread(result.unread_count); } catch {} };
+  useEffect(() => { void refresh(); let unsubscribe: (() => void) | undefined; void listenForForegroundMessages((payload) => { const title = payload.notification?.title || 'PUZO'; const body = payload.notification?.body || 'PUZO has something to tell you.'; toast.info(`${title}: ${body}`); void refresh(); }).then((fn) => { unsubscribe = fn; }); return () => unsubscribe?.(); }, []);
+  return <div className="relative"><button aria-label="Notifications" className="relative rounded-full p-2 text-on-surface-variant hover:bg-surface-container-high" onClick={() => { setOpen(!open); if (!open) void refresh(); }}><Bell size={19} />{unread > 0 && <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-primary" />}</button>{open && <div className="absolute right-0 top-12 z-40 w-[min(360px,calc(100vw-2rem))] rounded-2xl border border-outline-variant bg-surface-container-highest p-3 shadow-puzo"><div className="flex items-center justify-between px-2 pb-2"><p className="font-bold">PUZO messages</p><button onClick={() => setOpen(false)}><X size={16} /></button></div>{isFcmConfigured && Notification.permission !== 'granted' && <button className="mb-2 w-full rounded-xl bg-primary/10 p-3 text-left text-sm text-primary" onClick={async () => { try { await enablePushNotifications(); setPush(true); toast.success('Notifications enabled'); } catch (e) { toast.error(e instanceof Error ? e.message : 'Could not enable notifications'); } }}>Enable push notifications</button>}{push && null}{items.length === 0 ? <p className="px-2 py-5 text-sm text-on-surface-variant">Nothing new yet.</p> : items.map((item) => <button key={item.id} className="flex w-full gap-3 rounded-xl p-3 text-left hover:bg-surface-container" onClick={async () => { if (!item.read_at) { await markNotificationRead(item.id); setUnread(Math.max(0, unread - 1)); setItems(items.map((x) => x.id === item.id ? { ...x, read_at: new Date().toISOString() } : x)); } }}><span className="mt-1 text-primary">{item.read_at ? <Check size={15} /> : <Bell size={15} />}</span><span><span className="block text-sm font-semibold">{item.title}</span><span className="block text-sm text-on-surface-variant">{item.body}</span></span></button>)}</div>}</div>;
+}

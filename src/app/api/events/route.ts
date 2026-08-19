@@ -7,12 +7,15 @@ const TABLE_CHANNELS = [
   'firmware_releases',
   'interactions',
   'schedules',
+  'notifications',
 ];
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
   const encoder = new TextEncoder();
+  // Assigned in start(), invoked from cancel() when the client goes away.
+  let cleanup = () => {};
 
   const stream = new ReadableStream({
     async start(controller) {
@@ -35,6 +38,9 @@ export async function GET() {
         send('unavailable', {
           message: 'Supabase Realtime is not configured. Using fallback refresh.',
         });
+        // Close instead of holding an idle stream open until a proxy times it
+        // out; the client backs off and retries on its own schedule.
+        controller.close();
         return;
       }
 
@@ -55,15 +61,15 @@ export async function GET() {
 
       const heartbeat = setInterval(() => send('ping', { t: Date.now() }), 25000);
 
-      // Cleanup on client disconnect.
-      (controller as unknown as { __cleanup?: () => void }).__cleanup = () => {
+      cleanup = () => {
         clearInterval(heartbeat);
-        supabase.removeChannel(channel);
+        void supabase.removeChannel(channel);
       };
     },
     cancel() {
-      // Node's web stream doesn't hand us a reference here; the timeout in
-      // start() is cleared when the client goes away via the interval below.
+      // Without this the heartbeat interval and the Supabase channel outlive
+      // every disconnected client.
+      cleanup();
     },
   });
 

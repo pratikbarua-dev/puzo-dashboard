@@ -10,6 +10,7 @@ import type {
   DeviceMode,
   DeviceMood,
   DeviceSetupSession,
+  DeviceSetupSessionCreated,
   DeviceEvent,
   DeviceStatus,
   FirmwareRelease,
@@ -29,6 +30,7 @@ import type {
   ContentAsset,
   EmotionEngineSettings,
   EmotionDecision,
+  NotificationRecord,
 } from './types';
 
 export class ApiError extends Error {
@@ -40,6 +42,29 @@ export class ApiError extends Error {
     this.status = status;
     this.code = code;
   }
+}
+
+/**
+ * Seconds until a rate limit lifts. Reads `Retry-After` first, then the
+ * draft-8 `RateLimit` header (`limit=5, remaining=0, reset=42`) that
+ * express-rate-limit emits on the backend.
+ */
+function retryAfterSeconds(headers: Headers): number | null {
+  const retryAfter = Number(headers.get('retry-after'));
+  if (Number.isFinite(retryAfter) && retryAfter > 0) return retryAfter;
+
+  const reset = /reset=(\d+)/.exec(headers.get('ratelimit') ?? '')?.[1];
+  const resetSeconds = Number(reset);
+  if (Number.isFinite(resetSeconds) && resetSeconds > 0) return resetSeconds;
+
+  return null;
+}
+
+function rateLimitMessage(seconds: number | null): string {
+  if (seconds === null) return 'Too many attempts. Please try again in a few minutes.';
+  if (seconds < 60) return `Too many attempts. Please try again in ${Math.ceil(seconds)}s.`;
+  const minutes = Math.ceil(seconds / 60);
+  return `Too many attempts. Please try again in ${minutes} minute${minutes === 1 ? '' : 's'}.`;
 }
 
 async function request<T>(
@@ -65,7 +90,20 @@ async function request<T>(
   });
 
   const text = await res.text();
-  const json = text ? (JSON.parse(text) as ApiEnvelope<T>) : null;
+  // Gateways and crashes can answer with HTML, so never let a parse failure
+  // surface as a raw SyntaxError.
+  let json: ApiEnvelope<T> | null = null;
+  if (text) {
+    try {
+      json = JSON.parse(text) as ApiEnvelope<T>;
+    } catch {
+      json = null;
+    }
+  }
+
+  if (res.status === 429) {
+    throw new ApiError(429, 'RATE_LIMITED', rateLimitMessage(retryAfterSeconds(res.headers)));
+  }
 
   if (!res.ok || !json?.success) {
     const err = json?.error;
@@ -79,7 +117,7 @@ async function request<T>(
 export const me = () => request<MeResponse>('GET', '/me');
 export const getProfile = () =>
   request<MeResponse>('GET', '/me').then((d) => d.profile);
-export const updateMe = (patch: { display_name?: string; username?: string; timezone?: string }) =>
+export const updateMe = (patch: { display_name?: string; username?: string; timezone?: string; notification_preferences?: Record<string, boolean> }) =>
   request<{ profile: Profile }>('PATCH', '/me', patch).then((d) => d.profile);
 export interface ProfileLocationInput {
   location?: string | null;
@@ -98,6 +136,10 @@ export const getProfileLocation = () =>
 export const updateProfileLocation = (input: ProfileLocationInput) =>
   request<ProfileLocation>('PUT', '/me/location', input).then((d) => d);
 export const deleteMe = () => request<{ deleted: boolean }>('DELETE', '/me');
+export const listNotifications = () => request<{ notifications: NotificationRecord[]; unread_count: number }>('GET', '/notifications');
+export const markNotificationRead = (id: string) => request<NotificationRecord>('PATCH', `/notifications/${id}/read`);
+export const registerPushSubscription = (token: string) => request<unknown>('POST', '/notifications/push-subscriptions', { token, platform: 'web', userAgent: navigator.userAgent });
+export const removePushSubscription = (token: string) => request<unknown>('DELETE', '/notifications/push-subscriptions', { token });
 export const searchUsers = (q: string) =>
   request<{ users: ProfileLite[] }>('GET', `/users/search?q=${encodeURIComponent(q)}`).then(
     (d) => d.users,
@@ -105,10 +147,10 @@ export const searchUsers = (q: string) =>
 
 /* ---- devices ---- */
 
-export const myDevices = () =>
-  request<{ devices: Device[] }>('GET', '/devices').then((d) => d.devices);
-export const myDevice = (deviceId: string) =>
-  request<{ device: Device }>('GET', `/devices/${deviceId}`).then((d) => d.device);
+export const myDevices = (): Promise<Device[]> =>
+  request<any>('GET', '/devices').then((d) => (Array.isArray(d) ? d : d?.devices ?? []));
+export const myDevice = (deviceId: string): Promise<Device> =>
+  request<any>('GET', `/devices/${deviceId}`).then((d) => d?.device ?? d);
 export const provisionDevice = (input: {
   device_id: string;
   name: string;
@@ -118,12 +160,12 @@ export const createDeviceSetupSession = (input: {
   setup_id: string;
   name: string;
   hardware_model?: string;
-}) => request<DeviceSetupSession & { code: string }>('POST', '/device-setup/sessions', input);
+}) => request<DeviceSetupSessionCreated>('POST', '/device-setup/sessions', input);
 export const getDeviceSetupSession = (sessionId: string) =>
   request<DeviceSetupSession>('GET', `/device-setup/sessions/${sessionId}`);
-export const deviceHistory = (deviceId: string) =>
-  request<{ history: OwnershipHistoryEntry[] }>('GET', `/devices/${deviceId}/history`).then(
-    (d) => d.history,
+export const deviceHistory = (deviceId: string): Promise<OwnershipHistoryEntry[]> =>
+  request<any>('GET', `/devices/${deviceId}/history`).then(
+    (d) => (Array.isArray(d) ? d : d?.history ?? []),
   );
 export const transferDevice = (deviceId: string, newOwnerUsername: string) =>
   request<{ device: Device }>('POST', `/devices/${deviceId}/transfer`, {
@@ -131,30 +173,39 @@ export const transferDevice = (deviceId: string, newOwnerUsername: string) =>
   });
 export const updateMyDevice = (deviceId: string, input: { name?: string; firmware_channel?: string }) =>
   request<{ device: Device }>('PATCH', `/devices/${deviceId}`, input).then((d) => d.device);
-export const getDeviceSettings = (deviceId: string) =>
-  request<{ settings: DeviceSettings }>('GET', `/devices/${deviceId}/settings`).then(
-    (d) => d.settings,
+export const getDeviceSettings = (deviceId: string): Promise<DeviceSettings | null> =>
+  request<any>('GET', `/devices/${deviceId}/settings`).then(
+    (d) => d?.settings ?? d ?? null,
   );
 export const updateDeviceSettings = (deviceId: string, patch: DeviceSettingsPatch) =>
   request<{ settings: DeviceSettings }>('PUT', `/devices/${deviceId}/settings`, patch).then(
     (d) => d.settings,
   );
-export const getDeviceMode = (deviceId: string) =>
-  request<{ mode: DeviceMode }>('GET', `/devices/${deviceId}/mode`).then((d) => d.mode);
+export const getDeviceMode = (deviceId: string): Promise<DeviceMode> =>
+  request<any>('GET', `/devices/${deviceId}/mode`).then((d) => d?.mode ?? (typeof d === 'string' ? d : 'normal'));
 export const setDeviceMode = (deviceId: string, mode: DeviceMode) =>
   request<{ mode: DeviceMode; command: CommandRecord }>('PUT', `/devices/${deviceId}/mode`, { mode });
-export const getDeviceMood = (deviceId: string) =>
-  request<{ mood: DeviceMood }>('GET', `/devices/${deviceId}/mood`).then((d) => d.mood);
+export const getDeviceMood = (deviceId: string): Promise<DeviceMood> =>
+  request<any>('GET', `/devices/${deviceId}/mood`).then((d) => d?.mood ?? (typeof d === 'string' ? d : 'happy'));
 export const setDeviceMood = (deviceId: string, mood: DeviceMood) =>
   request<{ mood: DeviceMood; command: CommandRecord }>('PUT', `/devices/${deviceId}/mood`, { mood });
 export const sendDeviceMood = (deviceId: string, emotion: string) =>
   request<{ emotion: string; command: CommandRecord }>('POST', `/devices/${deviceId}/mood`, { emotion });
-export const getEmotionEngineSettings = (deviceId: string) =>
-  request<{ settings: EmotionEngineSettings }>('GET', `/devices/${deviceId}/emotion-engine`).then((d) => d.settings);
+export const getEmotionEngineSettings = (deviceId: string): Promise<EmotionEngineSettings> =>
+  request<any>('GET', `/devices/${deviceId}/emotion-engine`).then((d) => (d?.settings ? d.settings : d ?? {
+    emotion_engine_enabled: true,
+    emotion_intensity: 'normal',
+    weather_reactions_enabled: true,
+    weather_messages_enabled: true,
+    partner_context_enabled: true,
+    emotion_quiet_hours_start: null,
+    emotion_quiet_hours_end: null,
+    emotion_minimum_interval_seconds: 300,
+  }));
 export const updateEmotionEngineSettings = (deviceId: string, patch: Partial<EmotionEngineSettings>) =>
   request<{ settings: EmotionEngineSettings }>('PATCH', `/devices/${deviceId}/emotion-engine`, patch).then((d) => d.settings);
-export const getEmotionDecisions = (deviceId: string) =>
-  request<{ decisions: EmotionDecision[] }>('GET', `/devices/${deviceId}/emotion-decisions?limit=8`).then((d) => d.decisions);
+export const getEmotionDecisions = (deviceId: string): Promise<EmotionDecision[]> =>
+  request<any>('GET', `/devices/${deviceId}/emotion-decisions?limit=8`).then((d) => (Array.isArray(d) ? d : d?.decisions ?? []));
 export const removeMyDevice = (deviceId: string) =>
   request<{ device: Device }>('DELETE', `/devices/${deviceId}`);
 
@@ -166,16 +217,16 @@ export const createPairingCode = (relationshipType: string) =>
   });
 export const joinPairingCode = (code: string) =>
   request<{ relationship: Relationship }>('POST', '/pairing/join', { code });
-export const myPairingCodes = () =>
-  request<{ codes: PairingCode[] }>('GET', '/pairing').then((d) => d.codes);
+export const myPairingCodes = (): Promise<PairingCode[]> =>
+  request<any>('GET', '/pairing').then((d) => (Array.isArray(d) ? d : d?.codes ?? []));
 export const revokePairingCode = (codeId: string) =>
   request<{ revoked: string }>('DELETE', `/pairing/${codeId}`);
 
 /* ---- relationships ---- */
 
-export const myRelationships = () =>
-  request<{ relationships: Relationship[] }>('GET', '/relationships').then((d) => d.relationships);
-export const relationship = (id: string) =>
+export const myRelationships = (): Promise<Relationship[]> =>
+  request<any>('GET', '/relationships').then((d) => (Array.isArray(d) ? d : d?.relationships ?? []));
+export const relationship = (id: string): Promise<Relationship> =>
   request<{ relationship: Relationship }>('GET', `/relationships/${id}`).then(
     (d) => d.relationship,
   );
@@ -188,8 +239,8 @@ export const relationshipAction = (
   );
 export const unpair = (id: string, reason?: string) =>
   request<{ relationship: Relationship }>('DELETE', `/relationships/${id}`, { reason });
-export const myBlocks = () =>
-  request<{ blocks: BlockEntry[] }>('GET', '/relationships/blocks').then((d) => d.blocks);
+export const myBlocks = (): Promise<BlockEntry[]> =>
+  request<any>('GET', '/relationships/blocks').then((d) => (Array.isArray(d) ? d : d?.blocks ?? []));
 
 /* ---- interactions ---- */
 
@@ -203,8 +254,8 @@ export const sendInteraction = (input: {
   request<{ interaction: Interaction }>('POST', '/interactions', input).then(
     (d) => d.interaction,
   );
-export const myInteractions = () =>
-  request<{ interactions: Interaction[] }>('GET', '/interactions').then((d) => d.interactions);
+export const myInteractions = (): Promise<Interaction[]> =>
+  request<any>('GET', '/interactions').then((d) => (Array.isArray(d) ? d : d?.interactions ?? []));
 export const deleteInteraction = (id: string) =>
   request<{ deleted: boolean }>('DELETE', `/interactions/${id}`);
 
@@ -218,8 +269,8 @@ export const cancelSubscription = () =>
 
 /* ---- schedules ---- */
 
-export const mySchedules = () =>
-  request<{ schedules: Schedule[] }>('GET', '/schedules').then((d) => d.schedules);
+export const mySchedules = (): Promise<Schedule[]> =>
+  request<any>('GET', '/schedules').then((d) => (Array.isArray(d) ? d : d?.schedules ?? []));
 export const createSchedule = (input: {
   type: string;
   payload: Record<string, unknown>;

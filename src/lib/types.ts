@@ -63,6 +63,17 @@ export interface MeResponse {
   subscription: Subscription | null;
 }
 
+export interface NotificationRecord {
+  id: string;
+  profile_id: string;
+  kind: 'partner_message' | 'puzo_pet' | 'system';
+  title: string;
+  body: string;
+  data: Record<string, unknown>;
+  read_at: string | null;
+  created_at: string;
+}
+
 export interface Device {
   device_id: string;
   id: string;
@@ -74,6 +85,8 @@ export interface Device {
   firmware_build?: number | null;
   battery_voltage?: number | null;
   battery_percentage?: number | null;
+  wifi_rssi?: number | null;
+  last_ip?: string | null;
   status: 'unknown' | 'online' | 'offline' | 'updating';
   owner_id: string | null;
   last_seen?: string | null;
@@ -96,6 +109,7 @@ export interface DeviceSettings {
   wake_sound_enabled: boolean;
   wake_vibration_enabled: boolean;
   quiet_mode_enabled: boolean;
+  weather_cache?: string;
   eye_pack: 'classic' | 'iris_oled';
 }
 
@@ -138,6 +152,14 @@ export interface DeviceSetupSession {
   expires_at: string;
   claimed_at?: string | null;
   device?: Device | null;
+}
+
+/** Response of `POST /api/device-setup/sessions` — no status yet, code shown once. */
+export interface DeviceSetupSessionCreated {
+  session_id: string;
+  setup_id: string;
+  code: string;
+  expires_at: string;
 }
 
 export interface DeviceTelemetry {
@@ -187,6 +209,14 @@ export interface PairingCode {
   created_at: string;
 }
 
+export interface RelationshipMember {
+  profile_id: string;
+  role: string;
+  joined_at: string | null;
+  left_at: string | null;
+  profile: (ProfileLite & { timezone?: string }) | null;
+}
+
 export interface Relationship {
   id: string;
   user1_id: string;
@@ -196,6 +226,7 @@ export interface Relationship {
   created_by: string;
   created_at: string;
   updated_at: string;
+  members?: RelationshipMember[];
   devices?: Array<Pick<Device, 'device_id' | 'name' | 'status' | 'owner_id'>>;
 }
 
