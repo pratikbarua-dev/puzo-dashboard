@@ -7,6 +7,7 @@ import { myInteractions, deleteInteraction, myDevices } from '@/lib/api';
 import { commandDef, INTERACTION_TYPES } from '@/lib/registry';
 import { useAuth } from '@/lib/auth-store';
 import { useSendInteraction } from '@/hooks/useSendInteraction';
+import { labelForEmotion, EMOTION_PRESETS, describeInteraction } from '@/lib/interaction-display';
 import { PageHeader } from '@/components/PageHeader';
 import { InteractionStatus } from '@/components/InteractionStatus';
 import { Card, CardHeader, Button, Input, Select, Sheet, CardSkeleton, EmptyState } from '@/components/ui';
@@ -39,31 +40,12 @@ export default function InteractionsPage() {
     }
   }, [partnerDevice, target]);
 
-  function labelForEmotion(emotion: string) {
-    return {
-      thinking_of_you: 'Thinking of you ❤️',
-      happy: "I'm feeling happy 😊",
-      miss_you: 'I miss you 🥺',
-      love: 'I love you 💕',
-      hug: 'Sending a warm hug 🌸',
-      heartbeat: 'Sending my heartbeat ⚡',
-    }[emotion] || emotion;
-  }
-
   const delMut = useMutation({
     mutationFn: (id: string) => deleteInteraction(id),
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['interactions'] }),
     onError: (e) => toast.error(extractError(e).message),
   });
 
-  const EMOTION_PRESETS = [
-    { key: 'thinking_of_you', label: 'Thinking of you', icon: '❤️' },
-    { key: 'happy', label: 'Happy', icon: '😊' },
-    { key: 'miss_you', label: 'Miss you', icon: '🥺' },
-    { key: 'love', label: 'I love you', icon: '💕' },
-    { key: 'hug', label: 'Warm hug', icon: '🌸' },
-    { key: 'heartbeat', label: 'Heartbeat', icon: '⚡' },
-  ];
 
   return (
     <div>
@@ -122,14 +104,7 @@ export default function InteractionsPage() {
           <div className="flex flex-col gap-2">
             {interactions.map((i) => {
               const isSent = !i.sender_id || i.sender_id === profile?.id;
-              const emotionKey = i.payload?.emotion ? String(i.payload.emotion) : null;
-              const displayText = i.payload?.message
-                ? String(i.payload.message)
-                : i.payload?.text
-                ? String(i.payload.text)
-                : emotionKey
-                ? labelForEmotion(emotionKey)
-                : i.type;
+              const { text: displayText } = describeInteraction(i);
 
               return (
                 <div

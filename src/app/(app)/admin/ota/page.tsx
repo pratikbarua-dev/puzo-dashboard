@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { UploadCloud } from 'lucide-react';
 import { otaJobs, otaStats } from '@/lib/api';
@@ -7,7 +8,7 @@ import { PageHeader } from '@/components/PageHeader';
 import { DataTable, type Column, type TableFilter } from '@/components/DataTable';
 import { StatusBadge } from '@/components/StatusBadge';
 import { StatCard } from '@/components/StatCard';
-import { Card, Loading } from '@/components/ui';
+import { Card, Button, Loading } from '@/components/ui';
 import { formatDate, timeAgo } from '@/lib/utils';
 import type { OtaJob } from '@/lib/types';
 
@@ -27,6 +28,7 @@ const FILTERS: TableFilter[] = [
 ];
 
 export default function AdminOtaPage() {
+  const router = useRouter();
   const { data: jobs, isLoading } = useQuery({ queryKey: ['admin', 'ota'], queryFn: otaJobs });
   const { data: stats } = useQuery({ queryKey: ['admin', 'ota', 'stats'], queryFn: otaStats });
 
@@ -68,7 +70,15 @@ export default function AdminOtaPage() {
             columns={columns}
             rows={jobs ?? []}
             filters={FILTERS}
-            empty={{ title: 'No OTA jobs', message: 'Jobs appear when devices check for firmware updates.' }}
+            empty={{
+              title: 'No OTA jobs',
+              message: 'Jobs appear when devices check for firmware updates. Publish a release to push to the fleet.',
+              action: (
+                <Button size="sm" variant="link" asChild>
+                  <Link href="/admin/firmware">Publish a release</Link>
+                </Button>
+              ),
+            }}
           />
         </Card>
       )}

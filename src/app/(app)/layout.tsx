@@ -8,6 +8,7 @@ import type { MeResponse } from '@/lib/types';
 import { useAuth } from '@/lib/auth-store';
 import { AppShell } from '@/components/AppShell';
 import { RealtimeWatcher } from '@/components/RealtimeWatcher';
+import { IncomingInteractionMoment } from '@/components/IncomingInteractionMoment';
 import { AppSplash } from '@/components/AppSplash';
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
@@ -54,6 +55,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     <>
       <AppShell>{children}</AppShell>
       <RealtimeWatcher />
+      {/* Rich recipient-side reveal for interactions my partner sends me.
+          Sits next to RealtimeWatcher, which feeds it incoming INSERTs. */}
+      <IncomingInteractionMoment />
     </>
   );
 }

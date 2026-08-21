@@ -3,14 +3,16 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { useLiveEvents } from '@/hooks/useLiveEvents';
 import { useAuth } from '@/lib/auth-store';
+import { useIncomingMoment } from '@/lib/incoming-moment-store';
 import { toast } from './Toast';
-import type { Interaction } from '@/lib/types';
+import type { Interaction, InteractionType } from '@/lib/types';
 
 /**
  * Global realtime watcher.
  *
  * Two responsibilities:
- *   • INSERT  — toast received interactions + invalidate live lists (legacy).
+ *   • INSERT  — surface an interaction I just received as a rich IncomingInteractionMoment
+ *     (no more flat toast) and keep the live lists fresh.
  *   • UPDATE  — when an interaction's status transitions (sent→delivered→
  *     acknowledged→completed/failed), patch it in place in the interactions
  *     cache so the InteractionStatus pill steps live, without a refetch. The
@@ -19,6 +21,7 @@ import type { Interaction } from '@/lib/types';
 export function RealtimeWatcher() {
   const queryClient = useQueryClient();
   const { profile } = useAuth();
+  const showIncoming = useIncomingMoment((s) => s.show);
 
   useLiveEvents({
     onChange: ({ data }) => {
@@ -28,9 +31,17 @@ export function RealtimeWatcher() {
 
       if (table === 'interactions' && profile) {
         if (eventType === 'INSERT') {
-          // Incoming interaction (I'm the recipient).
+          // Incoming interaction (I'm the recipient). Build a shaped Interaction
+          // for the overlay; fall back to the legacy toast if the row is too
+          // sparse to reveal (defensive — the realtime schema is fixed, but the
+          // recipient reveal is the one place we want to never throw).
           if (row && row.recipient_id === profile.id) {
-            toast.info(`New interaction received (${String(row.type)})`);
+            const moment = rowToInteraction(row);
+            if (moment) {
+              showIncoming(moment);
+            } else {
+              toast.info('New interaction received');
+            }
           }
         } else if (eventType === 'UPDATE') {
           // A status transition on an interaction I sent (or received).
@@ -96,4 +107,41 @@ function patchInteractionStatus(
         : i,
     );
   });
+}
+
+/**
+ * Coerce a raw realtime INSERT row into a shaped Interaction for the
+ * incoming-moment overlay. Returns null when essential fields are missing or
+ * the wrong type — the caller falls back to a plain toast in that case so the
+ * recipient still gets *some* signal.
+ */
+function rowToInteraction(row: Record<string, unknown>): Interaction | null {
+  const id = typeof row.id === 'string' ? row.id : null;
+  const sender_id = typeof row.sender_id === 'string' ? row.sender_id : null;
+  const recipient_id = typeof row.recipient_id === 'string' ? row.recipient_id : null;
+  const type = typeof row.type === 'string' ? (row.type as InteractionType) : null;
+  if (!id || !sender_id || !recipient_id || !type) return null;
+
+  const payload =
+    row.payload && typeof row.payload === 'object' && !Array.isArray(row.payload)
+      ? (row.payload as Record<string, unknown>)
+      : {};
+
+  return {
+    id,
+    sender_id,
+    recipient_id,
+    relationship_id: typeof row.relationship_id === 'string' ? row.relationship_id : null,
+    type,
+    payload,
+    source_device_id: typeof row.source_device_id === 'string' ? row.source_device_id : null,
+    target_device_id: typeof row.target_device_id === 'string' ? row.target_device_id : null,
+    status: (row.status as Interaction['status']) ?? 'sent',
+    created_at: typeof row.created_at === 'string' ? row.created_at : new Date().toISOString(),
+    sent_at: typeof row.sent_at === 'string' ? row.sent_at : null,
+    delivered_at: typeof row.delivered_at === 'string' ? row.delivered_at : null,
+    acknowledged_at: typeof row.acknowledged_at === 'string' ? row.acknowledged_at : null,
+    completed_at: typeof row.completed_at === 'string' ? row.completed_at : null,
+    failed_at: typeof row.failed_at === 'string' ? row.failed_at : null,
+  };
 }

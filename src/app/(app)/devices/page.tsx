@@ -201,6 +201,7 @@ export default function DevicesPage() {
             empty={{
               title: 'No devices yet',
               message: 'Add your first PUZO. You will only need its setup ID from the device screen.',
+              action: <AddPuzoSheet />,
             }}
           />
         </Card>
