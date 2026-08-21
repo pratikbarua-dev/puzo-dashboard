@@ -1,9 +1,10 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { ArrowLeft, Trash2, Edit3, WifiOff } from 'lucide-react';
+import { ArrowLeft, Trash2, Edit3, Music4, WifiOff } from 'lucide-react';
 import { myDevice, updateMyDevice, transferDevice, removeMyDevice, sendDeviceCommand } from '@/lib/api';
 import { PageHeader } from '@/components/PageHeader';
 import { StatusBadge } from '@/components/StatusBadge';
@@ -163,6 +164,17 @@ export default function DeviceDetailPage() {
           <DeviceMoodCard deviceId={deviceId} />
         </div>
         <DeviceSettingsCard deviceId={deviceId} />
+
+        <Card className="mt-4">
+          <CardHeader
+            title="Sounds"
+            subtitle="Choose which sound pack this PUZO plays"
+            action={<Music4 size={18} className="text-on-surface-variant" />}
+          />
+          <Link href={`/audio-packs?device=${encodeURIComponent(deviceId)}`}>
+            <Button variant="outline">Browse sound packs</Button>
+          </Link>
+        </Card>
       </div>
 
       <Sheet open={renameOpen} onClose={() => setRenameOpen(false)} title="Rename device">

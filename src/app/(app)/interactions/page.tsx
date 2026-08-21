@@ -4,10 +4,11 @@ import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Zap, Plus, Trash2, Send, ArrowUpRight, ArrowDownLeft, Heart, Smile, Sparkles, Volume2 } from 'lucide-react';
 import { myInteractions, sendInteraction, deleteInteraction, myDevices, myRelationships } from '@/lib/api';
-import { commandDef, INTERACTION_TYPES } from '@/lib/registry';
+import { commandDef, buildPayload, commandForInteractionType, defaultPayload, INTERACTION_TYPES } from '@/lib/registry';
 import { useAuth } from '@/lib/auth-store';
 import { PageHeader } from '@/components/PageHeader';
-import { Card, CardHeader, Button, Input, Select, Sheet, CardSkeleton, EmptyState } from '@/components/ui';
+import { CommandFields } from '@/components/CommandForm';
+import { Card, CardHeader, Button, Select, Sheet, CardSkeleton, EmptyState } from '@/components/ui';
 import { toast } from '@/components/Toast';
 import { formatDate, extractError } from '@/lib/utils';
 
@@ -28,8 +29,7 @@ export default function InteractionsPage() {
   const [relationshipId, setRelationshipId] = useState('');
   const [payload, setPayload] = useState<Record<string, unknown>>({ emotion: 'thinking_of_you', message: 'Thinking of you' });
 
-  const def = commandDef(type === 'message' ? 'display' : type);
-
+  const def = commandDef(commandForInteractionType(type));
   const partnerDevice = (relationships ?? [])
     .filter((relationship) => relationship.status === 'active')
     .flatMap((relationship) => relationship.devices ?? [])
@@ -72,7 +72,7 @@ export default function InteractionsPage() {
     mutationFn: () =>
       sendInteraction({
         type,
-        payload,
+        payload: buildPayload(commandForInteractionType(type), payload),
         target_device_id: target,
         source_device_id: source || undefined,
         relationship_id: relationshipId || undefined,
@@ -208,7 +208,16 @@ export default function InteractionsPage() {
             sendMut.mutate();
           }}
         >
-          <Select label="Type of interaction" value={type} onChange={(e) => setType(e.target.value)}>
+          <Select
+            label="Type of interaction"
+            value={type}
+            onChange={(e) => {
+              // The payload belongs to the old type — carrying `emotion` into a
+              // vibration would be rejected by the backend's strict schema.
+              setType(e.target.value);
+              setPayload(defaultPayload(commandForInteractionType(e.target.value)));
+            }}
+          >
             {INTERACTION_TYPES.map((t) => (
               <option key={t} value={t}>
                 {t}
@@ -254,20 +263,11 @@ export default function InteractionsPage() {
             )}
           </Select>
 
-          {def?.fields.map((f) => (
-            <Input
-              key={f.name}
-              label={f.label}
-              type={f.type === 'number' ? 'number' : 'text'}
-              value={String(payload[f.name] ?? '')}
-              onChange={(e) =>
-                setPayload((p) => ({
-                  ...p,
-                  [f.name]: f.type === 'number' ? Number(e.target.value) : e.target.value,
-                }))
-              }
-            />
-          ))}
+          <CommandFields
+            fields={def?.fields ?? []}
+            payload={payload}
+            onChange={(name, value) => setPayload((p) => ({ ...p, [name]: value }))}
+          />
 
           <Button type="submit" isLoading={sendMut.isPending} disabled={!partnerDevice}>
             Send moment now

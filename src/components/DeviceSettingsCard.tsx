@@ -4,7 +4,8 @@ import { useEffect, useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { BellOff, ListOrdered, Locate, MapPin, Search, Timer, Vibrate, Volume2, X } from 'lucide-react';
 import { getDeviceSettings, getProfileLocation, updateDeviceSettings, updateProfileLocation } from '@/lib/api';
-import type { DeviceSettings, DeviceSettingsPatch } from '@/lib/types';
+import type { DeviceSettings, DeviceSettingsPatch, HapticIntensity } from '@/lib/types';
+import { HAPTIC_INTENSITIES } from '@/lib/registry';
 import { useAuth } from '@/lib/auth-store';
 import { Card, CardHeader, Button, Input, Toggle, Select, Loading, ErrorState } from '@/components/ui';
 import { toast } from '@/components/Toast';
@@ -19,6 +20,8 @@ type SettingsDraft = Pick<
   | 'wake_vibration_enabled'
   | 'quiet_mode_enabled'
   | 'eye_pack'
+  | 'volume'
+  | 'haptic_intensity'
 >;
 
 type ToggleDraft = Pick<SettingsDraft, 'wake_sound_enabled' | 'wake_vibration_enabled' | 'quiet_mode_enabled'>;
@@ -99,6 +102,9 @@ export function DeviceSettingsCard({ deviceId }: { deviceId: string }) {
         wake_vibration_enabled: settings.wake_vibration_enabled,
         quiet_mode_enabled: settings.quiet_mode_enabled,
         eye_pack: settings.eye_pack,
+        // Devices provisioned before these settings existed answer without them.
+        volume: settings.volume ?? 70,
+        haptic_intensity: settings.haptic_intensity ?? 'medium',
       });
     }
   }, [settings, draft]);
@@ -267,6 +273,36 @@ export function DeviceSettingsCard({ deviceId }: { deviceId: string }) {
     onError: (e) => toast.error(extractError(e).message),
   });
 
+  const volumeMut = useMutation({
+    mutationFn: (volume: number) => updateDeviceSettings(deviceId, { volume }),
+    onSuccess: (_data, volume) => {
+      toast.success(`Volume set to ${volume}%`);
+      void queryClient.invalidateQueries({ queryKey: ['devices', deviceId, 'settings'] });
+    },
+    onError: (e) => toast.error(extractError(e).message),
+  });
+
+  const hapticMut = useMutation({
+    mutationFn: (haptic_intensity: HapticIntensity) =>
+      updateDeviceSettings(deviceId, { haptic_intensity }),
+    onSuccess: (_data, haptic_intensity) => {
+      toast.success(`Vibration strength set to ${haptic_intensity}`);
+      void queryClient.invalidateQueries({ queryKey: ['devices', deviceId, 'settings'] });
+    },
+    onError: (e) => toast.error(extractError(e).message),
+  });
+
+  // The slider fires on every pixel of travel, so the value is only sent once the
+  // user lets go — a drag from 20 to 80 is one command, not sixty.
+  const sentVolume = useRef<number | null>(null);
+  const commitVolume = () => {
+    if (!draft) return;
+    const target = sentVolume.current ?? settings?.volume ?? null;
+    if (draft.volume === target) return;
+    sentVolume.current = draft.volume;
+    volumeMut.mutate(draft.volume);
+  };
+
   if (isLoading) return <Loading label="Loading device settings…" />;
   if (isError || !draft) {
     return (
@@ -296,6 +332,77 @@ export function DeviceSettingsCard({ deviceId }: { deviceId: string }) {
             />
           </div>
         ))}
+      </div>
+
+      <div className="mb-4 rounded-md bg-surface-container-low px-3 py-3">
+        <div className="flex items-center justify-between gap-3">
+          <span className="flex items-center gap-2 text-body-base">
+            <span className="text-on-surface-variant"><Volume2 size={16} /></span>
+            Speaker volume
+          </span>
+          <span className="text-label-caps text-on-surface-variant tabular-nums">
+            {draft.volume}%
+          </span>
+        </div>
+        <input
+          type="range"
+          min={0}
+          max={100}
+          step={5}
+          value={draft.volume}
+          aria-label="Speaker volume"
+          disabled={volumeMut.isPending}
+          onChange={(e) => {
+            const value = Number(e.target.value);
+            setDraft((d) => (d ? { ...d, volume: value } : d));
+          }}
+          onPointerUp={commitVolume}
+          onKeyUp={commitVolume}
+          onBlur={commitVolume}
+          className="mt-3 h-1.5 w-full cursor-pointer appearance-none rounded-full bg-surface-container-highest accent-primary disabled:opacity-50"
+        />
+        <p className="mt-2 text-micro-label text-on-surface-variant">
+          {draft.volume === 0
+            ? 'Muted — sounds are skipped entirely.'
+            : 'Scales playback level in software; the amplifier’s gain is fixed in hardware.'}
+        </p>
+
+        <div className="mt-4 flex items-center justify-between gap-3">
+          <span className="flex items-center gap-2 text-body-base">
+            <span className="text-on-surface-variant"><Vibrate size={16} /></span>
+            Vibration strength
+          </span>
+        </div>
+        <div className="mt-2 grid grid-cols-3 gap-2" role="group" aria-label="Vibration strength">
+          {HAPTIC_INTENSITIES.map((i) => {
+            const active = draft.haptic_intensity === i.value;
+            return (
+              <button
+                key={i.value}
+                type="button"
+                aria-pressed={active}
+                disabled={hapticMut.isPending}
+                onClick={() => {
+                  if (active) return;
+                  setDraft((d) => (d ? { ...d, haptic_intensity: i.value } : d));
+                  hapticMut.mutate(i.value);
+                }}
+                className={`rounded-md border py-2 text-label-caps transition-fast disabled:opacity-50 ${
+                  active
+                    ? 'border-primary bg-primary/10 text-primary'
+                    : 'border-outline-variant/60 bg-surface text-on-surface-variant hover:bg-surface-container-high'
+                }`}
+              >
+                {i.label}
+              </button>
+            );
+          })}
+        </div>
+        {draft.quiet_mode_enabled && (
+          <p className="mt-2 text-micro-label text-on-surface-variant">
+            Quiet mode is on, so this PUZO stays silent and still until you turn it off.
+          </p>
+        )}
       </div>
 
       <div className="mb-4 max-w-sm">

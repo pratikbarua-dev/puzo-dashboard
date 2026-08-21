@@ -111,7 +111,25 @@ export interface DeviceSettings {
   quiet_mode_enabled: boolean;
   weather_cache?: string;
   eye_pack: 'classic' | 'iris_oled';
+  /** 0–100. Scales playback amplitude in software; the amplifier's gain is fixed in hardware. */
+  volume: number;
+  haptic_intensity: HapticIntensity;
 }
+
+/**
+ * Named vibration patterns and intensity tiers the firmware implements. The
+ * device resolves each with an exact match against a compiled table, so these
+ * strings are a contract, not labels — see the backend command registry.
+ */
+export type HapticPattern =
+  | 'short'
+  | 'double'
+  | 'triple'
+  | 'long'
+  | 'heartbeat'
+  | 'love'
+  | 'notification';
+export type HapticIntensity = 'low' | 'medium' | 'high';
 
 export type DeviceMode = 'normal' | 'focus' | 'clock' | 'weather';
 export type DeviceMood = 'curious' | 'calm' | 'playful' | 'sleepy' | 'happy' | 'love' | 'sad' | 'excited' | 'angry';
@@ -372,6 +390,50 @@ export interface ContentAsset {
   sha256?: string;
   url?: string;
   created_at: string;
+}
+
+/* ---------- audio packs ---------- */
+
+/**
+ * A downloadable set of sounds. Deliberately free of storage paths, checksums
+ * and on-device filesystem detail: the user is buying a sound pack, not managing
+ * a flash volume.
+ */
+export interface AudioPack {
+  slug: string;
+  name: string;
+  description: string | null;
+  version: string;
+  thumbnail_url: string | null;
+  total_bytes: number;
+  is_premium: boolean;
+  /** Premium pack the current plan does not include. Listed, but not installable. */
+  locked: boolean;
+}
+
+export interface AudioPackSound {
+  sound_id: string;
+  ordinal: number;
+  bytes: number;
+  /** Null when the pack is locked — preview is part of what a plan buys. */
+  preview_url: string | null;
+}
+
+export interface AudioPackDetail extends AudioPack {
+  sounds: AudioPackSound[];
+}
+
+/** `not_installed` is synthesised by the backend when no row exists yet. */
+export type AudioPackState = 'not_installed' | 'pending' | 'downloading' | 'installed' | 'failed';
+
+/** A catalogue pack joined with what one device last reported having on flash. */
+export interface DeviceAudioPack extends AudioPack {
+  state: AudioPackState;
+  installed_version: string | null;
+  installed_bytes: number;
+  update_available: boolean;
+  active: boolean;
+  last_error: string | null;
 }
 
 export interface AuditLogEntry {

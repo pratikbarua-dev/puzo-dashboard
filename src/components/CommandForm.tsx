@@ -1,8 +1,68 @@
 'use client';
 
 import { useState } from 'react';
-import { commandDef, defaultPayload } from '@/lib/registry';
+import { buildPayload, commandDef, defaultPayload } from '@/lib/registry';
+import type { CommandField } from '@/lib/registry';
 import { Button, Input, Select } from './ui';
+
+/**
+ * Renders a command's payload fields. Shared so every surface that sends a
+ * command offers the same pickers — a `select` field rendered as free text is how
+ * a user ends up typing a pattern name the firmware has never heard of.
+ */
+export function CommandFields({
+  fields,
+  payload,
+  onChange,
+}: {
+  fields: CommandField[];
+  payload: Record<string, unknown>;
+  onChange: (name: string, value: string | number) => void;
+}) {
+  return (
+    <>
+      {fields.map((f) =>
+        f.type === 'select' && f.options && f.options.length > 0 ? (
+          <div key={f.name}>
+            <Select
+              label={f.label}
+              name={f.name}
+              value={String(payload[f.name] ?? f.options[0].value)}
+              onChange={(e) => onChange(f.name, e.target.value)}
+            >
+              {f.options.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </Select>
+            {f.hint && (
+              <p className="mt-1.5 text-[11px] leading-snug text-on-surface-variant">{f.hint}</p>
+            )}
+          </div>
+        ) : (
+          <Input
+            key={f.name}
+            label={f.label}
+            name={f.name}
+            type={f.type === 'number' ? 'number' : 'text'}
+            // `max` is a bound on a number and a length on text — the backend
+            // rejects an over-long string, so stop it at the keyboard.
+            min={f.type === 'number' ? f.min : undefined}
+            max={f.type === 'number' ? f.max : undefined}
+            maxLength={f.type === 'number' ? undefined : f.max}
+            value={String(payload[f.name] ?? '')}
+            onChange={(e) =>
+              onChange(f.name, f.type === 'number' ? Number(e.target.value) : e.target.value)
+            }
+            placeholder={f.placeholder}
+            hint={f.hint}
+          />
+        ),
+      )}
+    </>
+  );
+}
 
 export function CommandForm({
   commands,
@@ -24,18 +84,12 @@ export function CommandForm({
 
   const def = commandDef(command);
 
-  const setField = (name: string, value: string) => {
-    const field = def?.fields.find((f) => f.name === name);
-    const parsed = field?.type === 'number' ? Number(value) : value;
-    setPayload((p) => ({ ...p, [name]: parsed }));
-  };
-
   return (
     <form
       className="flex flex-col gap-4"
       onSubmit={(e) => {
         e.preventDefault();
-        onSubmit(command, payload);
+        onSubmit(command, buildPayload(command, payload));
       }}
     >
       <Select
@@ -55,19 +109,11 @@ export function CommandForm({
 
       {extraField}
 
-      {def?.fields.map((f) => (
-        <Input
-          key={f.name}
-          label={f.label}
-          name={f.name}
-          type={f.type === 'number' ? 'number' : 'text'}
-          min={f.min}
-          max={f.max}
-          value={String(payload[f.name] ?? '')}
-          onChange={(e) => setField(f.name, e.target.value)}
-          placeholder={f.placeholder}
-        />
-      ))}
+      <CommandFields
+        fields={def?.fields ?? []}
+        payload={payload}
+        onChange={(name, value) => setPayload((p) => ({ ...p, [name]: value }))}
+      />
 
       {payload.text !== undefined && (
         <p className="text-micro-label text-on-surface-variant">

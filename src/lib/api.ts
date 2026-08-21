@@ -2,9 +2,12 @@ import type {
   ApiEnvelope,
   AuditLogEntry,
   AdminUser,
+  AudioPack,
+  AudioPackDetail,
   BlockEntry,
   CommandRecord,
   Device,
+  DeviceAudioPack,
   DeviceSettings,
   DeviceSettingsPatch,
   DeviceMode,
@@ -208,6 +211,36 @@ export const getEmotionDecisions = (deviceId: string): Promise<EmotionDecision[]
   request<any>('GET', `/devices/${deviceId}/emotion-decisions?limit=8`).then((d) => (Array.isArray(d) ? d : d?.decisions ?? []));
 export const removeMyDevice = (deviceId: string) =>
   request<{ device: Device }>('DELETE', `/devices/${deviceId}`);
+
+/* ---- audio packs ---- */
+
+export const audioPacks = () =>
+  request<{ packs: AudioPack[] }>('GET', '/audio-packs').then((d) => d.packs);
+export const audioPack = (slug: string) =>
+  request<{ pack: AudioPackDetail }>('GET', `/audio-packs/${slug}`).then((d) => d.pack);
+export const deviceAudioPacks = (deviceId: string) =>
+  request<{ device_id: string; packs: DeviceAudioPack[] }>(
+    'GET',
+    `/devices/${deviceId}/audio-packs`,
+  ).then((d) => d.packs);
+export const installAudioPack = (deviceId: string, slug: string, version?: string) =>
+  request<{ slug: string; version: string; state: string; command: CommandRecord }>(
+    'POST',
+    `/devices/${deviceId}/audio-packs`,
+    version ? { slug, version } : { slug },
+  );
+/** `slug: null` returns the device to core sounds without uninstalling anything. */
+export const activateAudioPack = (deviceId: string, slug: string | null) =>
+  request<{ slug: string | null; command: CommandRecord }>(
+    'POST',
+    `/devices/${deviceId}/audio-packs/active`,
+    { slug },
+  );
+export const removeAudioPack = (deviceId: string, slug: string) =>
+  request<{ slug: string; command: CommandRecord }>(
+    'DELETE',
+    `/devices/${deviceId}/audio-packs/${slug}`,
+  );
 
 /* ---- pairing ---- */
 

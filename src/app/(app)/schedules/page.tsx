@@ -4,9 +4,10 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { CalendarClock, Plus, Trash2 } from 'lucide-react';
 import { mySchedules, createSchedule, cancelSchedule, myDevices, myRelationships } from '@/lib/api';
-import { commandDef, INTERACTION_TYPES } from '@/lib/registry';
+import { buildPayload, commandDef, commandForInteractionType, defaultPayload, INTERACTION_TYPES } from '@/lib/registry';
 import { useAuth } from '@/lib/auth-store';
 import { PageHeader } from '@/components/PageHeader';
+import { CommandFields } from '@/components/CommandForm';
 import { Card, CardHeader, Button, Input, Select, Sheet, CardSkeleton, EmptyState } from '@/components/ui';
 import { toast } from '@/components/Toast';
 import { formatDate, extractError } from '@/lib/utils';
@@ -26,7 +27,11 @@ export default function SchedulesPage() {
   const [target, setTarget] = useState('');
   const [source, setSource] = useState('');
   const [when, setWhen] = useState('');
-  const [text, setText] = useState('');
+  const [payload, setPayload] = useState<Record<string, unknown>>(() =>
+    defaultPayload(commandForInteractionType('message')),
+  );
+
+  const def = commandDef(commandForInteractionType(type));
 
   const partnerDevice = (relationships ?? [])
     .filter((relationship) => relationship.status === 'active')
@@ -37,7 +42,9 @@ export default function SchedulesPage() {
     mutationFn: () =>
       createSchedule({
         type,
-        payload: { text },
+        // Every type has its own strict payload schema — a vibration scheduled
+        // with a message body is rejected outright.
+        payload: buildPayload(commandForInteractionType(type), payload),
         target_device_id: target || partnerDevice?.device_id || '',
         source_device_id: source || undefined,
         scheduled_for: new Date(when).toISOString(),
@@ -46,7 +53,7 @@ export default function SchedulesPage() {
       toast.success('Scheduled');
       setOpen(false);
       setWhen('');
-      setText('');
+      setPayload(defaultPayload(commandForInteractionType(type)));
       void queryClient.invalidateQueries({ queryKey: ['schedules'] });
     },
     onError: (e) => toast.error(extractError(e).message),
@@ -140,7 +147,14 @@ export default function SchedulesPage() {
             createMut.mutate();
           }}
         >
-          <Select label="Type" value={type} onChange={(e) => setType(e.target.value)}>
+          <Select
+            label="Type"
+            value={type}
+            onChange={(e) => {
+              setType(e.target.value);
+              setPayload(defaultPayload(commandForInteractionType(e.target.value)));
+            }}
+          >
             {INTERACTION_TYPES.map((t) => (
               <option key={t} value={t}>
                 {t}
@@ -148,15 +162,11 @@ export default function SchedulesPage() {
             ))}
           </Select>
 
-          {type === 'message' && (
-            <Input
-              label="Message"
-              value={text}
-              onChange={(e) => setText(e.target.value.slice(0, 120))}
-              placeholder="Reminder text"
-              required
-            />
-          )}
+          <CommandFields
+            fields={def?.fields ?? []}
+            payload={payload}
+            onChange={(name, value) => setPayload((p) => ({ ...p, [name]: value }))}
+          />
 
           <Select
             label="Target companion device"

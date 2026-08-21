@@ -17,6 +17,7 @@ import {
   MapPin,
   Bell,
   Send,
+  Music4,
 } from 'lucide-react';
 import {
   updateMe,
@@ -317,6 +318,22 @@ export default function MePage() {
                 <p className="text-[11px] text-[#64748B]">
                   {interactions ? `${interactions.length} sent so far` : 'Nudges, moods & messages'}
                 </p>
+              </div>
+            </div>
+            <ChevronRight size={16} className="text-[#94A3B8]" />
+          </Link>
+
+          <Link
+            href="/audio-packs"
+            className="flex items-center justify-between py-3 -mx-2 px-2 rounded-xl hover:bg-[#F8FAFC] transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#F1F5F9] text-[#1E232B]">
+                <Music4 size={16} />
+              </div>
+              <div>
+                <p className="text-xs font-bold text-[#1E232B]">Sound Packs</p>
+                <p className="text-[11px] text-[#64748B]">Choose the sounds PUZO plays</p>
               </div>
             </div>
             <ChevronRight size={16} className="text-[#94A3B8]" />

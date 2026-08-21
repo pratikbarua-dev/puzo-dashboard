@@ -34,3 +34,8 @@ public/sw.js
 public/sw.js.map
 public/workbox-*
 public/fallback-*
+
+# agent tool state. `.claude/worktrees/` holds full checkouts of this repo,
+# each with its own .git and .next -- several hundred MB that must never be
+# committed into the repo they were cut from.
+.claude/
