@@ -18,6 +18,7 @@ import {
   Bell,
   Send,
   Music4,
+  Bot,
 } from 'lucide-react';
 import {
   updateMe,
@@ -120,6 +121,19 @@ export default function MePage() {
       setPushEnabled(hasPushPermission());
       toast.error(extractError(err).message);
     },
+  });
+
+  const puzoMessagesEnabled = profile?.notification_preferences?.puzo_messages !== false;
+  const puzoMessagesMut = useMutation({
+    mutationFn: (next: boolean) =>
+      updateMe({
+        notification_preferences: { puzo_messages: next },
+      }),
+    onSuccess: (_, next) => {
+      toast.success(next ? 'PUZO messages enabled' : 'PUZO messages paused');
+      void queryClient.invalidateQueries({ queryKey: ['me'] });
+    },
+    onError: (err) => toast.error(extractError(err).message),
   });
 
   const handleSignOut = async () => {
@@ -356,6 +370,26 @@ export default function MePage() {
             </div>
             <ChevronRight size={16} className="text-[#94A3B8]" />
           </button>
+
+          {/* PUZO messages toggle */}
+          <div className="flex items-center justify-between gap-3 py-3">
+            <div className="flex min-w-0 items-center gap-3">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#FFEBEF] text-[#A82835]">
+                <Bot size={16} />
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs font-bold text-[#1E232B]">PUZO Companion Messages</p>
+                <p className="text-[11px] text-[#64748B]">
+                  Daily check-ins &amp; messages directly from PUZO
+                </p>
+              </div>
+            </div>
+            <Toggle
+              checked={puzoMessagesEnabled}
+              onChange={(v) => puzoMessagesMut.mutate(v)}
+              ariaLabel="PUZO Companion Messages"
+            />
+          </div>
 
           {/* Web push toggle */}
           <div className="flex items-center justify-between gap-3 py-3">

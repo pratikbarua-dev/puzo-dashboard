@@ -18,6 +18,7 @@ export interface Profile {
   city?: string | null;
   latitude?: number | null;
   longitude?: number | null;
+  notification_preferences?: Record<string, boolean> | null;
   role: Role;
   deleted_at: string | null;
   created_at: string;
