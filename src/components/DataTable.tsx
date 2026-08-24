@@ -234,9 +234,17 @@ export function DataTable<T extends { id?: string }>({
             {pageRows.map((row, i) => {
               const isSelected = !!row.id && selectedIds?.includes(row.id);
               return (
-                <button
+                <div
                   key={row.id || i}
                   onClick={() => onRowClick?.(row)}
+                  role={onRowClick ? 'button' : undefined}
+                  tabIndex={onRowClick ? 0 : undefined}
+                  onKeyDown={(e) => {
+                    if (onRowClick && (e.key === 'Enter' || e.key === ' ')) {
+                      e.preventDefault();
+                      onRowClick(row);
+                    }
+                  }}
                   className={cn(
                     'rounded-lg border border-outline-variant bg-surface-container-low p-4 text-left transition-fast',
                     onRowClick && 'active:bg-surface-container-high',
@@ -265,7 +273,7 @@ export function DataTable<T extends { id?: string }>({
                       </span>
                     </div>
                   ))}
-                </button>
+                </div>
               );
             })}
           </div>

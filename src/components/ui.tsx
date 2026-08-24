@@ -57,10 +57,10 @@ export function Button({
       {...props}
     >
       {isLoading ? (
-        <>
+        <span className="inline-flex items-center justify-center gap-2">
           <Spinner className="h-4 w-4 border-current/30 border-t-current" />
-          <span>{children}</span>
-        </>
+          <span className="inline-flex items-center gap-2">{children}</span>
+        </span>
       ) : (
         children
       )}

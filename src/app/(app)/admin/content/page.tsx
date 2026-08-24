@@ -268,7 +268,7 @@ export default function AdminContentPage() {
           onClick={() => setActiveTab('emotions')}
           className={`flex min-h-[44px] items-center gap-2 border-b-2 px-4 text-body-base font-extrabold transition-fast ${
             activeTab === 'emotions'
-              ? 'border-primary-container text-white'
+              ? 'border-[#FF5A5F] text-[#C82D35]'
               : 'border-transparent text-on-surface-variant hover:text-on-surface'
           }`}
         >
@@ -278,7 +278,7 @@ export default function AdminContentPage() {
           onClick={() => setActiveTab('assets')}
           className={`flex min-h-[44px] items-center gap-2 border-b-2 px-4 text-body-base font-extrabold transition-fast ${
             activeTab === 'assets'
-              ? 'border-primary-container text-white'
+              ? 'border-[#FF5A5F] text-[#C82D35]'
               : 'border-transparent text-on-surface-variant hover:text-on-surface'
           }`}
         >

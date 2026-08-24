@@ -148,7 +148,7 @@ export default function AdminDeviceDetailPage() {
       {isUpdateAvailable && latestRelease && (
         <div className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-lg bg-primary-container/20 border border-primary-container/40 p-4">
           <div className="flex items-center gap-3">
-            <div className="grid h-10 w-10 place-items-center rounded-full bg-primary-container text-white">
+            <div className="grid h-10 w-10 place-items-center rounded-full bg-primary-container text-[#C82D35]">
               <CloudDownload size={20} />
             </div>
             <div>

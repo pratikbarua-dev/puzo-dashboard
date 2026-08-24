@@ -1,18 +1,21 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { me, ApiError } from '@/lib/api';
 import type { MeResponse } from '@/lib/types';
 import { useAuth } from '@/lib/auth-store';
 import { authClient } from '@/lib/auth-client';
 import { AppShell } from '@/components/AppShell';
+import { AdminShell } from '@/components/AdminShell';
 import { RealtimeWatcher } from '@/components/RealtimeWatcher';
 import { AppSplash } from '@/components/AppSplash';
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
+  const pathname = usePathname();
+  const isAdminArea = !!pathname && pathname.startsWith('/admin');
   const { setIdentity, clear } = useAuth();
 
   const { data, isLoading, isError, error, refetch } = useQuery<MeResponse>({
@@ -56,7 +59,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <>
-      <AppShell>{children}</AppShell>
+      {isAdminArea ? <AdminShell>{children}</AdminShell> : <AppShell>{children}</AppShell>}
       <RealtimeWatcher />
     </>
   );

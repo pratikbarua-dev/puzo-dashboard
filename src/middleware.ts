@@ -6,8 +6,17 @@ export async function middleware(request: NextRequest) {
 
   const isAuthPage = request.nextUrl.pathname.startsWith('/login');
   const isApiRoute = request.nextUrl.pathname.startsWith('/api/');
+  const isLandingPage = request.nextUrl.pathname === '/';
+  const isReservePage = request.nextUrl.pathname.startsWith('/reserve');
+  const isPublicPage = isLandingPage || isReservePage;
 
-  if (!sessionCookie && !isAuthPage && !isApiRoute) {
+  if (sessionCookie && isLandingPage) {
+    const url = request.nextUrl.clone();
+    url.pathname = '/overview';
+    return NextResponse.redirect(url);
+  }
+
+  if (!sessionCookie && !isAuthPage && !isApiRoute && !isPublicPage) {
     const url = request.nextUrl.clone();
     url.pathname = '/login';
     return NextResponse.redirect(url);

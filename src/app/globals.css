@@ -58,9 +58,35 @@
   --color-error-container: #FEE2E2;
   --color-on-error-container: #7F1D1D;
 
-  /* Typography */
+  /* Typography — PUZO aesthetic: soft-geometric, friendly, premium */
   --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-display: "Hanken Grotesk", "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  --text-micro-label: 0.6875rem;
+  --text-micro-label--line-height: 1rem;
+  --text-micro-label--letter-spacing: 0.06em;
+  --text-label-caps: 0.75rem;
+  --text-label-caps--line-height: 1.125rem;
+  --text-label-caps--letter-spacing: 0.04em;
+  --text-body-base: 0.875rem;
+  --text-body-base--line-height: 1.375rem;
+  --text-headline-lg: 1.5rem;
+  --text-headline-lg--line-height: 2rem;
+  --text-headline-lg--letter-spacing: -0.01em;
+
+  --text-display: 3.75rem;
+  --text-display--line-height: 1.05;
+  --text-display--letter-spacing: -0.025em;
+  --text-display--font-weight: 800;
+  --text-title-lg: 2.25rem;
+  --text-title-lg--line-height: 1.2;
+  --text-title-lg--letter-spacing: -0.02em;
+  --text-title: 1.875rem;
+  --text-title--line-height: 1.25;
+  --text-title--letter-spacing: -0.015em;
+  --text-body-lg: 1.125rem;
+  --text-body-lg--line-height: 1.6;
 
   /* Radius */
   --radius-sm: 0.5rem;
@@ -87,9 +113,32 @@ body {
   color: #1E232B;
   font-family: var(--font-sans);
   font-size: 14px;
-  line-height: 1.5;
+  line-height: 1.6;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "ss01" 1, "calt" 1;
   min-height: 100dvh;
+}
+
+h1, h2, h3 {
+  font-family: var(--font-display);
+  font-optical-sizing: auto;
+}
+
+.puzo-display {
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  line-height: 1.05;
+  font-optical-sizing: auto;
+}
+
+.puzo-eyebrow {
+  font-family: var(--font-sans);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 * {
@@ -158,6 +207,12 @@ body {
 }
 @utility pt-safe {
   padding-top: max(0.75rem, env(safe-area-inset-top));
+}
+
+@utility transition-fast {
+  transition-property: color, background-color, border-color, outline-color, box-shadow, transform, opacity, fill, stroke;
+  transition-duration: 150ms;
+  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* Custom Scrollbars */
