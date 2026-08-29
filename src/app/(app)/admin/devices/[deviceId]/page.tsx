@@ -120,10 +120,10 @@ export default function AdminDeviceDetailPage() {
       : device.firmware_version !== latestRelease.version);
 
   return (
-    <div>
+    <div className="flex flex-col gap-5">
       <button
         onClick={() => router.back()}
-        className="mb-3 flex min-h-[44px] items-center gap-2 text-label-caps text-on-surface-variant hover:text-on-surface"
+        className="flex min-h-[40px] items-center gap-2 font-mono text-xs font-bold text-[#64748B] hover:text-[#1E232B] transition-colors cursor-pointer"
       >
         <ArrowLeft size={16} /> BACK TO DEVICES
       </button>
@@ -146,16 +146,16 @@ export default function AdminDeviceDetailPage() {
 
       {/* Firmware Update Available Alert Banner */}
       {isUpdateAvailable && latestRelease && (
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-lg bg-primary-container/20 border border-primary-container/40 p-4">
+        <div className="flex flex-wrap items-center justify-between gap-4 rounded-[28px] bg-[#FFEBEF] border border-[#FF5A5F]/30 p-4 shadow-sm">
           <div className="flex items-center gap-3">
-            <div className="grid h-10 w-10 place-items-center rounded-full bg-primary-container text-[#C82D35]">
+            <div className="grid h-10 w-10 place-items-center rounded-2xl bg-white text-[#FF5A5F] border border-[#FF5A5F]/20">
               <CloudDownload size={20} />
             </div>
             <div>
-              <h4 className="text-body-base font-extrabold text-on-surface">
+              <h4 className="text-sm font-extrabold text-[#1E232B]">
                 Firmware Update Available: v{latestRelease.version} (build {latestRelease.build_number})
               </h4>
-              <p className="text-micro-label text-on-surface-variant">
+              <p className="font-mono text-[11px] text-[#64748B]">
                 Device currently running v{device.firmware_version || '0.0.0'} (build {device.firmware_build ?? 0}). Target: {latestRelease.hardware_model}.
               </p>
             </div>
@@ -164,6 +164,7 @@ export default function AdminDeviceDetailPage() {
             size="sm"
             onClick={() => sendUpdate(latestRelease.id)}
             disabled={sendMut.isPending}
+            variant="primary"
           >
             <Send size={14} /> Push Update v{latestRelease.version} Now
           </Button>
@@ -171,44 +172,44 @@ export default function AdminDeviceDetailPage() {
       )}
 
       {/* Grid Row 1: Firmware Control + Live Telemetry */}
-      <div className="mb-6 grid gap-4 lg:grid-cols-2">
+      <div className="grid gap-4 lg:grid-cols-2">
         {/* Firmware & Update Management Card */}
-        <Card>
+        <Card className="rounded-[32px] p-5 sm:p-6 border border-[#EBF0F5] shadow-sm">
           <CardHeader
-            title="Firmware & OTA Control"
+            title="Firmware &amp; OTA Control"
             subtitle="Channel, versioning, and direct release push"
             action={
               !isUpdateAvailable ? (
-                <span className="inline-flex items-center gap-1 rounded-md bg-surface-container-high px-2 py-1 text-micro-label text-primary">
+                <span className="inline-flex items-center gap-1 rounded-full bg-[#C7F9CC] px-2.5 py-0.5 font-mono text-[10px] font-bold text-[#065A60]">
                   <CheckCircle2 size={12} /> Up to date
                 </span>
               ) : (
-                <span className="inline-flex items-center gap-1 rounded-md bg-secondary-container/30 px-2 py-1 text-micro-label text-secondary">
+                <span className="inline-flex items-center gap-1 rounded-full bg-[#FEF3C7] px-2.5 py-0.5 font-mono text-[10px] font-bold text-[#92400E]">
                   <AlertCircle size={12} /> Update available
                 </span>
               )
             }
           />
-          <div className="mb-4 grid grid-cols-2 gap-3 rounded-md bg-surface-container-low p-3">
+          <div className="mb-4 grid grid-cols-2 gap-3 rounded-2xl border border-[#E2E8F0] bg-[#F8FAFC] p-4">
             <div>
-              <span className="text-micro-label text-on-surface-variant">INSTALLED VERSION</span>
-              <p className="text-body-base font-extrabold">v{device.firmware_version || '0.1.0'}</p>
+              <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-[#94A3B8]">INSTALLED VERSION</span>
+              <p className="text-sm font-extrabold text-[#1E232B]">v{device.firmware_version || '0.1.0'}</p>
             </div>
             <div>
-              <span className="text-micro-label text-on-surface-variant">BUILD NUMBER</span>
-              <p className="text-body-base font-extrabold">
+              <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-[#94A3B8]">BUILD NUMBER</span>
+              <p className="text-sm font-extrabold text-[#1E232B]">
                 {typeof device.firmware_build === 'number' || typeof device.firmware_build === 'string'
                   ? String(device.firmware_build)
                   : '—'}
               </p>
             </div>
             <div>
-              <span className="text-micro-label text-on-surface-variant">HARDWARE MODEL</span>
-              <p className="text-body-base">{hwModel}</p>
+              <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-[#94A3B8]">HARDWARE MODEL</span>
+              <p className="text-sm font-bold text-[#1E232B]">{hwModel}</p>
             </div>
             <div>
-              <span className="text-micro-label text-on-surface-variant">FIRMWARE CHANNEL</span>
-              <p className="text-body-base uppercase">{device.firmware_channel || 'stable'}</p>
+              <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-[#94A3B8]">FIRMWARE CHANNEL</span>
+              <p className="text-sm font-bold text-[#1E232B] uppercase">{device.firmware_channel || 'stable'}</p>
             </div>
           </div>
 
@@ -220,72 +221,67 @@ export default function AdminDeviceDetailPage() {
             <Button variant="secondary" onClick={() => setUpdateOpen(true)} disabled={sendMut.isPending}>
               <Send size={16} /> Force specific release
             </Button>
-            <p className="mt-1 text-micro-label text-on-surface-variant">
+            <p className="mt-1 font-mono text-[10px] text-[#94A3B8]">
               Commands are delivered over WebSocket if connected, or queued until next heartbeat.
             </p>
           </div>
         </Card>
 
         {/* Live Telemetry & Presence Card */}
-        <Card>
+        <Card className="rounded-[32px] p-5 sm:p-6 border border-[#EBF0F5] shadow-sm">
           <CardHeader
-            title="Live Telemetry & Metrics"
+            title="Live Telemetry &amp; Metrics"
             subtitle={`Last reported ${timeAgo(status?.presence?.last_seen as string)}`}
-            action={<Activity size={18} className="text-primary" />}
+            action={<Activity size={18} className="text-[#FF5A5F]" />}
           />
           <div className="grid grid-cols-2 gap-3">
-            <div className="flex items-center gap-3 rounded-md bg-surface-container-low p-3">
-              <div className="grid h-9 w-9 place-items-center rounded bg-surface-container-high text-on-surface-variant">
+            <div className="flex items-center gap-3 rounded-2xl border border-[#E2E8F0] bg-[#F8FAFC] p-3.5">
+              <div className="grid h-9 w-9 place-items-center rounded-xl bg-white text-[#64748B] border border-[#E2E8F0]">
                 <Wifi size={18} />
               </div>
               <div>
-                <span className="text-micro-label text-on-surface-variant">PRESENCE STATUS</span>
-                <p className="text-body-base font-extrabold capitalize">{status?.presence?.status || 'Offline'}</p>
+                <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-[#94A3B8]">PRESENCE</span>
+                <p className="text-sm font-extrabold text-[#1E232B] capitalize">{status?.presence?.status || 'Offline'}</p>
               </div>
             </div>
 
-            <div className="flex items-center gap-3 rounded-md bg-surface-container-low p-3">
-              <div className="grid h-9 w-9 place-items-center rounded bg-surface-container-high text-on-surface-variant">
+            <div className="flex items-center gap-3 rounded-2xl border border-[#E2E8F0] bg-[#F8FAFC] p-3.5">
+              <div className="grid h-9 w-9 place-items-center rounded-xl bg-white text-[#64748B] border border-[#E2E8F0]">
                 <HardDrive size={18} />
               </div>
               <div>
-                <span className="text-micro-label text-on-surface-variant">FREE HEAP</span>
-                <p className="text-body-base font-extrabold">
+                <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-[#94A3B8]">FREE HEAP</span>
+                <p className="text-sm font-extrabold text-[#1E232B]">
                   {telemetry?.heap_free != null ? formatBytes(Number(telemetry.heap_free)) : '—'}
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center gap-3 rounded-md bg-surface-container-low p-3">
-              <div className="grid h-9 w-9 place-items-center rounded bg-surface-container-high text-on-surface-variant">
+            <div className="flex items-center gap-3 rounded-2xl border border-[#E2E8F0] bg-[#F8FAFC] p-3.5">
+              <div className="grid h-9 w-9 place-items-center rounded-xl bg-white text-[#64748B] border border-[#E2E8F0]">
                 <Clock size={18} />
               </div>
               <div>
-                <span className="text-micro-label text-on-surface-variant">UPTIME</span>
-                <p className="text-body-base font-extrabold">
+                <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-[#94A3B8]">UPTIME</span>
+                <p className="text-sm font-extrabold text-[#1E232B]">
                   {telemetry?.uptime != null ? `${Math.floor(Number(telemetry.uptime) / 3600)}h ${Math.floor((Number(telemetry.uptime) % 3600) / 60)}m` : '—'}
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center gap-3 rounded-md bg-surface-container-low p-3">
-              <div className="grid h-9 w-9 place-items-center rounded bg-surface-container-high text-on-surface-variant">
+            <div className="flex items-center gap-3 rounded-2xl border border-[#E2E8F0] bg-[#F8FAFC] p-3.5">
+              <div className="grid h-9 w-9 place-items-center rounded-xl bg-white text-[#64748B] border border-[#E2E8F0]">
                 <Zap size={18} />
               </div>
               <div>
-                <span className="text-micro-label text-on-surface-variant">BATTERY / TEMP</span>
-                <p className="text-body-base font-extrabold">
+                <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-[#94A3B8]">BATTERY / TEMP</span>
+                <p className="text-sm font-extrabold text-[#1E232B]">
                   {currentBatteryStatus !== 'unavailable' && batteryPercentage !== null
                     ? `${Math.round(batteryPercentage)}%${batteryVoltage !== null ? ` · ${batteryVoltage.toFixed(2)}V` : ''}`
                     : batteryLabel(currentBatteryStatus)}
                 </p>
-                {(currentBatteryStatus === 'low' || currentBatteryStatus === 'critical') && (
-                  <p className={currentBatteryStatus === 'critical' ? 'text-micro-label text-error' : 'text-micro-label text-secondary'}>
-                    {batteryLabel(currentBatteryStatus)}
-                  </p>
-                )}
-                <p className="text-micro-label text-on-surface-variant">
-                  {telemetry?.temperature != null ? `${telemetry.temperature}°C` : 'Temperature unavailable'}
+                <p className="font-mono text-[10px] text-[#94A3B8]">
+                  {telemetry?.temperature != null ? `${telemetry.temperature}°C` : 'Temp unavailable'}
                 </p>
               </div>
             </div>
@@ -293,7 +289,7 @@ export default function AdminDeviceDetailPage() {
         </Card>
       </div>
 
-      <div className="mb-6 grid gap-4 lg:grid-cols-2">
+      <div className="grid gap-4 lg:grid-cols-2">
         <DeviceEmotionalModeCard deviceId={deviceId} admin />
         <DeviceMoodCard deviceId={deviceId} admin />
       </div>
@@ -301,26 +297,26 @@ export default function AdminDeviceDetailPage() {
       {/* Grid Row 2: Logs (Events & Commands) */}
       <div className="grid gap-4 lg:grid-cols-2">
         {/* Device Events Log */}
-        <Card>
+        <Card className="rounded-[32px] p-5 sm:p-6 border border-[#EBF0F5] shadow-sm">
           <CardHeader
             title="Received Device Events"
             subtitle="Last 50 hardware events & heartbeats"
-            action={<Terminal size={18} className="text-on-surface-variant" />}
+            action={<Terminal size={18} className="text-[#94A3B8]" />}
           />
           <div className="flex max-h-80 flex-col gap-2 overflow-y-auto pr-1">
             {!events?.length ? (
-              <p className="py-8 text-center text-on-surface-variant">No events recorded from this device.</p>
+              <p className="py-8 text-center text-xs text-[#94A3B8]">No events recorded from this device.</p>
             ) : (
               events.map((e) => (
-                <div key={e.id} className="rounded-md bg-surface-container-low p-2.5">
+                <div key={e.id} className="rounded-2xl border border-[#E2E8F0] bg-[#F8FAFC] p-3">
                   <div className="flex items-center justify-between">
-                    <span className="rounded bg-surface-container-high px-2 py-0.5 text-micro-label font-mono text-primary">
+                    <span className="rounded-full bg-white px-2.5 py-0.5 font-mono text-[10px] font-bold text-[#FF5A5F] border border-[#E2E8F0]">
                       {e.type}
                     </span>
-                    <span className="text-micro-label text-on-surface-variant">{formatDate(e.created_at)}</span>
+                    <span className="font-mono text-[10px] text-[#94A3B8]">{formatDate(e.created_at)}</span>
                   </div>
                   {e.payload && Object.keys(e.payload).length > 0 && (
-                    <pre className="mt-1.5 overflow-x-auto rounded bg-surface-container-lowest p-2 font-mono text-micro-label text-on-surface-variant">
+                    <pre className="mt-2 overflow-x-auto rounded-xl bg-white p-2.5 font-mono text-[10px] text-[#64748B] border border-[#E2E8F0]">
                       {JSON.stringify(e.payload, null, 2)}
                     </pre>
                   )}
@@ -331,29 +327,29 @@ export default function AdminDeviceDetailPage() {
         </Card>
 
         {/* Commands Dispatch Log */}
-        <Card>
+        <Card className="rounded-[32px] p-5 sm:p-6 border border-[#EBF0F5] shadow-sm">
           <CardHeader
             title="Command History"
             subtitle="Sent commands & delivery status"
-            action={<Send size={18} className="text-on-surface-variant" />}
+            action={<Send size={18} className="text-[#94A3B8]" />}
           />
           <div className="flex max-h-80 flex-col gap-2 overflow-y-auto pr-1">
             {!commands?.length ? (
-              <p className="py-8 text-center text-on-surface-variant">No commands sent yet.</p>
+              <p className="py-8 text-center text-xs text-[#94A3B8]">No commands sent yet.</p>
             ) : (
               commands.map((c) => (
-                <div key={c.id} className="rounded-md bg-surface-container-low p-2.5">
+                <div key={c.id} className="rounded-2xl border border-[#E2E8F0] bg-[#F8FAFC] p-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <span className="font-extrabold uppercase">{c.command_type}</span>
+                      <span className="text-xs font-extrabold uppercase text-[#1E232B]">{c.command_type}</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="text-micro-label text-on-surface-variant">{timeAgo(c.created_at)}</span>
+                      <span className="font-mono text-[10px] text-[#94A3B8]">{timeAgo(c.created_at)}</span>
                       <StatusBadge status={c.status} />
                     </div>
                   </div>
                   {c.payload && Object.keys(c.payload).length > 0 && (
-                    <pre className="mt-1.5 overflow-x-auto rounded bg-surface-container-lowest p-2 font-mono text-micro-label text-on-surface-variant">
+                    <pre className="mt-2 overflow-x-auto rounded-xl bg-white p-2.5 font-mono text-[10px] text-[#64748B] border border-[#E2E8F0]">
                       {JSON.stringify(c.payload, null, 2)}
                     </pre>
                   )}
@@ -395,7 +391,7 @@ export default function AdminDeviceDetailPage() {
               ))}
           </Select>
           {!releases?.some((r) => r.status === 'published') && (
-            <p className="text-micro-label text-on-surface-variant">
+            <p className="font-mono text-xs text-[#94A3B8]">
               No published releases available. Upload and publish a release from the Firmware page first.
             </p>
           )}

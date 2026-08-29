@@ -1,9 +1,8 @@
 'use client';
 
-import { useState } from 'react';
 import { PuzoLogo } from '@/components/PuzoLogo';
-import { Button, Sheet } from '@/components/ui';
-import { Cpu, Link2, Sparkles, X } from 'lucide-react';
+import { Button } from '@/components/ui';
+import { Cpu, Link2, X } from 'lucide-react';
 
 interface WelcomeModalProps {
   open: boolean;
@@ -24,15 +23,15 @@ export function WelcomeModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black/70 backdrop-blur-sm transition-opacity"
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
         onClick={onClose}
       />
 
       {/* Modal Container */}
-      <div className="relative w-full max-w-md overflow-hidden rounded-2xl bg-surface-container p-6 shadow-puzo border border-primary/20 animate-in fade-in zoom-in duration-200">
+      <div className="relative w-full max-w-md overflow-hidden rounded-[32px] bg-white p-6 shadow-2xl border border-[#EBF0F5] animate-in fade-in zoom-in duration-200">
         <button
           onClick={onClose}
-          className="absolute right-4 top-4 rounded-full p-1 text-on-surface-variant hover:bg-surface-container-high transition-fast"
+          className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full text-[#94A3B8] hover:bg-[#F1F5F9] hover:text-[#1E232B] transition-colors cursor-pointer"
           aria-label="Close welcome modal"
         >
           <X size={18} />
@@ -43,17 +42,17 @@ export function WelcomeModal({
             <PuzoLogo size={90} animated={true} />
           </div>
 
-          <h2 className="mb-1 font-display text-2xl font-black text-on-surface">
+          <h2 className="mb-1 text-2xl font-extrabold text-[#1E232B] tracking-tight">
             Welcome to PUZO!
           </h2>
-          <p className="mb-6 text-body-base text-on-surface-variant max-w-xs">
+          <p className="mb-6 text-xs leading-relaxed text-[#64748B] max-w-xs">
             Your hardware desk companion for sharing warmth, OLED animations, and haptic moments with your partner.
           </p>
 
           <div className="flex w-full flex-col gap-3">
             <Button
               variant="primary"
-              className="w-full justify-start gap-3 py-3"
+              className="w-full justify-start gap-3.5 py-4"
               onClick={() => {
                 onClose();
                 onStartDeviceSetup();
@@ -68,7 +67,7 @@ export function WelcomeModal({
 
             <Button
               variant="outline"
-              className="w-full justify-start gap-3 py-3"
+              className="w-full justify-start gap-3.5 py-4"
               onClick={() => {
                 onClose();
                 onStartPairing();
@@ -77,14 +76,14 @@ export function WelcomeModal({
               <Link2 size={20} />
               <div className="text-left">
                 <div className="font-extrabold text-sm">I have a partner code</div>
-                <div className="text-[11px] text-on-surface-variant">Link with your partner&apos;s companion</div>
+                <div className="text-[11px] text-[#64748B]">Link with your partner&apos;s companion</div>
               </div>
             </Button>
           </div>
 
           <button
             onClick={onClose}
-            className="mt-5 text-micro-label font-bold text-on-surface-variant hover:text-on-surface transition-fast"
+            className="mt-5 font-mono text-[11px] font-bold text-[#94A3B8] hover:text-[#1E232B] transition-colors cursor-pointer uppercase tracking-wider"
           >
             Explore Dashboard First →
           </button>
@@ -93,3 +92,4 @@ export function WelcomeModal({
     </div>
   );
 }
+

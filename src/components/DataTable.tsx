@@ -118,7 +118,7 @@ export function DataTable<T extends { id?: string }>({
               setPage(0);
             }}
             placeholder="Search…"
-            className="min-h-[44px] flex-1 rounded-md bg-surface-container-high px-3 text-body-base outline-none focus:ring-2 focus:ring-primary-container sm:max-w-xs"
+            className="min-h-[44px] flex-1 rounded-2xl border border-[#E2E8F0] bg-[#F8FAFC] px-4 text-sm text-[#1E232B] outline-none transition-all focus:border-[#FF5A5F] focus:bg-white sm:max-w-xs"
           />
 
           {filters?.map((f) => (
@@ -129,7 +129,7 @@ export function DataTable<T extends { id?: string }>({
                 setActiveFilters((prev) => ({ ...prev, [f.key]: e.target.value }));
                 setPage(0);
               }}
-              className="min-h-[44px] rounded-md bg-surface-container-high px-3 text-body-base text-on-surface outline-none focus:ring-2 focus:ring-primary-container"
+              className="min-h-[44px] rounded-2xl border border-[#E2E8F0] bg-[#F8FAFC] px-4 text-sm font-semibold text-[#1E232B] outline-none transition-all focus:border-[#FF5A5F] focus:bg-white cursor-pointer"
             >
               <option value="ALL">All {f.label}</option>
               {f.options.map((o) => (
@@ -143,7 +143,7 @@ export function DataTable<T extends { id?: string }>({
 
         <div className="flex items-center gap-2">
           {actions}
-          <p className="text-micro-label text-on-surface-variant">
+          <p className="font-mono text-xs font-bold text-[#94A3B8]">
             {filtered.length} result{filtered.length === 1 ? '' : 's'}
           </p>
         </div>
@@ -158,22 +158,22 @@ export function DataTable<T extends { id?: string }>({
       ) : (
         <>
           {/* Desktop Table */}
-          <div className="hidden overflow-x-auto rounded-lg border border-outline-variant md:block">
+          <div className="hidden overflow-x-auto rounded-[24px] border border-[#EBF0F5] bg-white shadow-xs md:block">
             <table className="w-full text-left">
               <thead>
-                <tr className="border-b border-outline-variant bg-surface-container-low">
+                <tr className="border-b border-[#F1F5F9] bg-[#F8FAFC]">
                   {selectable && (
-                    <th className="w-10 px-3 py-2">
+                    <th className="w-10 px-4 py-3">
                       <input
                         type="checkbox"
                         checked={pageRows.length > 0 && pageRows.every((r) => r.id && selectedIds?.includes(r.id))}
                         onChange={toggleSelectAll}
-                        className="h-4 w-4 rounded border-outline bg-surface-container-high accent-primary-container"
+                        className="h-4 w-4 rounded-md border-[#CBD5E1] bg-white accent-[#FF5A5F]"
                       />
                     </th>
                   )}
                   {columns.map((c) => (
-                    <th key={c.key} className="px-3 py-2">
+                    <th key={c.key} className="px-4 py-3">
                       <button
                         onClick={() =>
                           setSort((prev) =>
@@ -184,7 +184,7 @@ export function DataTable<T extends { id?: string }>({
                               : { key: c.key, dir: 'asc' },
                           )
                         }
-                        className="flex items-center gap-1 text-label-caps text-on-surface-variant"
+                        className="flex items-center gap-1 font-mono text-[10px] font-bold uppercase tracking-wider text-[#94A3B8] hover:text-[#1E232B] cursor-pointer"
                       >
                         {c.header.toUpperCase()}
                         {sort?.key === c.key &&
@@ -194,7 +194,7 @@ export function DataTable<T extends { id?: string }>({
                   ))}
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-[#F1F5F9]">
                 {pageRows.map((row, i) => {
                   const isSelected = !!row.id && selectedIds?.includes(row.id);
                   return (
@@ -202,23 +202,23 @@ export function DataTable<T extends { id?: string }>({
                       key={row.id || i}
                       onClick={() => onRowClick?.(row)}
                       className={cn(
-                        'border-b border-outline-variant/50 last:border-0',
-                        onRowClick && 'cursor-pointer hover:bg-surface-container-high',
-                        isSelected && 'bg-primary-container/10',
+                        'transition-colors',
+                        onRowClick && 'cursor-pointer hover:bg-[#F8FAFC]',
+                        isSelected && 'bg-[#FFEBEF]/40',
                       )}
                     >
                       {selectable && (
-                        <td className="w-10 px-3 py-3" onClick={(e) => e.stopPropagation()}>
+                        <td className="w-10 px-4 py-3.5" onClick={(e) => e.stopPropagation()}>
                           <input
                             type="checkbox"
                             checked={isSelected}
                             onChange={(e) => row.id && toggleSelectRow(row.id, e as unknown as React.MouseEvent)}
-                            className="h-4 w-4 rounded border-outline bg-surface-container-high accent-primary-container"
+                            className="h-4 w-4 rounded-md border-[#CBD5E1] bg-white accent-[#FF5A5F]"
                           />
                         </td>
                       )}
                       {columns.map((c) => (
-                        <td key={c.key} className={cn('px-3 py-3', c.className)}>
+                        <td key={c.key} className={cn('px-4 py-3.5 text-sm text-[#1E232B]', c.className)}>
                           {c.render ? c.render(row) : String((row as Record<string, unknown>)[c.key] ?? '—')}
                         </td>
                       ))}
@@ -230,7 +230,7 @@ export function DataTable<T extends { id?: string }>({
           </div>
 
           {/* Mobile Card List */}
-          <div className="flex flex-col gap-2 md:hidden">
+          <div className="flex flex-col gap-2.5 md:hidden">
             {pageRows.map((row, i) => {
               const isSelected = !!row.id && selectedIds?.includes(row.id);
               return (
@@ -246,29 +246,29 @@ export function DataTable<T extends { id?: string }>({
                     }
                   }}
                   className={cn(
-                    'rounded-lg border border-outline-variant bg-surface-container-low p-4 text-left transition-fast',
-                    onRowClick && 'active:bg-surface-container-high',
-                    isSelected && 'border-primary-container bg-primary-container/10',
+                    'rounded-2xl border border-[#E2E8F0] bg-white p-4 text-left transition-all shadow-xs',
+                    onRowClick && 'active:bg-[#F8FAFC]',
+                    isSelected && 'border-[#FF5A5F] bg-[#FFEBEF]/30',
                   )}
                 >
                   {selectable && row.id && (
-                    <div className="mb-2 flex items-center justify-between border-b border-outline-variant/30 pb-2">
-                      <span className="text-micro-label text-on-surface-variant">SELECT ROW</span>
+                    <div className="mb-2.5 flex items-center justify-between border-b border-[#F1F5F9] pb-2">
+                      <span className="font-mono text-[10px] font-bold text-[#94A3B8]">SELECT ROW</span>
                       <input
                         type="checkbox"
                         checked={isSelected}
                         onChange={(e) => toggleSelectRow(row.id!, e as unknown as React.MouseEvent)}
                         onClick={(e) => e.stopPropagation()}
-                        className="h-4 w-4 rounded border-outline bg-surface-container-high accent-primary-container"
+                        className="h-4 w-4 rounded-md border-[#CBD5E1] bg-white accent-[#FF5A5F]"
                       />
                     </div>
                   )}
                   {columns.map((c) => (
                     <div key={c.key} className="flex items-center justify-between gap-2 py-1">
-                      <span className="text-micro-label text-on-surface-variant">
+                      <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-[#94A3B8]">
                         {c.header.toUpperCase()}
                       </span>
-                      <span className="text-body-base">
+                      <span className="text-sm font-semibold text-[#1E232B]">
                         {c.render ? c.render(row) : String((row as Record<string, unknown>)[c.key] ?? '—')}
                       </span>
                     </div>
@@ -280,21 +280,21 @@ export function DataTable<T extends { id?: string }>({
 
           {/* Pagination */}
           {pages > 1 && (
-            <div className="mt-3 flex items-center justify-end gap-2">
+            <div className="mt-4 flex items-center justify-end gap-2">
               <button
                 onClick={() => setPage((p) => Math.max(0, p - 1))}
                 disabled={page === 0}
-                className="min-h-[44px] min-w-[44px] rounded-md px-2 text-label-caps disabled:opacity-30"
+                className="min-h-[40px] rounded-xl border border-[#E2E8F0] bg-white px-3 font-mono text-xs font-bold text-[#1E232B] disabled:opacity-30 cursor-pointer"
               >
                 PREV
               </button>
-              <span className="text-micro-label text-on-surface-variant">
+              <span className="font-mono text-xs text-[#94A3B8]">
                 {page + 1} / {pages}
               </span>
               <button
                 onClick={() => setPage((p) => Math.min(pages - 1, p + 1))}
                 disabled={page >= pages - 1}
-                className="min-h-[44px] min-w-[44px] rounded-md px-2 text-label-caps disabled:opacity-30"
+                className="min-h-[40px] rounded-xl border border-[#E2E8F0] bg-white px-3 font-mono text-xs font-bold text-[#1E232B] disabled:opacity-30 cursor-pointer"
               >
                 NEXT
               </button>

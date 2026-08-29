@@ -55,11 +55,11 @@ const STATE_LABELS: Record<AudioPackState, string> = {
 };
 
 const STATE_CLASSES: Record<AudioPackState, string> = {
-  not_installed: 'bg-surface-container-highest text-on-surface-variant',
-  pending: 'bg-tertiary/20 text-on-surface-variant',
-  downloading: 'bg-tertiary/20 text-on-surface-variant',
-  installed: 'bg-secondary/15 text-secondary',
-  failed: 'bg-error/15 text-error',
+  not_installed: 'bg-[#F1F5F9] text-[#64748B]',
+  pending: 'bg-[#FEF3C7] text-[#92400E]',
+  downloading: 'bg-[#FEF3C7] text-[#92400E]',
+  installed: 'bg-[#C7F9CC] text-[#065A60]',
+  failed: 'bg-[#FFEBEF] text-[#B92B34]',
 };
 
 function StateChip({ state }: { state: AudioPackState }) {
@@ -227,8 +227,8 @@ function AudioPacksView() {
       )}
 
       {!devicesLoading && !devices?.length && (
-        <Card className="mb-4">
-          <p className="text-body-base text-on-surface-variant">
+        <Card className="mb-4 rounded-[32px] p-5 border border-[#EBF0F5] shadow-sm">
+          <p className="text-xs text-[#64748B]">
             Browse what is available below. Add a PUZO first to install a pack on it.
           </p>
           <Link href="/devices" className="mt-3 inline-block">
@@ -240,7 +240,7 @@ function AudioPacksView() {
       )}
 
       {deviceId && (
-        <Card className="mb-4">
+        <Card className="mb-4 rounded-[32px] p-5 border border-[#EBF0F5] shadow-sm">
           <CardHeader
             title="Now playing"
             subtitle={
@@ -248,7 +248,7 @@ function AudioPacksView() {
                 ? `${activePack.name} replaces PUZO’s built-in sounds`
                 : 'PUZO is using its own built-in sounds'
             }
-            action={<Music4 size={18} className="text-on-surface-variant" />}
+            action={<Music4 size={18} className="text-[#FF5A5F]" />}
           />
           {activePack && (
             <Button
@@ -296,44 +296,44 @@ function AudioPacksView() {
               return (
                 <div
                   key={p.slug}
-                  className="rounded-2xl border border-outline-variant/60 bg-surface-container-low p-3"
+                  className="rounded-2xl border border-[#E2E8F0] bg-[#F8FAFC] p-4"
                 >
-                  <div className="flex items-start gap-3">
+                  <div className="flex items-start gap-3.5">
                     {p.thumbnail_url ? (
                       // eslint-disable-next-line @next/next/no-img-element -- pack art is a remote URL from the catalogue, not a bundled asset
                       <img
                         src={p.thumbnail_url}
                         alt=""
-                        className="h-11 w-11 shrink-0 rounded-xl object-cover"
+                        className="h-12 w-12 shrink-0 rounded-2xl object-cover"
                       />
                     ) : (
-                      <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-primary-container/50 text-primary">
-                        <Music4 size={20} />
+                      <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-[#FFEBEF] text-[#FF5A5F]">
+                        <Music4 size={22} />
                       </div>
                     )}
 
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
-                        <span className="truncate text-sm font-extrabold text-on-surface">
+                        <span className="truncate text-sm font-extrabold text-[#1E232B]">
                           {p.name}
                         </span>
                         {p.active && (
-                          <span className="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary">
+                          <span className="shrink-0 rounded-full bg-[#FFEBEF] px-2.5 py-0.5 font-mono text-[9px] font-bold uppercase tracking-wider text-[#FF5A5F]">
                             Playing
                           </span>
                         )}
                         {p.is_premium && p.locked && (
-                          <span className="flex shrink-0 items-center gap-1 rounded-full bg-tertiary/25 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">
+                          <span className="flex shrink-0 items-center gap-1 rounded-full bg-[#FEF3C7] px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-wider text-[#92400E]">
                             <Lock size={9} /> Premium
                           </span>
                         )}
                       </div>
                       {p.description && (
-                        <p className="mt-0.5 line-clamp-2 text-micro-label text-on-surface-variant">
+                        <p className="mt-0.5 line-clamp-2 text-xs text-[#64748B]">
                           {p.description}
                         </p>
                       )}
-                      <p className="mt-1 text-micro-label text-on-surface-variant">
+                      <p className="mt-1 font-mono text-[10px] text-[#94A3B8]">
                         {formatBytes(p.total_bytes)} · v{p.installed_version ?? p.version}
                         {p.update_available && ' · new version available'}
                       </p>
@@ -344,13 +344,13 @@ function AudioPacksView() {
 
                   {inFlight && (
                     <div className="mt-3">
-                      <div className="h-1.5 w-full overflow-hidden rounded-full bg-surface-container-highest">
+                      <div className="h-2 w-full overflow-hidden rounded-full bg-[#E2E8F0]">
                         <div
-                          className="h-full rounded-full bg-primary transition-all duration-500"
+                          className="h-full rounded-full bg-[#FF5A5F] transition-all duration-500"
                           style={{ width: `${Math.max(pct, 4)}%` }}
                         />
                       </div>
-                      <p className="mt-1 text-micro-label text-on-surface-variant">
+                      <p className="mt-1 font-mono text-[10px] text-[#64748B]">
                         {p.state === 'pending'
                           ? 'Waiting for PUZO to come online…'
                           : `Sending — ${pct}%`}
@@ -359,15 +359,15 @@ function AudioPacksView() {
                   )}
 
                   {p.state === 'failed' && p.last_error && (
-                    <p className="mt-3 flex items-start gap-1.5 text-micro-label text-error">
-                      <AlertTriangle size={12} className="mt-0.5 shrink-0" />
+                    <p className="mt-3 flex items-start gap-1.5 text-xs text-[#B92B34]">
+                      <AlertTriangle size={13} className="mt-0.5 shrink-0" />
                       {p.last_error}
                     </p>
                   )}
 
                   <div className="mt-3 flex flex-wrap gap-2">
-                    <Button variant="ghost" size="sm" onClick={() => setDetailSlug(p.slug)}>
-                      <Play size={13} /> Preview
+                    <Button variant="outline" size="sm" onClick={() => setDetailSlug(p.slug)}>
+                      <Play size={13} /> Preview Sounds
                     </Button>
 
                     {p.locked ? (
@@ -449,13 +449,13 @@ function AudioPacksView() {
             onRetry={() => void detailQuery.refetch()}
           />
         ) : !detailQuery.data?.sounds.length ? (
-          <p className="text-body-base text-on-surface-variant">
+          <p className="text-xs text-[#64748B]">
             This pack has no sounds to preview yet.
           </p>
         ) : (
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2 py-2">
             {detailQuery.data.locked && (
-              <p className="mb-1 flex items-start gap-1.5 rounded-xl bg-tertiary/15 px-3 py-2 text-micro-label text-on-surface-variant">
+              <p className="mb-1 flex items-start gap-1.5 rounded-2xl bg-[#FEF3C7] px-4 py-2.5 font-mono text-[10px] font-bold text-[#92400E]">
                 <Lock size={12} className="mt-0.5 shrink-0" />
                 Previews come with the plan that includes this pack.
               </p>
@@ -465,18 +465,18 @@ function AudioPacksView() {
               return (
                 <div
                   key={s.sound_id}
-                  className="flex items-center justify-between gap-3 rounded-xl bg-surface-container-low px-3 py-2"
+                  className="flex items-center justify-between gap-3 rounded-2xl border border-[#E2E8F0] bg-[#F8FAFC] px-4 py-3"
                 >
                   <div className="min-w-0">
-                    <p className="truncate text-body-base font-semibold text-on-surface">
+                    <p className="truncate text-xs font-bold text-[#1E232B]">
                       {titleCase(s.sound_id)}
                     </p>
-                    <p className="text-micro-label text-on-surface-variant">
+                    <p className="font-mono text-[10px] text-[#94A3B8]">
                       {formatBytes(s.bytes)}
                     </p>
                   </div>
                   <Button
-                    variant="ghost"
+                    variant="outline"
                     size="sm"
                     disabled={!s.preview_url}
                     aria-label={isPlaying ? `Stop ${s.sound_id}` : `Play ${s.sound_id}`}

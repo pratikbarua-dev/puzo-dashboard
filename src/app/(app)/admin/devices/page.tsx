@@ -118,27 +118,29 @@ export default function AdminDevicesPage() {
       header: 'Device',
       render: (d) => (
         <div className="flex items-center gap-3">
-          <Cpu size={18} className="text-primary-container" />
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#FFEBEF] text-[#FF5A5F]">
+            <Cpu size={18} />
+          </div>
           <div>
-            <p className="font-extrabold">{d?.name || d?.device_id || 'Device'}</p>
-            <p className="text-micro-label text-on-surface-variant font-mono">{d?.device_id}</p>
+            <p className="font-extrabold text-[#1E232B]">{d?.name || d?.device_id || 'Device'}</p>
+            <p className="font-mono text-[10px] text-[#94A3B8]">{d?.device_id}</p>
           </div>
         </div>
       ),
     },
-    { key: 'hardware_model', header: 'Model', render: (d) => d.hardware_model || '—' },
+    { key: 'hardware_model', header: 'Model', render: (d) => <span className="font-mono text-xs">{d.hardware_model || '—'}</span> },
     {
       key: 'firmware_version',
       header: 'Firmware',
       render: (d) => (
         <div className="flex flex-col">
-          <span className="font-mono text-xs">v{d.firmware_version || '0.1.0'}</span>
-          <span className="text-micro-label text-on-surface-variant uppercase">{d.firmware_channel || 'stable'}</span>
+          <span className="font-mono text-xs font-bold text-[#1E232B]">v{d.firmware_version || '0.1.0'}</span>
+          <span className="font-mono text-[9px] uppercase text-[#94A3B8]">{d.firmware_channel || 'stable'}</span>
         </div>
       ),
     },
     { key: 'status', header: 'Status', render: (d) => <StatusBadge status={d.status} /> },
-    { key: 'last_seen', header: 'Last seen', render: (d) => timeAgo((d.last_seen || d.last_seen_at) as string) },
+    { key: 'last_seen', header: 'Last seen', render: (d) => <span className="font-mono text-xs text-[#64748B]">{timeAgo((d.last_seen || d.last_seen_at) as string)}</span> },
     {
       key: 'actions',
       header: 'Actions',
@@ -170,7 +172,7 @@ export default function AdminDevicesPage() {
       {isLoading ? (
         <Loading label="Loading fleet devices…" />
       ) : (
-        <Card className="p-0">
+        <Card className="rounded-[32px] p-4 sm:p-6 border border-[#EBF0F5] shadow-sm">
           <DataTable
             columns={columns}
             rows={devices ?? []}

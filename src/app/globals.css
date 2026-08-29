@@ -265,3 +265,244 @@ h1, h2, h3 {
 .puzo-toggle[data-state="unchecked"] .puzo-toggle-thumb {
   transform: translateX(0);
 }
+
+/* =========================================================================
+   PUZO Component & Surface Utilities
+   ========================================================================= */
+
+.puzo-control-surface {
+  background: #FFFFFF;
+  border-radius: 1.75rem;
+  padding: 1.25rem;
+  border: 1px solid #EBF0F5;
+  box-shadow: 0 10px 30px -4px rgba(20, 30, 45, 0.04);
+  transition: all 200ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.puzo-section-title {
+  font-family: var(--font-display);
+  font-size: 1.125rem;
+  font-weight: 800;
+  line-height: 1.35;
+  letter-spacing: -0.015em;
+  color: #1E232B;
+}
+
+.puzo-eyebrow {
+  font-family: var(--font-sans);
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #94A3B8;
+}
+
+/* Current Pill Status */
+.puzo-current-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  border-radius: 9999px;
+  background-color: #FFEBEF;
+  padding: 0.25rem 0.75rem;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #FF5A5F;
+}
+
+.puzo-current-dot {
+  height: 0.375rem;
+  width: 0.375rem;
+  border-radius: 9999px;
+  background-color: #FF5A5F;
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Mood & Mode Selection Grid Tiles */
+.puzo-mood-tile,
+.puzo-mode-tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  border-radius: 1.25rem;
+  border: 1.5px solid #E2E8F0;
+  background-color: #F8FAFC;
+  padding: 0.875rem;
+  transition: all 180ms cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+  user-select: none;
+}
+
+.puzo-mood-tile:hover,
+.puzo-mode-tile:hover {
+  background-color: #F1F5F9;
+  border-color: #CBD5E1;
+  transform: translateY(-1px);
+}
+
+.puzo-mood-tile-selected,
+.puzo-mode-tile-selected {
+  border-color: #FF5A5F !important;
+  background-color: #FFF5F7 !important;
+  box-shadow: 0 4px 16px -2px rgba(255, 90, 95, 0.15);
+}
+
+.puzo-mode-tile-selected {
+  border-color: #2EC4B6 !important;
+  background-color: #F0FDF9 !important;
+  box-shadow: 0 4px 16px -2px rgba(46, 196, 182, 0.15);
+}
+
+.puzo-mood-icon {
+  font-size: 1.5rem;
+  line-height: 1;
+  display: inline-block;
+  transition: transform 180ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.puzo-mood-tile:hover .puzo-mood-icon,
+.puzo-mode-tile:hover .puzo-mode-icon {
+  transform: scale(1.1);
+}
+
+.puzo-selection-check {
+  position: absolute;
+  top: 0.625rem;
+  right: 0.625rem;
+  display: flex;
+  height: 1.25rem;
+  width: 1.25rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  background-color: #FF5A5F;
+  color: #FFFFFF;
+  opacity: 0;
+  transform: scale(0.6);
+  transition: all 180ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.puzo-mode-tile-selected .puzo-selection-check {
+  background-color: #2EC4B6;
+}
+
+.puzo-mood-tile-selected .puzo-selection-check,
+.puzo-mode-tile-selected .puzo-selection-check {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Mood Tone Accents */
+.puzo-mood-tone-happy.puzo-mood-tile-selected {
+  border-color: #FFD166 !important;
+  background-color: #FFFDF0 !important;
+}
+.puzo-mood-tone-happy.puzo-mood-tile-selected .puzo-selection-check {
+  background-color: #E5B232;
+}
+
+.puzo-mood-tone-love.puzo-mood-tile-selected {
+  border-color: #FF5A5F !important;
+  background-color: #FFF5F7 !important;
+}
+.puzo-mood-tone-love.puzo-mood-tile-selected .puzo-selection-check {
+  background-color: #FF5A5F;
+}
+
+.puzo-mood-tone-curious.puzo-mood-tile-selected {
+  border-color: #2EC4B6 !important;
+  background-color: #F0FDF9 !important;
+}
+.puzo-mood-tone-curious.puzo-mood-tile-selected .puzo-selection-check {
+  background-color: #2EC4B6;
+}
+
+.puzo-mood-tone-excited.puzo-mood-tile-selected {
+  border-color: #FB923C !important;
+  background-color: #FFF7ED !important;
+}
+.puzo-mood-tone-excited.puzo-mood-tile-selected .puzo-selection-check {
+  background-color: #EA580C;
+}
+
+.puzo-mood-tone-sleepy.puzo-mood-tile-selected {
+  border-color: #818CF8 !important;
+  background-color: #EEF2FF !important;
+}
+.puzo-mood-tone-sleepy.puzo-mood-tile-selected .puzo-selection-check {
+  background-color: #6366F1;
+}
+
+.puzo-mood-tone-sad.puzo-mood-tile-selected {
+  border-color: #A78BFA !important;
+  background-color: #F5F3FF !important;
+}
+.puzo-mood-tone-sad.puzo-mood-tile-selected .puzo-selection-check {
+  background-color: #8B5CF6;
+}
+
+.puzo-mood-tone-angry.puzo-mood-tile-selected {
+  border-color: #F87171 !important;
+  background-color: #FEF2F2 !important;
+}
+.puzo-mood-tone-angry.puzo-mood-tile-selected .puzo-selection-check {
+  background-color: #DC2626;
+}
+
+/* Send Mood Button */
+.puzo-send-button {
+  display: inline-flex;
+  width: 100%;
+  min-height: 48px;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 1.25rem;
+  background-color: #FF5A5F;
+  padding: 0.75rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #FFFFFF;
+  box-shadow: 0 6px 20px -3px rgba(255, 90, 95, 0.3);
+  transition: all 180ms cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+}
+
+.puzo-send-button:hover {
+  background-color: #F5494F;
+  box-shadow: 0 8px 24px -4px rgba(255, 90, 95, 0.4);
+  transform: translateY(-1px);
+}
+
+.puzo-send-button:active {
+  transform: scale(0.98);
+}
+
+.puzo-send-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.puzo-button-spinner {
+  height: 1rem;
+  width: 1rem;
+  border-radius: 9999px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #FFFFFF;
+  animation: spin 1s linear infinite;
+}
+
+/* OLED Simulation Screen */
+.oled-display-screen {
+  background-color: #121418;
+  position: relative;
+  overflow: hidden;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.8);
+}
+

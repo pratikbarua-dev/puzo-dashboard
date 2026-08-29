@@ -24,13 +24,13 @@ export default function AdminSubscriptionsPage() {
   ];
 
   return (
-    <div>
-      <PageHeader title="Admin · Subscriptions" subtitle="All subscriber plans" />
+    <div className="flex flex-col gap-5">
+      <PageHeader title="Admin · Subscriptions" subtitle="All subscriber plans & renewals" />
 
       {isLoading ? (
         <Loading />
       ) : (
-        <Card className="p-0">
+        <Card className="rounded-[32px] p-4 sm:p-6 border border-[#EBF0F5] shadow-sm">
           <DataTable
             columns={columns}
             rows={subs ?? []}

@@ -71,13 +71,13 @@ export default function SchedulesPage() {
   const locked = !entitlements?.scheduled_emotions;
 
   return (
-    <div>
+    <div className="flex flex-col gap-5 pt-2 pb-8">
       <PageHeader
         title="Schedules"
-        subtitle={locked ? 'Requires the Plus plan' : 'Interactions on a timer'}
+        subtitle={locked ? 'Requires the Plus plan' : 'Queue interactions on a timer'}
         action={
           locked ? undefined : (
-            <Button onClick={() => setOpen(true)}>
+            <Button onClick={() => setOpen(true)} variant="primary">
               <Plus size={16} /> Schedule
             </Button>
           )
@@ -88,10 +88,10 @@ export default function SchedulesPage() {
         <EmptyState
           icon={<CalendarClock size={28} />}
           title="Scheduled interactions are a Plus feature"
-          message="Upgrade to send emotions and messages on a timer."
+          message="Upgrade to send emotions, reminders, and messages on a timer."
           action={
             <a href="/subscription">
-              <Button>Upgrade to Plus</Button>
+              <Button variant="primary">Upgrade to Plus</Button>
             </a>
           }
         />
@@ -104,20 +104,20 @@ export default function SchedulesPage() {
           message="Create a future interaction and it will fire automatically."
         />
       ) : (
-        <Card>
-          <CardHeader title="Upcoming & past" />
-          <div className="flex flex-col gap-2">
+        <Card className="rounded-[32px] p-5 sm:p-6 border border-[#EBF0F5] shadow-sm">
+          <CardHeader title="Upcoming &amp; Past" subtitle="Automated events for your companion" />
+          <div className="flex flex-col gap-2.5">
             {schedules.map((s) => (
               <div
                 key={s.id}
-                className="flex flex-wrap items-center justify-between gap-2 rounded-md bg-surface-container-low px-3 py-2 border border-border/20"
+                className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-[#F8FAFC] border border-[#E2E8F0] p-4"
               >
                 <div>
-                  <p className="text-label-caps font-bold">
+                  <p className="text-sm font-extrabold text-[#1E232B] uppercase">
                     {s.type}
                     {s.payload?.text ? ` · ${String(s.payload.text).slice(0, 40)}` : ''}
                   </p>
-                  <p className="text-micro-label text-on-surface-variant">
+                  <p className="font-mono text-[11px] text-[#64748B] mt-0.5">
                     {s.status} · fires {formatDate(s.scheduled_for)}
                   </p>
                 </div>
@@ -127,11 +127,12 @@ export default function SchedulesPage() {
                     size="sm"
                     disabled={cancelMut.isPending}
                     onClick={() => cancelMut.mutate(s.id)}
+                    className="text-[#B92B34] hover:bg-[#FFEBEF]"
                   >
                     <Trash2 size={14} /> Cancel
                   </Button>
                 ) : (
-                  <span className="text-label-caps text-on-surface-variant">{s.status}</span>
+                  <span className="font-mono text-[11px] font-bold text-[#94A3B8] uppercase">{s.status}</span>
                 )}
               </div>
             ))}
@@ -141,7 +142,7 @@ export default function SchedulesPage() {
 
       <Sheet open={open} onClose={() => setOpen(false)} title="Schedule an interaction">
         <form
-          className="flex flex-col gap-4"
+          className="flex flex-col gap-4 py-2"
           onSubmit={(e) => {
             e.preventDefault();
             createMut.mutate();
@@ -203,7 +204,7 @@ export default function SchedulesPage() {
             required
           />
 
-          <Button type="submit" isLoading={createMut.isPending}>
+          <Button type="submit" isLoading={createMut.isPending} className="w-full mt-2">
             Schedule moment
           </Button>
         </form>

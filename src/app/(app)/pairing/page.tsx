@@ -72,41 +72,41 @@ export default function PairingPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-5 pt-2 pb-8">
       <PageHeader
         title="Pairing"
         subtitle="Link your PUZO with your partner or friend's device"
         action={
-          <Button onClick={() => setCreateOpen(true)} className="shadow-lg shadow-purple-950/40">
-            <Plus size={18} /> New Code
+          <Button onClick={() => setCreateOpen(true)} variant="primary">
+            <Plus size={16} /> New Code
           </Button>
         }
       />
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <Card className="flex flex-col justify-between">
+      <div className="grid gap-5 lg:grid-cols-2">
+        <Card className="rounded-[32px] p-5 sm:p-6 border border-[#EBF0F5] shadow-sm flex flex-col justify-between">
           <div>
             <CardHeader
               title="Create a Pairing Code"
               subtitle="Share it once — it expires after use or in 10 minutes"
             />
             <div className="flex flex-col gap-4 mt-2">
-              <p className="text-xs text-on-surface-variant leading-relaxed">
+              <p className="text-xs text-[#64748B] leading-relaxed">
                 Generate a secure, single-use invite code to pair your PUZO companion with another user.
               </p>
               <Button variant="outline" onClick={() => setJoinOpen(true)} className="w-full">
                 <Link2 size={16} /> I Have a Code — Join Pairing
               </Button>
               {newCode && (
-                <div className="mt-2 rounded-2xl border border-purple-500/30 bg-gradient-to-b from-purple-950/40 to-surface-container p-5 text-center shadow-lg">
-                  <p className="mb-2 text-[10px] font-extrabold tracking-widest text-purple-300 uppercase flex items-center justify-center gap-1.5">
-                    <Sparkles size={14} className="text-purple-400" /> Active Invite Code
+                <div className="mt-2 rounded-2xl border border-[#FF5A5F]/30 bg-[#FFEBEF]/40 p-5 text-center shadow-sm">
+                  <p className="mb-2 text-[10px] font-mono font-bold tracking-widest text-[#FF5A5F] uppercase flex items-center justify-center gap-1.5">
+                    <Sparkles size={14} className="text-[#FF5A5F]" /> Active Invite Code
                   </p>
-                  <p className="mb-4 break-all font-mono text-3xl font-black tracking-widest text-purple-300">
+                  <p className="mb-4 break-all font-mono text-3xl font-black tracking-widest text-[#1E232B]">
                     {newCode}
                   </p>
-                  <Button variant="secondary" onClick={copyCode} className="w-full">
-                    {copied ? <Check size={18} className="text-emerald-950" /> : <Copy size={18} />}
+                  <Button variant="primary" onClick={copyCode} className="w-full">
+                    {copied ? <Check size={18} /> : <Copy size={18} />}
                     {copied ? 'Copied to Clipboard' : 'Copy Code'}
                   </Button>
                 </div>
@@ -115,13 +115,13 @@ export default function PairingPage() {
           </div>
         </Card>
 
-        <Card>
+        <Card className="rounded-[32px] p-5 sm:p-6 border border-[#EBF0F5] shadow-sm">
           <CardHeader title="Your Codes" subtitle="Pending, used, and revoked invitations" />
           {isLoading ? (
             <Loading />
           ) : !codes?.length ? (
             <EmptyState
-              icon={<Heart size={32} />}
+              icon={<Heart size={28} />}
               title="No active pairing codes"
               message="Create a code to invite a partner, or ask for theirs to join."
             />
@@ -130,11 +130,11 @@ export default function PairingPage() {
               {codes.map((c) => (
                 <div
                   key={c.id}
-                  className="flex items-center justify-between rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3"
+                  className="flex items-center justify-between rounded-2xl border border-[#E2E8F0] bg-[#F8FAFC] px-4 py-3"
                 >
                   <div>
-                    <p className="text-xs font-bold text-white uppercase tracking-wider">{c.relationship_type}</p>
-                    <p className="text-[11px] font-mono text-on-surface-variant/70">
+                    <p className="text-xs font-bold text-[#1E232B] uppercase tracking-wider">{c.relationship_type}</p>
+                    <p className="text-[11px] font-mono text-[#64748B]">
                       {c.status} · expires {formatDate(c.expires_at)}
                     </p>
                   </div>
@@ -143,12 +143,12 @@ export default function PairingPage() {
                       variant="ghost"
                       size="sm"
                       onClick={() => revokeMut.mutate(c.id)}
-                      className="text-red-400 hover:bg-red-500/10 hover:text-red-300"
+                      className="text-[#B92B34] hover:bg-[#FFEBEF]"
                     >
                       <Trash2 size={14} /> Revoke
                     </Button>
                   ) : (
-                    <span className="text-xs font-mono text-on-surface-variant/60 capitalize">{c.status}</span>
+                    <span className="text-xs font-mono text-[#94A3B8] capitalize">{c.status}</span>
                   )}
                 </div>
               ))}
@@ -177,7 +177,7 @@ export default function PairingPage() {
             pattern="\d{6}"
             maxLength={6}
             required
-            className="text-center font-mono text-2xl font-bold tracking-widest text-purple-300"
+            className="text-center font-mono text-2xl font-bold tracking-widest text-[#1E232B]"
           />
           <Button
             type="submit"

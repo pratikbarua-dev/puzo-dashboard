@@ -101,32 +101,30 @@ export default function InteractionsPage() {
   ];
 
   return (
-    <div>
+    <div className="flex flex-col gap-5 pt-2 pb-8">
       <PageHeader
         title="Interactions"
         subtitle="Send emotions, expressions, and vibrations to your partner's companion"
         action={
-          <Button onClick={() => setOpen(true)}>
+          <Button onClick={() => setOpen(true)} variant="primary">
             <Plus size={16} /> Send moment
           </Button>
         }
       />
 
-      <Card className="mb-4">
+      <Card className="rounded-[32px] p-5 sm:p-6 border border-[#EBF0F5] shadow-sm">
         <CardHeader title="Quick Reactions" subtitle={partnerDevice ? `Targeting ${partnerDevice.name || partnerDevice.device_id}` : 'Pair a partner companion first'} />
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-6">
+        <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 md:grid-cols-6">
           {EMOTION_PRESETS.map(({ key, label, icon }) => (
-            <Button
+            <button
               key={key}
-              variant="outline"
               disabled={!partnerDevice}
-              isLoading={presetMut.isPending && presetMut.variables === key}
               onClick={() => presetMut.mutate(key)}
-              className="flex-col py-3 gap-1 min-h-[56px]"
+              className="flex flex-col items-center justify-center gap-1.5 rounded-2xl border border-[#E2E8F0] bg-[#F8FAFC] p-3 text-center transition-all hover:border-[#FF5A5F]/50 hover:bg-[#FFEBEF]/20 disabled:opacity-40 cursor-pointer"
             >
-              <span className="text-lg">{icon}</span>
-              <span className="text-[11px] font-semibold">{label}</span>
-            </Button>
+              <span className="text-2xl">{icon}</span>
+              <span className="text-xs font-bold text-[#1E232B]">{label}</span>
+            </button>
           ))}
         </div>
       </Card>
@@ -135,19 +133,19 @@ export default function InteractionsPage() {
         <CardSkeleton count={3} />
       ) : !interactions?.length ? (
         <EmptyState
-          icon={<Zap size={28} />}
+          icon={<Zap size={26} />}
           title="No moments shared yet"
           message="Send your first emotion, message, sound, or animation to your partner's PUZO."
           action={
-            <Button variant="outline" onClick={() => setOpen(true)}>
+            <Button onClick={() => setOpen(true)}>
               Send first moment
             </Button>
           }
         />
       ) : (
-        <Card>
+        <Card className="rounded-[32px] p-5 sm:p-6 border border-[#EBF0F5] shadow-sm">
           <CardHeader title="Timeline" subtitle="Moments shared between companion devices" />
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2.5">
             {interactions.map((i) => {
               const isSent = !i.sender_id || i.sender_id === profile?.id;
               const emotionKey = i.payload?.emotion ? String(i.payload.emotion) : null;
@@ -162,37 +160,37 @@ export default function InteractionsPage() {
               return (
                 <div
                   key={i.id}
-                  className="flex items-center justify-between gap-3 rounded-lg bg-surface-container-low px-4 py-3 border border-border/20 hover:bg-surface-container-high transition-fast"
+                  className="flex items-center justify-between gap-3 rounded-2xl bg-[#F8FAFC] px-4 py-3.5 border border-[#E2E8F0]/60 hover:border-[#FF5A5F]/30 transition-all"
                 >
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 min-w-0">
                     <div
-                      className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${
-                        isSent ? 'bg-primary/10 text-primary' : 'bg-secondary/10 text-secondary'
+                      className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ${
+                        isSent ? 'bg-[#FFEBEF] text-[#FF5A5F]' : 'bg-[#C7F9CC] text-[#065A60]'
                       }`}
                     >
                       {isSent ? <ArrowUpRight size={18} /> : <ArrowDownLeft size={18} />}
                     </div>
-                    <div>
+                    <div className="min-w-0">
                       <div className="flex items-center gap-2">
-                        <span className="font-extrabold text-on-surface text-sm">{displayText}</span>
-                        <span className="rounded-full bg-surface-container-highest px-2 py-0.5 text-[10px] font-bold uppercase text-on-surface-variant">
+                        <span className="font-extrabold text-[#1E232B] text-sm truncate">{displayText}</span>
+                        <span className="shrink-0 rounded-full bg-[#E2E8F0] px-2 py-0.5 font-mono text-[9px] font-bold uppercase text-[#64748B]">
                           {i.type}
                         </span>
                       </div>
-                      <p className="text-micro-label text-on-surface-variant mt-0.5">
+                      <p className="font-mono text-[10px] text-[#94A3B8] mt-0.5">
                         {isSent ? 'Sent' : 'Received'} · {formatDate(i.created_at)} · {i.status}
                       </p>
                     </div>
                   </div>
 
-                  <Button
-                    variant="ghost"
-                    size="sm"
+                  <button
                     disabled={delMut.isPending}
                     onClick={() => delMut.mutate(i.id)}
+                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[#94A3B8] hover:bg-[#FFEBEF] hover:text-[#B92B34] transition-colors cursor-pointer"
+                    title="Delete"
                   >
                     <Trash2 size={14} />
-                  </Button>
+                  </button>
                 </div>
               );
             })}
@@ -202,7 +200,7 @@ export default function InteractionsPage() {
 
       <Sheet open={open} onClose={() => setOpen(false)} title="Send a moment">
         <form
-          className="flex flex-col gap-4"
+          className="flex flex-col gap-4 py-2"
           onSubmit={(e) => {
             e.preventDefault();
             sendMut.mutate();
@@ -212,8 +210,6 @@ export default function InteractionsPage() {
             label="Type of interaction"
             value={type}
             onChange={(e) => {
-              // The payload belongs to the old type — carrying `emotion` into a
-              // vibration would be rejected by the backend's strict schema.
               setType(e.target.value);
               setPayload(defaultPayload(commandForInteractionType(e.target.value)));
             }}
@@ -227,8 +223,8 @@ export default function InteractionsPage() {
 
           {type === 'emotion' && (
             <div>
-              <label className="mb-2 block text-label-caps text-on-surface-variant">Pick emotion swatch</label>
-              <div className="grid grid-cols-3 gap-2 mb-3">
+              <label className="mb-1.5 block font-mono text-[10px] font-bold uppercase tracking-wider text-[#94A3B8]">Pick emotion swatch</label>
+              <div className="grid grid-cols-3 gap-2 mb-2">
                 {EMOTION_PRESETS.map(({ key, label, icon }) => (
                   <button
                     key={key}
@@ -236,14 +232,14 @@ export default function InteractionsPage() {
                     onClick={() =>
                       setPayload({ emotion: key, message: labelForEmotion(key) })
                     }
-                    className={`flex items-center gap-2 rounded-lg border p-2.5 text-xs font-bold transition-fast ${
+                    className={`flex items-center gap-2 rounded-xl border p-2.5 text-xs font-bold transition-all cursor-pointer ${
                       payload.emotion === key
-                        ? 'border-primary bg-primary/10 text-primary'
-                        : 'border-border/40 bg-surface-container-low hover:bg-surface-container-high'
+                        ? 'border-[#FF5A5F] bg-[#FFEBEF] text-[#C82D35]'
+                        : 'border-[#E2E8F0] bg-[#F8FAFC] hover:bg-[#F1F5F9]'
                     }`}
                   >
                     <span>{icon}</span>
-                    <span>{label}</span>
+                    <span className="truncate">{label}</span>
                   </button>
                 ))}
               </div>
@@ -269,7 +265,7 @@ export default function InteractionsPage() {
             onChange={(name, value) => setPayload((p) => ({ ...p, [name]: value }))}
           />
 
-          <Button type="submit" isLoading={sendMut.isPending} disabled={!partnerDevice}>
+          <Button type="submit" isLoading={sendMut.isPending} disabled={!partnerDevice} className="w-full mt-2">
             Send moment now
           </Button>
         </form>

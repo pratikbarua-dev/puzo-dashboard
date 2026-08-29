@@ -42,8 +42,8 @@ export default function RelationshipsPage() {
   const others = relationships?.filter((r) => r.status !== 'active') ?? [];
 
   return (
-    <div>
-      <PageHeader title="Relationships" subtitle="People whose PUZO is linked to yours" />
+    <div className="flex flex-col gap-5 pt-2 pb-8">
+      <PageHeader title="Relationships" subtitle="People whose PUZO companion is linked to yours" />
 
       {isLoading ? (
         <Loading />
@@ -56,17 +56,17 @@ export default function RelationshipsPage() {
       ) : (
         <div className="flex flex-col gap-4">
           {active.length > 0 && (
-            <Card>
-              <p className="mb-3 text-label-caps text-on-surface-variant">ACTIVE</p>
-              <div className="flex flex-col gap-2">
+            <Card className="rounded-[32px] p-5 sm:p-6 border border-[#EBF0F5] shadow-sm">
+              <p className="mb-3 font-mono text-[10px] font-bold uppercase tracking-wider text-[#94A3B8]">ACTIVE CONNECTIONS</p>
+              <div className="flex flex-col gap-2.5">
                 {active.map((r) => (
                   <div
                     key={r.id}
-                    className="flex flex-wrap items-center justify-between gap-3 rounded-md bg-surface-container-low px-3 py-3"
+                    className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-[#F8FAFC] border border-[#E2E8F0] p-4"
                   >
                     <div>
-                      <p className="font-extrabold">{r.relationship_type}</p>
-                      <p className="text-micro-label text-on-surface-variant">
+                      <p className="text-sm font-extrabold text-[#1E232B] capitalize">{r.relationship_type}</p>
+                      <p className="font-mono text-[11px] text-[#64748B]">
                         since {formatDate(r.created_at)}
                       </p>
                     </div>
@@ -84,7 +84,7 @@ export default function RelationshipsPage() {
                       <Button variant="outline" size="sm" onClick={() => act.mutate({ id: r.id, action: 'block' })}>
                         <Ban size={14} /> Block
                       </Button>
-                      <Button variant="ghost" size="sm" onClick={() => setUnpairTarget(r)}>
+                      <Button variant="ghost" size="sm" onClick={() => setUnpairTarget(r)} className="text-[#B92B34] hover:bg-[#FFEBEF]">
                         <Trash2 size={14} />
                       </Button>
                     </div>
@@ -95,12 +95,12 @@ export default function RelationshipsPage() {
           )}
 
           {others.length > 0 && (
-            <Card>
-              <p className="mb-3 text-label-caps text-on-surface-variant">OTHERS</p>
-              <div className="flex flex-col gap-2">
+            <Card className="rounded-[32px] p-5 sm:p-6 border border-[#EBF0F5] shadow-sm">
+              <p className="mb-3 font-mono text-[10px] font-bold uppercase tracking-wider text-[#94A3B8]">PAUSED &amp; BLOCKED</p>
+              <div className="flex flex-col gap-2.5">
                 {others.map((r) => (
-                  <div key={r.id} className="flex items-center justify-between rounded-md bg-surface-container-low px-3 py-2">
-                    <span className="text-label-caps">{r.relationship_type}</span>
+                  <div key={r.id} className="flex items-center justify-between gap-3 rounded-2xl bg-[#F8FAFC] border border-[#E2E8F0] p-4">
+                    <span className="text-sm font-bold text-[#1E232B] capitalize">{r.relationship_type}</span>
                     <div className="flex items-center gap-2">
                       <StatusBadge status={r.status} />
                       <Button

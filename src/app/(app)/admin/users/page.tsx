@@ -59,7 +59,7 @@ export default function AdminUsersPage() {
             <option value="super_admin">super_admin</option>
           </Select>
         )}
-        {isSelf && <span className="text-micro-label text-on-surface-variant">(you)</span>}
+        {isSelf && <span className="font-mono text-[10px] text-[#94A3B8]">(you)</span>}
       </div>
     );
   };
@@ -70,27 +70,27 @@ export default function AdminUsersPage() {
       header: 'User',
       render: (u) => (
         <div>
-          <p className="font-extrabold">{u.display_name || u.username || '—'}</p>
-          <p className="text-micro-label text-on-surface-variant">
+          <p className="font-extrabold text-[#1E232B]">{u.display_name || u.username || '—'}</p>
+          <p className="font-mono text-[11px] text-[#64748B]">
             @{u.username || '—'} {u.email ? `· ${u.email}` : ''}
           </p>
         </div>
       ),
     },
     { key: 'role', header: 'Role', render: (u) => <RoleCell user={u} /> },
-    { key: 'timezone', header: 'Timezone', render: (u) => u.timezone || 'UTC' },
+    { key: 'timezone', header: 'Timezone', render: (u) => <span className="font-mono text-xs text-[#64748B]">{u.timezone || 'UTC'}</span> },
     { key: 'created_at', header: 'Joined', render: (u) => formatDate(u.created_at) },
     { key: 'last_active_at', header: 'Last active', render: (u) => timeAgo(u.last_active_at as string) },
   ];
 
   return (
-    <div>
+    <div className="flex flex-col gap-5">
       <PageHeader title="Admin · Users" subtitle="User accounts and role access management" />
 
       {isLoading ? (
         <Loading label="Loading users…" />
       ) : (
-        <Card className="p-0">
+        <Card className="rounded-[32px] p-4 sm:p-6 border border-[#EBF0F5] shadow-sm">
           <DataTable
             columns={columns}
             rows={users ?? []}

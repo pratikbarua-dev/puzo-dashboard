@@ -107,7 +107,7 @@ export default function AdminFirmwarePage() {
       {isLoading ? (
         <Loading />
       ) : (
-        <Card className="p-0">
+        <Card className="rounded-[32px] p-4 sm:p-6 border border-[#EBF0F5] shadow-sm">
           <DataTable
             columns={columns}
             rows={releases ?? []}
@@ -120,14 +120,14 @@ export default function AdminFirmwarePage() {
       )}
 
       <Sheet open={open} onClose={() => setOpen(false)} title="Upload firmware">
-        <form onSubmit={upload} className="flex flex-col gap-4">
+        <form onSubmit={upload} className="flex flex-col gap-4 py-2">
           <label className="block">
-            <span className="mb-1 block text-micro-label text-on-surface-variant">FIRMWARE .BIN (≤2 MB)</span>
+            <span className="mb-1.5 block font-mono text-[10px] font-bold uppercase tracking-wider text-[#94A3B8]">FIRMWARE .BIN (≤2 MB)</span>
             <input
               type="file"
               accept=".bin"
               onChange={(e) => setFile(e.target.files?.[0] || null)}
-              className="w-full rounded-md bg-surface-container-high px-3 py-3 text-body-base file:mr-3 file:rounded file:border-0 file:bg-primary-container file:px-3 file:py-1 file:text-white"
+              className="w-full rounded-2xl border border-[#E2E8F0] bg-[#F8FAFC] px-3.5 py-3 text-xs text-[#1E232B] file:mr-3 file:rounded-xl file:border-0 file:bg-[#FF5A5F] file:px-3 file:py-1 file:text-xs file:font-bold file:text-white cursor-pointer"
             />
           </label>
           <Input label="Version" value={version} onChange={(e) => setVersion(e.target.value)} placeholder="1.0.4" required />

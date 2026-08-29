@@ -16,29 +16,29 @@ export default function AdminAuditPage() {
   });
 
   const columns: Column<AuditLogEntry>[] = [
-    { key: 'action', header: 'Action', render: (l) => <span className="font-extrabold">{l.action || '—'}</span> },
+    { key: 'action', header: 'Action', render: (l) => <span className="font-extrabold text-[#1E232B]">{l.action || '—'}</span> },
     {
       key: 'entity',
       header: 'Entity',
       render: (l) => (
         <div>
-          <p className="text-micro-label">{l.entity_type || '—'}</p>
-          <p className="font-mono text-xs text-on-surface-variant">{l.entity_id || ''}</p>
+          <p className="font-mono text-xs font-bold text-[#1E232B]">{l.entity_type || '—'}</p>
+          <p className="font-mono text-[10px] text-[#64748B]">{l.entity_id || ''}</p>
         </div>
       ),
     },
-    { key: 'actor_id', header: 'Actor', render: (l) => <span className="font-mono text-xs">{l.actor_id ? l.actor_id.slice(0, 8) : '—'}</span> },
+    { key: 'actor_id', header: 'Actor', render: (l) => <span className="font-mono text-xs text-[#64748B]">{l.actor_id ? l.actor_id.slice(0, 8) : '—'}</span> },
     { key: 'created_at', header: 'Time', render: (l) => formatDate(l.created_at) },
   ];
 
   return (
-    <div>
-      <PageHeader title="Admin · Audit log" subtitle="A trail of sensitive actions" />
+    <div className="flex flex-col gap-5">
+      <PageHeader title="Admin · Audit log" subtitle="A trail of sensitive actions & security events" />
 
       {isLoading ? (
         <Loading />
       ) : (
-        <Card className="p-0">
+        <Card className="rounded-[32px] p-4 sm:p-6 border border-[#EBF0F5] shadow-sm">
           <DataTable
             columns={columns}
             rows={logs ?? []}

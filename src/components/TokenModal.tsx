@@ -33,41 +33,41 @@ export function TokenModal({
   };
 
   return (
-    <Sheet open={open} onClose={onClose} title={deviceName ? `Provision ${deviceName}` : 'Device token'}>
-      <div className="mb-4 rounded-lg bg-secondary/10 p-3 text-sm text-on-surface-variant">
-        <span className="font-extrabold text-secondary">Store this token securely.</span>{' '}
+    <Sheet open={open} onClose={onClose} title={deviceName ? `Provision ${deviceName}` : 'Device Token'}>
+      <div className="mb-4 rounded-2xl bg-[#FEF3C7] p-3.5 text-xs text-[#92400E] leading-relaxed">
+        <span className="font-extrabold">Store this token securely.</span>{' '}
         It is shown only once and cannot be recovered.
       </div>
       {deviceId && (
         <div className="mb-3">
-          <p className="mb-1 text-micro-label text-on-surface-variant">DEVICE ID</p>
-          <p className="font-mono text-sm text-primary">{deviceId}</p>
+          <p className="mb-1 font-mono text-[10px] font-bold uppercase tracking-wider text-[#94A3B8]">DEVICE ID</p>
+          <p className="font-mono text-sm font-extrabold text-[#1E232B]">{deviceId}</p>
         </div>
       )}
       <div className="mb-4">
-        <p className="mb-1 text-micro-label text-on-surface-variant">TOKEN</p>
-        <div className="flex items-center gap-2 rounded-md bg-surface-container-high p-3">
-          <code className="flex-1 break-all font-mono text-xs text-primary-container">
+        <p className="mb-1 font-mono text-[10px] font-bold uppercase tracking-wider text-[#94A3B8]">TOKEN</p>
+        <div className="flex items-center gap-2 rounded-2xl border border-[#E2E8F0] bg-[#F8FAFC] p-3">
+          <code className="flex-1 break-all font-mono text-xs text-[#FF5A5F]">
             {show ? token : '•'.repeat(Math.min(token.length, 32))}
           </code>
           <button
             onClick={() => setShow((s) => !s)}
-            className="min-h-[44px] min-w-[44px] text-on-surface-variant"
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-[#64748B] hover:bg-[#E2E8F0] hover:text-[#1E232B] cursor-pointer"
             aria-label={show ? 'Hide token' : 'Show token'}
           >
-            {show ? <EyeOff size={18} /> : <Eye size={18} />}
+            {show ? <EyeOff size={16} /> : <Eye size={16} />}
           </button>
           <button
             onClick={copy}
-            className="min-h-[44px] min-w-[44px] text-on-surface-variant"
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-[#64748B] hover:bg-[#E2E8F0] hover:text-[#1E232B] cursor-pointer"
             aria-label="Copy token"
           >
-            {copied ? <Check size={18} className="text-secondary" /> : <Copy size={18} />}
+            {copied ? <Check size={16} className="text-[#065A60]" /> : <Copy size={16} />}
           </button>
         </div>
       </div>
       <Button className="w-full" onClick={onClose}>
-        I&apos;ve stored it
+        I&apos;ve stored it safely
       </Button>
     </Sheet>
   );

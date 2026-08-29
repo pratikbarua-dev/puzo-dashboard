@@ -311,18 +311,18 @@ export function DeviceSettingsCard({ deviceId }: { deviceId: string }) {
   }
 
   return (
-    <Card>
+    <Card className="rounded-[32px] p-5 sm:p-6 border border-[#EBF0F5] shadow-sm">
       <CardHeader
         title="Behavior & Display"
-        subtitle="Settings synced to this PUZO device"
-        action={<ListOrdered size={18} className="text-on-surface-variant" />}
+        subtitle="Settings synced directly to this PUZO hardware"
+        action={<ListOrdered size={18} className="text-[#94A3B8]" />}
       />
 
-      <div className="mb-4 flex flex-col gap-1">
+      <div className="mb-4 flex flex-col divide-y divide-[#F1F5F9] rounded-2xl border border-[#E2E8F0] bg-[#F8FAFC] px-4 py-1">
         {TOGGLE_FIELDS.map((t) => (
-          <div key={t.key} className="flex items-center justify-between gap-3 rounded-md bg-surface-container-low px-3 py-2">
-            <span className="flex items-center gap-2 text-body-base">
-              <span className="text-on-surface-variant">{t.icon}</span>
+          <div key={t.key} className="flex items-center justify-between gap-3 py-3">
+            <span className="flex items-center gap-2.5 text-sm font-bold text-[#1E232B]">
+              <span className="text-[#FF5A5F]">{t.icon}</span>
               {t.label}
             </span>
             <Toggle
@@ -334,13 +334,13 @@ export function DeviceSettingsCard({ deviceId }: { deviceId: string }) {
         ))}
       </div>
 
-      <div className="mb-4 rounded-md bg-surface-container-low px-3 py-3">
+      <div className="mb-4 rounded-2xl border border-[#E2E8F0] bg-[#F8FAFC] p-4">
         <div className="flex items-center justify-between gap-3">
-          <span className="flex items-center gap-2 text-body-base">
-            <span className="text-on-surface-variant"><Volume2 size={16} /></span>
-            Speaker volume
+          <span className="flex items-center gap-2 text-sm font-bold text-[#1E232B]">
+            <Volume2 size={16} className="text-[#FF5A5F]" />
+            Speaker Volume
           </span>
-          <span className="text-label-caps text-on-surface-variant tabular-nums">
+          <span className="font-mono text-xs font-bold text-[#FF5A5F] tabular-nums">
             {draft.volume}%
           </span>
         </div>
@@ -359,18 +359,18 @@ export function DeviceSettingsCard({ deviceId }: { deviceId: string }) {
           onPointerUp={commitVolume}
           onKeyUp={commitVolume}
           onBlur={commitVolume}
-          className="mt-3 h-1.5 w-full cursor-pointer appearance-none rounded-full bg-surface-container-highest accent-primary disabled:opacity-50"
+          className="mt-3 h-2 w-full cursor-pointer appearance-none rounded-full bg-[#E2E8F0] accent-[#FF5A5F] disabled:opacity-50"
         />
-        <p className="mt-2 text-micro-label text-on-surface-variant">
+        <p className="mt-2 text-[11px] text-[#64748B]">
           {draft.volume === 0
             ? 'Muted — sounds are skipped entirely.'
-            : 'Scales playback level in software; the amplifier’s gain is fixed in hardware.'}
+            : 'Scales playback level in software; amplifier gain is fixed in hardware.'}
         </p>
 
         <div className="mt-4 flex items-center justify-between gap-3">
-          <span className="flex items-center gap-2 text-body-base">
-            <span className="text-on-surface-variant"><Vibrate size={16} /></span>
-            Vibration strength
+          <span className="flex items-center gap-2 text-sm font-bold text-[#1E232B]">
+            <Vibrate size={16} className="text-[#2EC4B6]" />
+            Vibration Strength
           </span>
         </div>
         <div className="mt-2 grid grid-cols-3 gap-2" role="group" aria-label="Vibration strength">
@@ -387,10 +387,10 @@ export function DeviceSettingsCard({ deviceId }: { deviceId: string }) {
                   setDraft((d) => (d ? { ...d, haptic_intensity: i.value } : d));
                   hapticMut.mutate(i.value);
                 }}
-                className={`rounded-md border py-2 text-label-caps transition-fast disabled:opacity-50 ${
+                className={`rounded-xl border py-2 text-xs font-bold transition-all disabled:opacity-50 cursor-pointer ${
                   active
-                    ? 'border-primary bg-primary/10 text-primary'
-                    : 'border-outline-variant/60 bg-surface text-on-surface-variant hover:bg-surface-container-high'
+                    ? 'border-[#2EC4B6] bg-[#C7F9CC]/40 text-[#065A60] shadow-xs'
+                    : 'border-[#E2E8F0] bg-white text-[#64748B] hover:bg-[#F8FAFC]'
                 }`}
               >
                 {i.label}
@@ -399,15 +399,15 @@ export function DeviceSettingsCard({ deviceId }: { deviceId: string }) {
           })}
         </div>
         {draft.quiet_mode_enabled && (
-          <p className="mt-2 text-micro-label text-on-surface-variant">
-            Quiet mode is on, so this PUZO stays silent and still until you turn it off.
+          <p className="mt-2 text-[11px] font-mono text-[#A82835]">
+            Quiet mode is on, so this PUZO stays silent and still until turned off.
           </p>
         )}
       </div>
 
-      <div className="mb-4 max-w-sm">
+      <div className="mb-4">
         <Select
-          label="OLED eye style"
+          label="OLED Eye Style"
           value={draft.eye_pack}
           disabled={eyePackMut.isPending}
           onChange={(event) => {
@@ -416,13 +416,13 @@ export function DeviceSettingsCard({ deviceId }: { deviceId: string }) {
             eyePackMut.mutate(value);
           }}
         >
-          <option value="classic">PUZO Classic</option>
-          <option value="iris_oled">IrisOLED Expressions</option>
+          <option value="classic">PUZO Classic (Parametric Eyes)</option>
+          <option value="iris_oled">IrisOLED Expressions (Bitmap Reactions)</option>
         </Select>
-        <p className="mt-1 text-[10px] text-on-surface-variant">IrisOLED is an MIT-licensed SSD1306 eye pack with bitmap reactions.</p>
+        <p className="mt-1 text-[11px] text-[#94A3B8]">IrisOLED is an SSD1306 expressive eye pack with bitmap reactions.</p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-3 sm:grid-cols-2">
         {NUMERIC_FIELDS.map((f) => (
           <div key={f.key}>
             <Input
@@ -437,54 +437,54 @@ export function DeviceSettingsCard({ deviceId }: { deviceId: string }) {
               }
             />
             {f.key === 'timezone_offset_min' && (
-              <p className="mt-1 text-micro-label text-on-surface-variant">
+              <p className="mt-1 font-mono text-[10px] text-[#94A3B8]">
                 Shown as {formatOffset(draft.timezone_offset_min)}
               </p>
             )}
             {f.hint && (
-              <p className="mt-1 text-micro-label text-on-surface-variant">{f.hint}</p>
+              <p className="mt-1 text-[10px] text-[#94A3B8]">{f.hint}</p>
             )}
           </div>
         ))}
       </div>
 
       <Button
-        className="mt-4"
+        className="mt-4 w-full"
         disabled={!numericDirty}
         isLoading={saveNumericMut.isPending}
         onClick={handleSaveNumeric}
       >
-        Save settings
+        Save Settings
       </Button>
 
-      <div className="mt-5 border-t border-outline-variant/40 pt-4">
+      <div className="mt-5 border-t border-[#F1F5F9] pt-4">
         <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2 text-on-surface-variant">
-            <MapPin size={14} />
-            <span className="text-label-caps">DEVICE LOCATION</span>
+          <div className="flex items-center gap-1.5 text-xs font-mono font-bold tracking-wider text-[#94A3B8] uppercase">
+            <MapPin size={13} className="text-[#FF5A5F]" />
+            <span>DEVICE LOCATION</span>
           </div>
           <button
             type="button"
             onClick={handleDetectLocation}
             disabled={isGeolocating}
-            className="flex items-center gap-1.5 text-micro-label text-primary hover:underline disabled:opacity-50"
+            className="flex items-center gap-1 text-xs font-bold text-[#FF5A5F] hover:underline disabled:opacity-50 cursor-pointer"
           >
-            <Locate size={12} className={isGeolocating ? 'animate-spin' : ''} />
+            <Locate size={13} className={isGeolocating ? 'animate-spin' : ''} />
             {isGeolocating ? 'Detecting…' : 'Detect my location'}
           </button>
         </div>
-        <p className="mt-1 text-micro-label text-on-surface-variant">
+        <p className="mt-1 text-xs text-[#64748B]">
           Used for local weather on your companion. Search a city to auto-detect coordinates.
         </p>
 
         {locCity && (
-          <div className="mt-3 flex items-center justify-between rounded-md border border-outline-variant/60 bg-surface-container-low px-3 py-2 text-body-base">
-            <div className="flex items-center gap-2 overflow-hidden">
-              <MapPin size={16} className="shrink-0 text-primary" />
+          <div className="mt-3 flex items-center justify-between rounded-2xl border border-[#E2E8F0] bg-[#F8FAFC] px-4 py-2.5 text-sm">
+            <div className="flex items-center gap-2.5 overflow-hidden">
+              <MapPin size={16} className="shrink-0 text-[#FF5A5F]" />
               <div className="truncate">
-                <span className="font-medium text-on-surface">{locCity}</span>
+                <span className="font-bold text-[#1E232B]">{locCity}</span>
                 {locLat && locLng && (
-                  <span className="ml-2 text-micro-label text-on-surface-variant">
+                  <span className="ml-2 font-mono text-xs text-[#94A3B8]">
                     ({Number(locLat).toFixed(2)}°, {Number(locLng).toFixed(2)}°)
                   </span>
                 )}
@@ -499,9 +499,9 @@ export function DeviceSettingsCard({ deviceId }: { deviceId: string }) {
                 setLocLng('');
                 locMut.mutate({ city: '', latitude: null, longitude: null });
               }}
-              className="ml-2 text-on-surface-variant hover:text-on-surface"
+              className="ml-2 text-[#94A3B8] hover:text-[#1E232B] cursor-pointer"
             >
-              <X size={14} />
+              <X size={15} />
             </button>
           </div>
         )}
@@ -519,13 +519,13 @@ export function DeviceSettingsCard({ deviceId }: { deviceId: string }) {
             />
             {isSearching && (
               <div className="absolute right-3 top-9 flex items-center">
-                <span className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                <span className="h-4 w-4 animate-spin rounded-full border-2 border-[#FF5A5F] border-t-transparent" />
               </div>
             )}
           </div>
 
           {showDropdown && suggestions.length > 0 && (
-            <div className="absolute z-20 mt-1 max-h-60 w-full overflow-y-auto rounded-md border border-outline-variant/60 bg-surface-container-high py-1 shadow-lg backdrop-blur-md">
+            <div className="absolute z-20 mt-1 max-h-60 w-full overflow-y-auto rounded-2xl border border-[#E2E8F0] bg-white py-1.5 shadow-xl">
               {suggestions.map((item) => {
                 const region = [item.admin1, item.country].filter(Boolean).join(', ');
                 return (
@@ -533,11 +533,11 @@ export function DeviceSettingsCard({ deviceId }: { deviceId: string }) {
                     key={item.id}
                     type="button"
                     onClick={() => handleSelectCity(item)}
-                    className="flex w-full flex-col text-left px-3 py-2 hover:bg-surface-container-highest transition-colors"
+                    className="flex w-full flex-col text-left px-4 py-2.5 hover:bg-[#F8FAFC] transition-colors cursor-pointer"
                   >
-                    <span className="font-medium text-on-surface">{item.name}</span>
+                    <span className="text-sm font-bold text-[#1E232B]">{item.name}</span>
                     {region && (
-                      <span className="text-micro-label text-on-surface-variant">{region}</span>
+                      <span className="text-xs text-[#64748B]">{region}</span>
                     )}
                   </button>
                 );
@@ -546,7 +546,7 @@ export function DeviceSettingsCard({ deviceId }: { deviceId: string }) {
           )}
 
           {showDropdown && !isSearching && searchQuery.trim().length >= 2 && suggestions.length === 0 && (
-            <div className="absolute z-20 mt-1 w-full rounded-md border border-outline-variant/60 bg-surface-container-high p-3 text-center text-micro-label text-on-surface-variant shadow-lg">
+            <div className="absolute z-20 mt-1 w-full rounded-2xl border border-[#E2E8F0] bg-white p-4 text-center text-xs text-[#94A3B8] shadow-xl">
               No matching cities found
             </div>
           )}

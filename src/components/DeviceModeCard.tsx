@@ -107,23 +107,23 @@ export function DeviceEmotionalModeCard({ deviceId, admin = false }: { deviceId:
         <div>
           <p className="puzo-eyebrow">PUZO emotional mode</p>
           <h2 id="puzo-emotional-mode-title" className="puzo-section-title">Choose how PUZO feels</h2>
-          <p className="mt-1.5 max-w-[28rem] text-[12px] leading-5 text-on-surface-variant">
+          <p className="mt-1 max-w-[28rem] text-xs leading-relaxed text-[#64748B]">
             A persistent personality that shapes PUZO&apos;s OLED eye expressions and touch reactions.
           </p>
         </div>
 
         {/* OLED Screen Eye Visualizer Simulation */}
-        <div className="flex flex-col items-center gap-1.5">
-          <div className="oled-display-screen h-16 w-36 rounded-xl flex items-center justify-center gap-4 px-3 border border-purple-500/30">
-            <div className="h-7 w-7 rounded-full bg-cyan-400 shadow-[0_0_12px_#22d3ee] flex items-center justify-center animate-pulse">
-              <div className="h-2.5 w-2.5 rounded-full bg-black" />
+        <div className="flex flex-col items-center gap-1.5 self-start sm:self-auto">
+          <div className="oled-bezel h-14 w-32 rounded-2xl flex items-center justify-center gap-3 px-3 bg-[#1C2026] border border-[#2A2E35]">
+            <div className="h-6 w-6 rounded-full bg-[#FFD166] shadow-[0_0_10px_#FFD166] flex items-center justify-center animate-pulse">
+              <div className="h-2 w-2 rounded-full bg-[#1C2026]" />
             </div>
-            <div className="h-7 w-7 rounded-full bg-cyan-400 shadow-[0_0_12px_#22d3ee] flex items-center justify-center animate-pulse">
-              <div className="h-2.5 w-2.5 rounded-full bg-black" />
+            <div className="h-6 w-6 rounded-full bg-[#FFD166] shadow-[0_0_10px_#FFD166] flex items-center justify-center animate-pulse">
+              <div className="h-2 w-2 rounded-full bg-[#1C2026]" />
             </div>
           </div>
-          <span className="text-[10px] font-bold tracking-widest text-purple-400 uppercase flex items-center gap-1">
-            <Eye size={10} /> OLED 128x64 Preview
+          <span className="text-[9px] font-mono font-bold tracking-wider text-[#94A3B8] uppercase flex items-center gap-1">
+            <Eye size={10} className="text-[#FF5A5F]" /> OLED 128x64
           </span>
         </div>
       </div>
@@ -146,16 +146,16 @@ export function DeviceEmotionalModeCard({ deviceId, admin = false }: { deviceId:
               className={`puzo-mood-tile ${isSelected ? 'puzo-mood-tile-selected' : ''} ${MOOD_ACCENTS[value] || ''}`}
             >
               <span className="puzo-mood-icon" aria-hidden="true">{emoji}</span>
-              <span className="mt-2 block text-[13px] font-extrabold text-on-surface">{label}</span>
-              <span className="mt-1 block text-[10px] leading-4 text-on-surface-variant/80">{description}</span>
-              <span className="puzo-selection-check" aria-hidden="true"><Check size={12} strokeWidth={3} /></span>
+              <span className="mt-2 block text-xs font-extrabold text-[#1E232B]">{label}</span>
+              <span className="mt-0.5 block text-[10px] leading-snug text-[#64748B]">{description}</span>
+              <span className="puzo-selection-check" aria-hidden="true"><Check size={11} strokeWidth={3} /></span>
             </button>
           );
         })}
       </div>
 
-      <p className="mt-4 max-w-[38rem] text-[11px] leading-4 text-on-surface-variant">
-        Saved to this PUZO. One-time moods and system reactions can briefly appear, then return to <strong className="text-white">{selected[1]}</strong>.
+      <p className="mt-4 max-w-[38rem] text-[11px] leading-relaxed text-[#94A3B8]">
+        Saved to this PUZO. One-time moods and system reactions can briefly appear, then return to <strong className="text-[#1E232B] font-bold">{selected[1]}</strong>.
       </p>
     </section>
   );
@@ -218,16 +218,18 @@ export function DeviceModeCard({ deviceId, admin = false }: { deviceId: string; 
               }}
               className={`puzo-mode-tile ${isSelected ? 'puzo-mode-tile-selected' : ''}`}
             >
-              <span className="puzo-mode-icon" aria-hidden="true"><Icon size={23} strokeWidth={1.8} /></span>
-              <span className="mt-4 block text-[14px] font-extrabold tracking-[-0.01em] text-on-surface">{item.label}</span>
-              <span className="mt-1 block text-[11px] leading-4 text-on-surface-variant/80">{item.description}</span>
-              <span className="puzo-selection-check" aria-hidden="true"><Check size={12} strokeWidth={3} /></span>
+              <span className="puzo-mode-icon text-[#2EC4B6]" aria-hidden="true">
+                <Icon size={22} strokeWidth={2} />
+              </span>
+              <span className="mt-3 block text-sm font-extrabold tracking-tight text-[#1E232B]">{item.label}</span>
+              <span className="mt-0.5 block text-[10px] leading-snug text-[#64748B]">{item.description}</span>
+              <span className="puzo-selection-check" aria-hidden="true"><Check size={11} strokeWidth={3} /></span>
             </button>
           );
         })}
       </div>
 
-      <p className="mt-4 max-w-[38rem] text-[11px] leading-4 text-on-surface-variant">Saved to this PUZO. Local moments can briefly take over, then return to your selected mode.</p>
+      <p className="mt-4 max-w-[38rem] text-[11px] leading-relaxed text-[#94A3B8]">Saved to this PUZO. Local moments can briefly take over, then return to your selected mode.</p>
     </section>
   );
 }
@@ -245,7 +247,7 @@ export function DeviceMoodCard({ deviceId, admin = false }: { deviceId: string; 
       <div className="mb-5">
         <p className="puzo-eyebrow">A little expression</p>
         <h2 id="send-mood-title" className="puzo-section-title">Send a mood</h2>
-        <p className="mt-1.5 max-w-[28rem] text-[12px] leading-5 text-on-surface-variant">Tell PUZO how you&apos;re feeling. This is a one-time moment, not a change to its mode.</p>
+        <p className="mt-1 max-w-[28rem] text-xs leading-relaxed text-[#64748B]">Tell PUZO how you&apos;re feeling. This is a one-time moment, not a change to its mode.</p>
       </div>
 
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-4" role="group" aria-label="Moods">
@@ -261,7 +263,7 @@ export function DeviceMoodCard({ deviceId, admin = false }: { deviceId: string; 
               className={`group puzo-mood-tile ${isSelected ? 'puzo-mood-tile-selected' : ''} ${MOOD_ACCENTS[value]}`}
             >
               <span className="puzo-mood-icon" aria-hidden="true">{emoji}</span>
-              <span className="mt-2 block text-[12px] font-extrabold text-on-surface">{label}</span>
+              <span className="mt-2 block text-xs font-extrabold text-[#1E232B]">{label}</span>
             </button>
           );
         })}
@@ -274,7 +276,7 @@ export function DeviceMoodCard({ deviceId, admin = false }: { deviceId: string; 
         className="puzo-send-button mt-4"
       >
         {moodMut.isPending ? <span className="puzo-button-spinner" aria-hidden="true" /> : <Send size={16} strokeWidth={2.2} />}
-        {moodMut.isPending ? 'Sending…' : `Send ${MOODS.find(([value]) => value === emotion)?.[1] || 'mood'}`}
+        <span>{moodMut.isPending ? 'Sending…' : `Send ${MOODS.find(([value]) => value === emotion)?.[1] || 'mood'}`}</span>
         <Heart size={14} className="ml-auto opacity-75 fill-current" />
       </button>
     </section>

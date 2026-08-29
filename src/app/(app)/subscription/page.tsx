@@ -39,10 +39,10 @@ export default function SubscriptionPage() {
   const activePlanName = subscription?.plan?.name ?? (subscription ? subscription.status : 'free');
 
   return (
-    <div>
+    <div className="flex flex-col gap-5 pt-2 pb-8">
       <PageHeader
         title="Subscription"
-        subtitle={`Current plan: ${activePlanName}`}
+        subtitle={`Current plan: ${activePlanName.toUpperCase()}`}
         action={
           subscription?.status === 'active' || subscription?.status === 'trialing' ? (
             <Button variant="outline" onClick={() => setCancelOpen(true)}>
@@ -67,34 +67,34 @@ export default function SubscriptionPage() {
                 key={p.id}
                 className={
                   current
-                    ? 'ring-2 ring-primary-container'
+                    ? 'rounded-[32px] p-6 border-2 border-[#FF5A5F] bg-white shadow-md'
                     : p.name === 'plus'
-                      ? 'ring-1 ring-secondary'
-                      : ''
+                      ? 'rounded-[32px] p-6 border border-[#2EC4B6] bg-white shadow-sm'
+                      : 'rounded-[32px] p-6 border border-[#EBF0F5] bg-white shadow-sm'
                 }
               >
                 <CardHeader
-                  title={p.name === 'free' ? 'Free' : p.name === 'plus' ? 'Plus' : 'Family'}
-                  subtitle={current ? 'Your current plan' : p.description || undefined}
+                  title={p.name === 'free' ? 'Free Companion' : p.name === 'plus' ? 'Plus Companion' : 'Family Companion'}
+                  subtitle={current ? 'Your active plan' : p.description || undefined}
                 />
-                <p className="mb-3 text-headline-lg">
+                <p className="mb-3 text-3xl font-extrabold text-[#1E232B]">
                   ${Number(p.price || 0).toFixed(2)}
-                  <span className="text-label-caps text-on-surface-variant">/mo</span>
+                  <span className="font-mono text-xs font-bold text-[#94A3B8]">/mo</span>
                 </p>
-                <ul className="mb-4 flex flex-col gap-2">
+                <ul className="mb-5 flex flex-col gap-2">
                   {Object.entries((p.features as Record<string, boolean>) || {})
                     .filter(([, v]) => v)
                     .map(([k]) => (
-                      <li key={k} className="flex items-center gap-2 text-body-base">
-                        <Check size={14} className="text-secondary" />
-                        {k.replace(/_/g, ' ')}
+                      <li key={k} className="flex items-center gap-2 text-xs font-semibold text-[#64748B]">
+                        <Check size={15} className="text-[#2EC4B6]" />
+                        <span className="capitalize">{k.replace(/_/g, ' ')}</span>
                       </li>
                     ))}
                 </ul>
                 {current ? (
-                  <p className="text-center text-label-caps text-on-surface-variant">
-                    {isFree && entitlements?.scheduled_emotions ? 'UPGRADING…' : 'ACTIVE'}
-                  </p>
+                  <div className="rounded-2xl bg-[#FFEBEF] py-2.5 text-center font-mono text-xs font-bold text-[#FF5A5F]">
+                    {isFree && entitlements?.scheduled_emotions ? 'UPGRADING…' : 'ACTIVE PLAN'}
+                  </div>
                 ) : (
                   <Button
                     className="w-full"

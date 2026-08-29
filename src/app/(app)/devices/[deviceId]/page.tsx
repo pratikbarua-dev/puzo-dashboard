@@ -107,9 +107,9 @@ export default function DeviceDetailPage() {
     <div>
       <button
         onClick={() => router.back()}
-        className="mb-3 flex min-h-[44px] items-center gap-2 text-label-caps text-on-surface-variant"
+        className="mb-3 flex min-h-[44px] items-center gap-2 font-mono text-xs font-bold text-[#64748B] hover:text-[#1E232B] transition-colors cursor-pointer"
       >
-        <ArrowLeft size={16} /> BACK
+        <ArrowLeft size={16} /> BACK TO DEVICES
       </button>
 
       <PageHeader
@@ -119,60 +119,61 @@ export default function DeviceDetailPage() {
       />
 
       <div className="grid gap-4">
-        <Card>
-          <CardHeader title="Details" />
+        <Card className="rounded-[32px] p-5 sm:p-6 border border-[#EBF0F5] shadow-sm">
+          <CardHeader title="Hardware Details" subtitle="Connected PUZO device parameters" />
           {(batteryStatus(device.battery_percentage, device.battery_voltage) === 'low' || batteryStatus(device.battery_percentage, device.battery_voltage) === 'critical') && (
-            <div className={`mb-4 rounded-lg px-3 py-2 text-sm ${batteryStatus(device.battery_percentage, device.battery_voltage) === 'critical' ? 'bg-error/15 text-error' : 'bg-secondary/15 text-secondary'}`} role="status">
+            <div className={`mb-4 rounded-2xl px-4 py-3 text-xs font-mono font-bold ${batteryStatus(device.battery_percentage, device.battery_voltage) === 'critical' ? 'bg-[#FFEBEF] text-[#B92B34]' : 'bg-[#FEF3C7] text-[#92400E]'}`} role="status">
               {batteryLabel(batteryStatus(device.battery_percentage, device.battery_voltage))} — recharge PUZO soon.
             </div>
           )}
-          <dl className="flex flex-col gap-2">
+          <dl className="flex flex-col divide-y divide-[#F1F5F9] rounded-2xl border border-[#E2E8F0] bg-[#F8FAFC] px-4 py-1">
             {rows.map((r) => (
-              <div key={r.label} className="flex justify-between gap-3 border-b border-outline-variant/40 pb-2 last:border-0">
-                <dt className="text-label-caps text-on-surface-variant">{r.label.toUpperCase()}</dt>
-                <dd className="text-body-base">{r.value}</dd>
+              <div key={r.label} className="flex justify-between items-center gap-3 py-3">
+                <dt className="font-mono text-xs font-bold uppercase tracking-wider text-[#94A3B8]">{r.label}</dt>
+                <dd className="text-sm font-extrabold text-[#1E232B]">{r.value}</dd>
               </div>
             ))}
           </dl>
 
-          <div className="mt-4 flex flex-col gap-2">
+          <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2.5">
             <Button
               variant="outline"
               onClick={() => {
                 setNewName(device?.name || '');
                 setRenameOpen(true);
               }}
+              className="py-3"
             >
-              <Edit3 size={16} /> Rename device
+              <Edit3 size={16} /> Rename Device
             </Button>
-            <Button variant="outline" onClick={() => setTransferOpen(true)}>
-              Transfer ownership
+            <Button variant="outline" onClick={() => setTransferOpen(true)} className="py-3">
+              Transfer Ownership
             </Button>
-            <Button variant="outline" onClick={() => setWifiResetOpen(true)}>
-              <WifiOff size={16} /> Request Wi-Fi reset
+            <Button variant="outline" onClick={() => setWifiResetOpen(true)} className="py-3">
+              <WifiOff size={16} /> Wi-Fi Reset
             </Button>
-            <Button variant="danger" onClick={() => setRemoveOpen(true)}>
-              <Trash2 size={16} /> Remove device
+            <Button variant="danger" onClick={() => setRemoveOpen(true)} className="py-3">
+              <Trash2 size={16} /> Unlink Device
             </Button>
           </div>
         </Card>
       </div>
 
-      <div className="mt-4">
-        <div className="mb-4 grid gap-4 lg:grid-cols-2">
+      <div className="mt-4 flex flex-col gap-4">
+        <div className="grid gap-4 lg:grid-cols-2">
           <DeviceEmotionalModeCard deviceId={deviceId} />
           <DeviceMoodCard deviceId={deviceId} />
         </div>
         <DeviceSettingsCard deviceId={deviceId} />
 
-        <Card className="mt-4">
+        <Card className="rounded-[32px] p-5 sm:p-6 border border-[#EBF0F5] shadow-sm">
           <CardHeader
-            title="Sounds"
+            title="Sound Packs"
             subtitle="Choose which sound pack this PUZO plays"
-            action={<Music4 size={18} className="text-on-surface-variant" />}
+            action={<Music4 size={18} className="text-[#FF5A5F]" />}
           />
-          <Link href={`/audio-packs?device=${encodeURIComponent(deviceId)}`}>
-            <Button variant="outline">Browse sound packs</Button>
+          <Link href={`/audio-packs?device=${encodeURIComponent(deviceId)}`} className="inline-block w-full sm:w-auto">
+            <Button variant="tealOutline" className="w-full sm:w-auto">Browse Sound Packs</Button>
           </Link>
         </Card>
       </div>
@@ -199,7 +200,7 @@ export default function DeviceDetailPage() {
       </Sheet>
 
       <Sheet open={transferOpen} onClose={() => setTransferOpen(false)} title="Transfer device">
-        <p className="mb-4 text-on-surface-variant">
+        <p className="mb-4 text-xs text-[#64748B] leading-relaxed">
           The recipient must already have a PUZO account. The device will be relinked to them.
         </p>
         <form

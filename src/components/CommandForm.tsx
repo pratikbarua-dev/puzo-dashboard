@@ -37,7 +37,7 @@ export function CommandFields({
               ))}
             </Select>
             {f.hint && (
-              <p className="mt-1.5 text-[11px] leading-snug text-on-surface-variant">{f.hint}</p>
+              <p className="mt-1.5 text-[11px] leading-snug text-[#64748B]">{f.hint}</p>
             )}
           </div>
         ) : (
@@ -116,7 +116,7 @@ export function CommandForm({
       />
 
       {payload.text !== undefined && (
-        <p className="text-micro-label text-on-surface-variant">
+        <p className="font-mono text-[10px] text-[#94A3B8]">
           {String(payload.text).length}/120 characters
         </p>
       )}

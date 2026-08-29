@@ -63,7 +63,7 @@ export default function AdminOtaPage() {
       {isLoading ? (
         <Loading label="Loading OTA jobs…" />
       ) : (
-        <Card className="p-0">
+        <Card className="rounded-[32px] p-4 sm:p-6 border border-[#EBF0F5] shadow-sm">
           <DataTable
             columns={columns}
             rows={jobs ?? []}

@@ -179,25 +179,25 @@ export default function AdminContentPage() {
       header: 'Emotion',
       render: (e) => (
         <div className="flex items-center gap-3">
-          <div className="grid h-8 w-8 place-items-center rounded bg-primary-container/20 text-primary">
+          <div className="grid h-9 w-9 place-items-center rounded-xl bg-[#FFEBEF] text-[#FF5A5F]">
             <Sparkles size={16} />
           </div>
           <div>
-            <p className="font-extrabold">{e?.name || 'Emotion'}</p>
-            {e?.description && <p className="text-micro-label text-on-surface-variant">{e.description}</p>}
+            <p className="font-extrabold text-[#1E232B]">{e?.name || 'Emotion'}</p>
+            {e?.description && <p className="font-mono text-[10px] text-[#64748B]">{e.description}</p>}
           </div>
         </div>
       ),
     },
-    { key: 'expression', header: 'Expression', render: (e) => <span className="font-mono text-xs">{e.expression}</span> },
+    { key: 'expression', header: 'Expression', render: (e) => <span className="font-mono text-xs text-[#1E232B]">{e.expression}</span> },
     {
       key: 'priority',
       header: 'Priority',
       render: (e) => <StatusBadge status={e.priority || 'local_user'} />,
     },
-    { key: 'sound', header: 'Sound', render: (e) => e.sound || '—' },
-    { key: 'haptic', header: 'Haptic', render: (e) => e.haptic || '—' },
-    { key: 'duration_ms', header: 'Duration', render: (e) => `${e.duration_ms || 1800}ms` },
+    { key: 'sound', header: 'Sound', render: (e) => <span className="font-mono text-xs">{e.sound || '—'}</span> },
+    { key: 'haptic', header: 'Haptic', render: (e) => <span className="font-mono text-xs">{e.haptic || '—'}</span> },
+    { key: 'duration_ms', header: 'Duration', render: (e) => <span className="font-mono text-xs">{e.duration_ms || 1800}ms</span> },
     {
       key: 'actions',
       header: 'Actions',
@@ -215,12 +215,12 @@ export default function AdminContentPage() {
       header: 'Asset Name',
       render: (a) => (
         <div className="flex items-center gap-3">
-          <div className="grid h-8 w-8 place-items-center rounded bg-surface-container-high text-on-surface-variant">
+          <div className="grid h-9 w-9 place-items-center rounded-xl bg-[#F1F5F9] text-[#64748B]">
             <FolderArchive size={16} />
           </div>
           <div>
-            <p className="font-extrabold">{a?.name || 'Asset'}</p>
-            <p className="text-micro-label font-mono text-on-surface-variant">{a?.storage_path || '—'}</p>
+            <p className="font-extrabold text-[#1E232B]">{a?.name || 'Asset'}</p>
+            <p className="font-mono text-[10px] text-[#94A3B8]">{a?.storage_path || '—'}</p>
           </div>
         </div>
       ),
@@ -251,35 +251,35 @@ export default function AdminContentPage() {
   ];
 
   return (
-    <div>
+    <div className="flex flex-col gap-5">
       <PageHeader
         title="Admin · Content Management"
         subtitle="Emotions catalog & animation/sound asset packs"
         action={
-          <Button onClick={() => (activeTab === 'emotions' ? openEmotionForm() : setAssetOpen(true))}>
+          <Button onClick={() => (activeTab === 'emotions' ? openEmotionForm() : setAssetOpen(true))} variant="primary">
             <Plus size={16} /> {activeTab === 'emotions' ? 'Add Emotion' : 'Register Asset'}
           </Button>
         }
       />
 
       {/* Tabs */}
-      <div className="mb-4 flex border-b border-outline-variant">
+      <div className="flex border-b border-[#E2E8F0]">
         <button
           onClick={() => setActiveTab('emotions')}
-          className={`flex min-h-[44px] items-center gap-2 border-b-2 px-4 text-body-base font-extrabold transition-fast ${
+          className={`flex min-h-[44px] items-center gap-2 border-b-2 px-4 text-xs font-bold transition-all cursor-pointer ${
             activeTab === 'emotions'
               ? 'border-[#FF5A5F] text-[#C82D35]'
-              : 'border-transparent text-on-surface-variant hover:text-on-surface'
+              : 'border-transparent text-[#64748B] hover:text-[#1E232B]'
           }`}
         >
           <Sparkles size={16} /> Emotions Catalog ({emotions?.length ?? 0})
         </button>
         <button
           onClick={() => setActiveTab('assets')}
-          className={`flex min-h-[44px] items-center gap-2 border-b-2 px-4 text-body-base font-extrabold transition-fast ${
+          className={`flex min-h-[44px] items-center gap-2 border-b-2 px-4 text-xs font-bold transition-all cursor-pointer ${
             activeTab === 'assets'
               ? 'border-[#FF5A5F] text-[#C82D35]'
-              : 'border-transparent text-on-surface-variant hover:text-on-surface'
+              : 'border-transparent text-[#64748B] hover:text-[#1E232B]'
           }`}
         >
           <FolderArchive size={16} /> Downloadable Assets ({assets?.length ?? 0})
@@ -290,7 +290,7 @@ export default function AdminContentPage() {
         emLoading ? (
           <Loading label="Loading emotions catalog…" />
         ) : (
-          <Card className="p-0">
+          <Card className="rounded-[32px] p-4 sm:p-6 border border-[#EBF0F5] shadow-sm">
             <DataTable
               columns={emotionColumns}
               rows={emotions ?? []}
@@ -302,7 +302,7 @@ export default function AdminContentPage() {
       ) : assetLoading ? (
         <Loading label="Loading content assets…" />
       ) : (
-        <Card className="p-0">
+        <Card className="rounded-[32px] p-4 sm:p-6 border border-[#EBF0F5] shadow-sm">
           <DataTable
             columns={assetColumns}
             rows={assets ?? []}

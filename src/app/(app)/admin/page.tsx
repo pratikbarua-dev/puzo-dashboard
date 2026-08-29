@@ -174,38 +174,38 @@ export default function AdminOverviewPage() {
               </div>
               <div className="flex w-1/2 flex-col gap-2 pl-4">
                 {otaPieData.map((d) => (
-                  <div key={d?.name || 'status'} className="flex items-center justify-between text-body-base">
+                  <div key={d?.name || 'status'} className="flex items-center justify-between text-sm">
                     <div className="flex items-center gap-2">
-                      <span className="h-3 w-3 rounded-full" style={{ backgroundColor: d.color }} />
-                      <span className="text-on-surface-variant">{d?.name}</span>
+                      <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: d.color }} />
+                      <span className="text-xs text-[#64748B]">{d?.name}</span>
                     </div>
-                    <span className="font-extrabold">{d.value}</span>
+                    <span className="font-mono text-xs font-extrabold text-[#1E232B]">{d.value}</span>
                   </div>
                 ))}
               </div>
             </div>
           ) : (
-            <p className="py-8 text-center text-on-surface-variant">No OTA job history available yet.</p>
+            <p className="py-8 text-center text-xs text-[#94A3B8]">No OTA job history available yet.</p>
           )}
         </Card>
 
         {/* Fleet Hardware Distribution */}
-        <Card>
-          <CardHeader title="Hardware & Firmware Fleet" subtitle="Devices by model & published builds" />
-          <div className="flex flex-col gap-3">
+        <Card className="rounded-[32px] p-5 sm:p-6 border border-[#EBF0F5] shadow-sm">
+          <CardHeader title="Hardware &amp; Firmware Fleet" subtitle="Devices by model &amp; published builds" />
+          <div className="flex flex-col gap-2.5">
             {Object.entries(hardwareCounts).length > 0 ? (
               Object.entries(hardwareCounts).map(([model, count]) => {
                 const latestRel = publishedReleases.find((r) => r.hardware_model === model);
                 return (
-                  <div key={model} className="flex items-center justify-between rounded-md bg-surface-container-low p-3">
+                  <div key={model} className="flex items-center justify-between rounded-2xl bg-[#F8FAFC] border border-[#E2E8F0] p-4">
                     <div>
-                      <span className="font-extrabold">{model}</span>
-                      <p className="text-micro-label text-on-surface-variant">
-                        Latest published: {latestRel ? `v${latestRel.version} (build ${latestRel.build_number})` : 'None'}
+                      <span className="text-sm font-extrabold text-[#1E232B]">{model}</span>
+                      <p className="font-mono text-[11px] text-[#64748B]">
+                        Latest: {latestRel ? `v${latestRel.version} (b${latestRel.build_number})` : 'None'}
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="rounded-md bg-primary-container/20 px-2 py-1 text-label-caps text-primary">
+                      <span className="rounded-full bg-[#FFEBEF] px-3 py-1 font-mono text-[10px] font-bold text-[#FF5A5F]">
                         {count} {count === 1 ? 'device' : 'devices'}
                       </span>
                     </div>
@@ -213,7 +213,7 @@ export default function AdminOverviewPage() {
                 );
               })
             ) : (
-              <p className="py-8 text-center text-on-surface-variant">No devices registered in fleet.</p>
+              <p className="py-8 text-center text-xs text-[#94A3B8]">No devices registered in fleet.</p>
             )}
           </div>
         </Card>
@@ -222,35 +222,37 @@ export default function AdminOverviewPage() {
       {/* Recent Fleet Activity & Quick Navigation */}
       <div className="grid gap-4 lg:grid-cols-3">
         {/* Recent Devices */}
-        <Card className="lg:col-span-2">
+        <Card className="lg:col-span-2 rounded-[32px] p-5 sm:p-6 border border-[#EBF0F5] shadow-sm">
           <CardHeader
             title="Recent Fleet Activity"
             subtitle="Latest registered devices"
             action={
-              <Link href="/admin/devices" className="flex items-center gap-1 text-micro-label text-primary hover:underline">
+              <Link href="/admin/devices" className="flex items-center gap-1 font-mono text-[10px] font-bold text-[#FF5A5F] hover:underline uppercase tracking-wider">
                 VIEW ALL <ArrowRight size={12} />
               </Link>
             }
           />
           <div className="flex max-h-72 flex-col gap-2 overflow-y-auto pr-1">
             {!devices?.length ? (
-              <p className="text-on-surface-variant">No devices found.</p>
+              <p className="py-6 text-center text-xs text-[#94A3B8]">No devices found.</p>
             ) : (
               devices.slice(0, 5).map((d) => (
                 <Link
                   key={d.id}
                   href={`/admin/devices/${d.device_id}`}
-                  className="flex items-center justify-between rounded-md bg-surface-container-low px-3 py-2 transition-fast hover:bg-surface-container-high"
+                  className="flex items-center justify-between rounded-2xl bg-[#F8FAFC] border border-[#E2E8F0] px-4 py-3 transition-colors hover:bg-white"
                 >
                   <div className="flex items-center gap-3">
-                    <Cpu size={16} className="text-on-surface-variant" />
+                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white text-[#FF5A5F] border border-[#E2E8F0]">
+                      <Cpu size={16} />
+                    </div>
                     <div>
-                      <span className="font-extrabold">{d?.name || d?.device_id || 'Device'}</span>
-                      <p className="text-micro-label font-mono text-on-surface-variant">{d?.device_id}</p>
+                      <span className="text-sm font-extrabold text-[#1E232B]">{d?.name || d?.device_id || 'Device'}</span>
+                      <p className="font-mono text-[10px] text-[#94A3B8]">{d?.device_id}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
-                    <span className="text-micro-label text-on-surface-variant">{timeAgo(d.last_seen_at ?? d.created_at)}</span>
+                    <span className="font-mono text-[10px] text-[#94A3B8]">{timeAgo(d.last_seen_at ?? d.created_at)}</span>
                     <StatusBadge status={d.status} />
                   </div>
                 </Link>
@@ -260,7 +262,7 @@ export default function AdminOverviewPage() {
         </Card>
 
         {/* Admin Navigation Quick-Links */}
-        <Card>
+        <Card className="rounded-[32px] p-5 sm:p-6 border border-[#EBF0F5] shadow-sm">
           <CardHeader title="Admin Modules" subtitle="Quick access" />
           <div className="flex flex-col gap-2">
             {[
@@ -274,14 +276,14 @@ export default function AdminOverviewPage() {
               <Link
                 key={m.href}
                 href={m.href}
-                className="flex items-center gap-3 rounded-md bg-surface-container-low p-2.5 transition-fast hover:bg-surface-container-high"
+                className="flex items-center gap-3 rounded-2xl bg-[#F8FAFC] border border-[#E2E8F0] p-3 transition-colors hover:bg-white"
               >
-                <div className="grid h-8 w-8 place-items-center rounded bg-surface-container-high text-primary">
+                <div className="grid h-8 w-8 place-items-center rounded-xl bg-[#FFEBEF] text-[#FF5A5F]">
                   <m.icon size={16} />
                 </div>
                 <div>
-                  <span className="text-body-base font-extrabold">{m.label}</span>
-                  <p className="text-micro-label text-on-surface-variant">{m.desc}</p>
+                  <span className="text-xs font-bold text-[#1E232B]">{m.label}</span>
+                  <p className="text-[10px] text-[#64748B]">{m.desc}</p>
                 </div>
               </Link>
             ))}
