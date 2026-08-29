@@ -55,7 +55,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     if (href === '/overview') return pathname === '/overview' || pathname === '/';
     if (href === '/history') return pathname === '/history' || pathname.startsWith('/history');
     if (href === '/devices') return pathname === '/devices' || pathname.startsWith('/devices') || pathname === '/pairing';
-    if (href === '/settings') return pathname === '/settings' || pathname === '/subscription' || pathname === '/relationships' || pathname === '/interactions' || pathname === '/schedules';
+    if (href === '/settings') return pathname === '/settings' || pathname === '/subscription' || pathname === '/relationships' || pathname === '/interactions' || pathname === '/schedules' || pathname === '/alarms' || pathname === '/audio-packs';
     return pathname === href;
   };
 

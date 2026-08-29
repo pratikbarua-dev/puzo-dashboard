@@ -33,6 +33,7 @@ export interface Entitlements {
   emotions?: boolean;
   animations?: boolean;
   scheduled_emotions?: boolean;
+  alarm_clock?: boolean;
   animation_packs?: boolean;
   premium_sounds?: boolean;
   family?: boolean;
@@ -299,6 +300,48 @@ export interface Schedule {
   status: 'pending' | 'processing' | 'completed' | 'cancelled' | 'failed';
   fired_at?: string | null;
   created_at: string;
+}
+
+/**
+ * A device-resident alarm slot. The device holds the authoritative copy in NVS
+ * (it rings offline); these rows are the dashboard-facing source of truth
+ * that is pushed as `set_alarm` commands. `days` are weekday numbers with the
+ * device's convention: 0=Sunday .. 6=Saturday; empty = every day.
+ */
+export interface Alarm {
+  id: string;
+  user_id: string;
+  device_id: string;
+  slot_index: number;
+  hour: number;
+  minute: number;
+  days: number[];
+  sound: string | null;
+  label: string | null;
+  snooze_min: number;
+  enabled: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AlarmInput {
+  device_id: string;
+  slot_index?: number;
+  hour: number;
+  minute: number;
+  days?: number[];
+  sound?: string;
+  label?: string;
+  snooze_min?: number;
+}
+
+export interface AlarmPatch {
+  hour?: number;
+  minute?: number;
+  days?: number[];
+  sound?: string | null;
+  label?: string | null;
+  snooze_min?: number;
 }
 
 export interface FirmwareRelease {

@@ -7,6 +7,7 @@ const TABLE_CHANNELS = [
   'firmware_releases',
   'interactions',
   'schedules',
+  'alarms',
   'notifications',
 ];
 

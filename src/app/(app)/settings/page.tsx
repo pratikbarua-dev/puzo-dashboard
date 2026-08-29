@@ -14,6 +14,7 @@ import {
   LogOut,
   Link2,
   CalendarClock,
+  AlarmClock,
   MapPin,
   Bell,
   Send,
@@ -314,6 +315,22 @@ export default function MePage() {
               <div>
                 <p className="text-xs font-bold text-[#1E232B]">Automations &amp; Schedules</p>
                 <p className="text-[11px] text-[#64748B]">Queue emotions for later</p>
+              </div>
+            </div>
+            <ChevronRight size={16} className="text-[#94A3B8]" />
+          </Link>
+
+          <Link
+            href="/alarms"
+            className="flex items-center justify-between py-3 -mx-2 px-2 rounded-xl hover:bg-[#F8FAFC] transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#FFEBEF] text-[#FF5A5F]">
+                <AlarmClock size={16} />
+              </div>
+              <div>
+                <p className="text-xs font-bold text-[#1E232B]">Alarms</p>
+                <p className="text-[11px] text-[#64748B]">Wake up with your companion</p>
               </div>
             </div>
             <ChevronRight size={16} className="text-[#94A3B8]" />

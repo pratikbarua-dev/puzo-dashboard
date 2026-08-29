@@ -33,6 +33,7 @@ export function RealtimeWatcher() {
         firmware_releases: [['admin', 'firmware']],
         interactions: [['interactions']],
         schedules: [['schedules']],
+        alarms: [['alarms']],
         notifications: [['notifications']],
       };
 

@@ -1,5 +1,8 @@
 import type {
   ApiEnvelope,
+  Alarm,
+  AlarmInput,
+  AlarmPatch,
   AuditLogEntry,
   AdminUser,
   AudioPack,
@@ -315,6 +318,17 @@ export const createSchedule = (input: {
 }) => request<{ schedule: Schedule }>('POST', '/schedules', input);
 export const cancelSchedule = (id: string) =>
   request<{ schedule: Schedule }>('DELETE', `/schedules/${id}`);
+
+/* ---- alarms ---- */
+
+export const myAlarms = (): Promise<Alarm[]> =>
+  request<any>('GET', '/alarms').then((d) => (Array.isArray(d) ? d : d?.alarms ?? []));
+export const createAlarm = (input: AlarmInput) =>
+  request<{ alarm: Alarm; command: CommandRecord }>('POST', '/alarms', input);
+export const updateAlarm = (id: string, patch: AlarmPatch) =>
+  request<{ alarm: Alarm; command: CommandRecord | null }>('PATCH', `/alarms/${id}`, patch);
+export const deleteAlarm = (id: string) =>
+  request<{ alarm: Alarm; command: CommandRecord }>('DELETE', `/alarms/${id}`);
 
 /* ---- admin ---- */
 
