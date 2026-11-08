@@ -74,6 +74,7 @@ async function proxy(
         payload: {
           sub: session.user.id,
           email: session.user.email ?? '',
+          email_verified: session.user.emailVerified === true,
           name: session.user.name ?? '',
         },
       },
